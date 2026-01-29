@@ -2,17 +2,12 @@
 URL Configuration for Lubricentro project
 """
 from django.contrib import admin
-from django.urls import path
-from rest_framework_simplejwt.views import (
-    TokenObtainPairView,
-    TokenRefreshView,
-)
+from django.urls import path, include
 
 urlpatterns = [
     # Admin
     path('admin/', admin.site.urls),
     
-    # JWT Authentication
-    path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    # API Authentication
+    path('api/auth/', include('apps.authentication.urls')),
 ]
