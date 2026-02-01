@@ -5,7 +5,6 @@ def is_admin(user) -> bool:
     if not user or not user.is_authenticated:
         return False
 
-    # Tu proyecto usa user_type en el User (staff/customer). Aquí agregamos admin.
     return (
         getattr(user, "user_type", None) == "admin"
         or getattr(user, "is_superuser", False)

@@ -24,6 +24,7 @@
         <div class="list-group">
           <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
           <a class="list-group-item list-group-item-action active" href="./dashboard_categories.html">Catálogo → Categorías</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_products.html">Catálogo → Productos</a>
         </div>
       </div>
     </aside>
@@ -142,7 +143,6 @@
   }
 
   function normalizeList(apiResponse) {
-    // soporta: [] o {results: []}
     if (Array.isArray(apiResponse)) return apiResponse;
     if (apiResponse && Array.isArray(apiResponse.results)) return apiResponse.results;
     return [];
@@ -253,7 +253,7 @@
     }
 
     closeForm();
-    await loadCategories(); // ✅ recarga y renderiza
+    await loadCategories();
   }
 
   async function remove(categoryId) {
