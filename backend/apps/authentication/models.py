@@ -18,9 +18,11 @@ class User(AbstractUser):
     
     # Tipo de usuario
     USER_TYPE_CHOICES = [
-        ('staff', 'Staff/Empleado'),
-        ('customer', 'Cliente'),
+    ('admin', 'Administrador'),
+    ('staff', 'Staff/Empleado'),
+    ('customer', 'Cliente'),
     ]
+
     user_type = models.CharField(
         max_length=10,
         choices=USER_TYPE_CHOICES,
