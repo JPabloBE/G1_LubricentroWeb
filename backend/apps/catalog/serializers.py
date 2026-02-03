@@ -51,7 +51,6 @@ class ProductSerializer(serializers.ModelSerializer):
         validated_data.setdefault("created_at", now)
         validated_data.setdefault("updated_at", now)
 
-        # category viene como {"category": {"category_id": ...}} por el source
         category_data = validated_data.pop("category", None)
         if category_data:
             validated_data["category_id"] = category_data.get("category_id")

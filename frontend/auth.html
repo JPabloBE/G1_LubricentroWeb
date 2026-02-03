@@ -409,7 +409,7 @@
 
                 const user = await meRes.json();
 
-                // ✅ REDIRECCIÓN SEGÚN user_type
+                // REDIRECCIÓN SEGÚN user_type
                 if (isAdminUser(user)) {
                     // Admin -> Dashboard
                     window.location.href = './dashboard.html';
@@ -491,7 +491,7 @@
 
                 const user = await response.json();
 
-                // ✅ Si ya hay sesión y es admin -> dashboard directo
+                // Si ya hay sesión y es admin -> dashboard directo
                 if (isAdminUser(user)) {
                     window.location.href = './dashboard.html';
                     return;

@@ -11,4 +11,6 @@ urlpatterns = [
     # API Authentication
     path('api/auth/', include('apps.authentication.urls')),
     path('api/catalog/', include('apps.catalog.urls')),
+    path('api/services/', include('apps.services.urls')),
+
 ]
