@@ -1,0 +1,289 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Lubricentro | Clientes</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">Lubricentro | Clientes</span>
+    <div class="d-flex gap-2 align-items-center">
+      <span id="whoami" class="text-white-50 small"></span>
+      <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height: calc(100vh - 56px);">
+      <div class="p-3">
+        <div class="fw-semibold">Menú</div>
+        <hr>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_categories.html">Catálogo → Categorías</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_products.html">Catálogo → Productos</a>
+          <a class="list-group-item list-group-item-action active" href="./dashboard_customers.html">Clientes</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_services.html">Servicios</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_staff_users.html">Usuarios (Staff/Admin)</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-12 col-md-9 col-lg-10 p-4">
+
+      <div id="msg" class="alert d-none" role="alert"></div>
+
+      <div class="d-flex gap-2 align-items-center mb-3">
+        <h4 class="m-0">Clientes</h4>
+        <button id="btnNew" class="btn btn-dark btn-sm ms-auto">Nuevo cliente</button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Email</th>
+                  <th>Teléfono</th>
+                  <th>Activo</th>
+                  <th style="width:160px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="small text-muted mt-2">
+        Este CRUD es solo para staff/admin. Login/registro de customers es aparte.
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal Create/Edit -->
+<div class="modal fade" id="modal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Cliente</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="id">
+
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Nombre completo</label>
+            <input id="full_name" class="form-control" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input id="email" type="email" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input id="phone" class="form-control">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Activo</label>
+            <select id="is_active" class="form-select">
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Notas</label>
+            <textarea id="notes" class="form-control" rows="3"></textarea>
+          </div>
+        </div>
+
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnSave" class="btn btn-dark">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = "http://localhost:8000";
+  const API = `${API_BASE}/api/customers/`;
+  const token = localStorage.getItem("access_token");
+
+  const modal = new bootstrap.Modal(document.getElementById("modal"));
+
+  function headersAuth() {
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
+
+  function showMsg(text, type="danger") {
+    const el = document.getElementById("msg");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+  }
+  function hideMsg() { document.getElementById("msg").classList.add("d-none"); }
+
+  async function ensureLogged() {
+    if (!token) return null;
+    const res = await fetch(`${API_BASE}/api/auth/me/`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  }
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    try {
+      await fetch(`${API_BASE}/api/auth/logout/`, { method:"POST", headers: headersAuth() });
+    } catch (_) {}
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "./auth.html";
+  });
+
+  function rowHtml(c) {
+    return `
+      <tr>
+        <td>${c.full_name || ""}</td>
+        <td>${c.email || ""}</td>
+        <td>${c.phone || ""}</td>
+        <td>${c.is_active ? "Sí" : "No"}</td>
+        <td>
+          <button class="btn btn-outline-dark btn-sm" data-action="edit" data-id="${c.customer_id}">Editar</button>
+          <button class="btn btn-outline-danger btn-sm" data-action="del" data-id="${c.customer_id}">Borrar</button>
+        </td>
+      </tr>
+    `;
+  }
+
+  async function load() {
+    hideMsg();
+    const res = await fetch(API, { headers: headersAuth() });
+    const data = await res.json().catch(()=>({}));
+
+    if (!res.ok) {
+      showMsg(data.detail || "No se pudieron cargar clientes.", "danger");
+      return;
+    }
+
+    const items = Array.isArray(data) ? data : (data.results || []);
+    document.getElementById("tbody").innerHTML = items.map(rowHtml).join("");
+  }
+
+  function openCreate() {
+    document.getElementById("modalTitle").textContent = "Nuevo cliente";
+    document.getElementById("id").value = "";
+    document.getElementById("full_name").value = "";
+    document.getElementById("email").value = "";
+    document.getElementById("phone").value = "";
+    document.getElementById("notes").value = "";
+    document.getElementById("is_active").value = "true";
+    modal.show();
+  }
+
+  async function openEdit(id) {
+    hideMsg();
+    const res = await fetch(`${API}${id}/`, { headers: headersAuth() });
+    const c = await res.json().catch(()=>({}));
+
+    if (!res.ok) {
+      showMsg(c.detail || "No se pudo cargar el cliente.", "danger");
+      return;
+    }
+
+    document.getElementById("modalTitle").textContent = "Editar cliente";
+    document.getElementById("id").value = c.customer_id;
+    document.getElementById("full_name").value = c.full_name || "";
+    document.getElementById("email").value = c.email || "";
+    document.getElementById("phone").value = c.phone || "";
+    document.getElementById("notes").value = c.notes || "";
+    document.getElementById("is_active").value = c.is_active ? "true" : "false";
+    modal.show();
+  }
+
+  async function save() {
+    hideMsg();
+    const id = document.getElementById("id").value;
+
+    const payload = {
+      full_name: document.getElementById("full_name").value.trim(),
+      email: (document.getElementById("email").value.trim() || null),
+      phone: (document.getElementById("phone").value.trim() || null),
+      notes: (document.getElementById("notes").value.trim() || null),
+      is_active: document.getElementById("is_active").value === "true",
+    };
+
+    const method = id ? "PATCH" : "POST";
+    const url = id ? `${API}${id}/` : API;
+
+    const res = await fetch(url, { method, headers: headersAuth(), body: JSON.stringify(payload) });
+    const data = await res.json().catch(()=>({}));
+
+    if (!res.ok) {
+      const msg = data.detail || Object.values(data).flat().join(", ") || "No se pudo guardar.";
+      showMsg(msg, "danger");
+      return;
+    }
+
+    modal.hide();
+    await load();
+    showMsg("Guardado correctamente.", "success");
+  }
+
+  async function del(id) {
+    if (!confirm("¿Seguro que quieres borrar este cliente?")) return;
+
+    hideMsg();
+    const res = await fetch(`${API}${id}/`, { method:"DELETE", headers: headersAuth() });
+    if (!res.ok) {
+      const data = await res.json().catch(()=>({}));
+      showMsg(data.detail || "No se pudo borrar.", "danger");
+      return;
+    }
+
+    await load();
+    showMsg("Cliente eliminado.", "success");
+  }
+
+  document.getElementById("btnNew").addEventListener("click", openCreate);
+  document.getElementById("btnSave").addEventListener("click", save);
+
+  document.getElementById("tbody").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const id = btn.getAttribute("data-id");
+    const action = btn.getAttribute("data-action");
+    if (action === "edit") openEdit(id);
+    if (action === "del") del(id);
+  });
+
+  (async () => {
+    const me = await ensureLogged();
+    if (!me) { window.location.href = "./auth.html"; return; }
+    const label = `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
+    document.getElementById("whoami").textContent = label;
+    await load();
+  })();
+</script>
+</body>
+</html>

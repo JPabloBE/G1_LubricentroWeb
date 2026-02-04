@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Usuarios Staff/Admin</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">Lubricentro | Usuarios (Staff/Admin)</span>
+    <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height: calc(100vh - 56px);">
+      <div class="p-3">
+        <div class="fw-semibold">Menú</div>
+        <hr>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_categories.html">Catálogo → Categorías</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_products.html">Catálogo → Productos</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_customers.html">Clientes</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_services.html">Servicios</a>
+          <a class="list-group-item list-group-item-action active" href="./dashboard_staff_users.html">Usuarios (Staff/Admin)</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="col-12 col-md-9 col-lg-10 p-4">
+      <div id="msg" class="alert d-none" role="alert"></div>
+
+      <div class="d-flex gap-2 align-items-center mb-3">
+        <h4 class="m-0">Usuarios del negocio</h4>
+        <button id="btnNew" class="btn btn-dark btn-sm ms-auto">Nuevo usuario</button>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <div class="table-responsive">
+            <table class="table table-striped align-middle">
+              <thead>
+                <tr>
+                  <th>Usuario</th>
+                  <th>Email</th>
+                  <th>Nombre</th>
+                  <th>Tipo</th>
+                  <th>Activo</th>
+                  <th style="width:160px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="usersTbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-2 small text-muted">
+        Nota: el backend permite ver a staff/admin, pero <b>crear/editar/borrar solo admin</b>.
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<!-- Modal Create/Edit -->
+<div class="modal fade" id="userModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 id="modalTitle" class="modal-title">Usuario</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+
+      <div class="modal-body">
+        <form id="userForm" class="row g-3">
+          <input type="hidden" id="u_id"/>
+
+          <div class="col-md-6">
+            <label class="form-label">Username</label>
+            <input class="form-control" id="u_username" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input class="form-control" id="u_email" type="email" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Nombre</label>
+            <input class="form-control" id="u_first" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Apellido</label>
+            <input class="form-control" id="u_last" required>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" id="u_phone">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Tipo</label>
+            <select class="form-select" id="u_type">
+              <option value="staff">staff</option>
+              <option value="admin">admin</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Activo</label>
+            <select class="form-select" id="u_active">
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+
+          <div class="col-12">
+            <label class="form-label">Password (obligatoria al crear / opcional al editar)</label>
+            <input class="form-control" id="u_pass" type="password" minlength="8"
+                   placeholder="Dejar vacío para no cambiar en editar">
+          </div>
+        </form>
+      </div>
+
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button id="btnSave" class="btn btn-dark">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+  const API_BASE = "http://localhost:8000";
+  const API_USERS = `${API_BASE}/api/auth/staff-users/`;
+
+  const token = localStorage.getItem("access_token");
+
+  const modal = new bootstrap.Modal(document.getElementById("userModal"));
+
+  function headersAuth() {
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
+
+  function showMsg(text, type="success") {
+    const el = document.getElementById("msg");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+  }
+  function hideMsg() { document.getElementById("msg").classList.add("d-none"); }
+
+  async function ensureLogged() {
+    if (!token) return false;
+    const res = await fetch(`${API_BASE}/api/auth/me/`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    return res.ok;
+  }
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    try { await fetch(`${API_BASE}/api/auth/logout/`, { method:"POST", headers: headersAuth() }); } catch (_) {}
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "./auth.html";
+  });
+
+  function rowHtml(u) {
+    const fullName = `${u.first_name || ""} ${u.last_name || ""}`.trim();
+    const badge = u.user_type === "admin" ? "danger" : "secondary";
+    return `
+      <tr>
+        <td>${u.username}</td>
+        <td>${u.email || ""}</td>
+        <td>${fullName}</td>
+        <td><span class="badge text-bg-${badge}">${u.user_type}</span></td>
+        <td>${u.is_active ? "Sí" : "No"}</td>
+        <td>
+          <button class="btn btn-outline-dark btn-sm" data-action="edit" data-id="${u.id}">Editar</button>
+          <button class="btn btn-outline-danger btn-sm" data-action="del" data-id="${u.id}">Borrar</button>
+        </td>
+      </tr>
+    `;
+  }
+
+  async function loadUsers() {
+    hideMsg();
+    const res = await fetch(API_USERS, { headers: headersAuth() });
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      showMsg(data.detail || "No se pudieron cargar usuarios.", "danger");
+      return;
+    }
+
+    const items = Array.isArray(data) ? data : (data.results || []);
+    document.getElementById("usersTbody").innerHTML = items.map(rowHtml).join("");
+  }
+
+  function openCreate() {
+    document.getElementById("modalTitle").textContent = "Nuevo usuario";
+    document.getElementById("u_id").value = "";
+    document.getElementById("u_username").value = "";
+    document.getElementById("u_email").value = "";
+    document.getElementById("u_first").value = "";
+    document.getElementById("u_last").value = "";
+    document.getElementById("u_phone").value = "";
+    document.getElementById("u_type").value = "staff";
+    document.getElementById("u_active").value = "true";
+    document.getElementById("u_pass").value = "";
+    modal.show();
+  }
+
+  async function openEdit(id) {
+    hideMsg();
+    const res = await fetch(`${API_USERS}${id}/`, { headers: headersAuth() });
+    const u = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      showMsg(u.detail || "No se pudo cargar el usuario.", "danger");
+      return;
+    }
+
+    document.getElementById("modalTitle").textContent = "Editar usuario";
+    document.getElementById("u_id").value = u.id;
+    document.getElementById("u_username").value = u.username || "";
+    document.getElementById("u_email").value = u.email || "";
+    document.getElementById("u_first").value = u.first_name || "";
+    document.getElementById("u_last").value = u.last_name || "";
+    document.getElementById("u_phone").value = u.phone || "";
+    document.getElementById("u_type").value = (u.user_type || "staff");
+    document.getElementById("u_active").value = u.is_active ? "true" : "false";
+    document.getElementById("u_pass").value = "";
+    modal.show();
+  }
+
+  async function saveUser() {
+    hideMsg();
+    const id = document.getElementById("u_id").value;
+
+    const payloadBase = {
+      username: document.getElementById("u_username").value.trim(),
+      email: document.getElementById("u_email").value.trim(),
+      first_name: document.getElementById("u_first").value.trim(),
+      last_name: document.getElementById("u_last").value.trim(),
+      phone: document.getElementById("u_phone").value.trim(),
+      user_type: document.getElementById("u_type").value,
+      is_active: document.getElementById("u_active").value === "true",
+    };
+
+    const pass = document.getElementById("u_pass").value;
+
+    let url = API_USERS;
+    let method = "POST";
+    let payload = payloadBase;
+
+    if (id) {
+      url = `${API_USERS}${id}/`;
+      method = "PATCH";
+      payload = { ...payloadBase };
+      if (pass) payload.password = pass;
+    } else {
+      if (!pass || pass.length < 8) {
+        showMsg("Para crear, la contraseña es obligatoria (mín. 8).", "danger");
+        return;
+      }
+      payload.password = pass;
+      payload.password2 = pass;
+    }
+
+    const res = await fetch(url, {
+      method,
+      headers: headersAuth(),
+      body: JSON.stringify(payload)
+    });
+
+    const data = await res.json().catch(() => ({}));
+
+    if (!res.ok) {
+      const msg = data.detail || Object.values(data).flat().join(", ") || "No se pudo guardar.";
+      showMsg(msg, "danger");
+      return;
+    }
+
+    modal.hide();
+    await loadUsers();
+    showMsg("Guardado correctamente.", "success");
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("¿Seguro que quieres borrar este usuario?")) return;
+
+    hideMsg();
+    const res = await fetch(`${API_USERS}${id}/`, {
+      method:"DELETE",
+      headers: headersAuth()
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      showMsg(data.detail || "No se pudo borrar.", "danger");
+      return;
+    }
+
+    await loadUsers();
+    showMsg("Usuario eliminado.", "success");
+  }
+
+  document.getElementById("btnNew").addEventListener("click", openCreate);
+  document.getElementById("btnSave").addEventListener("click", saveUser);
+
+  document.getElementById("usersTbody").addEventListener("click", (e) => {
+    const btn = e.target.closest("button");
+    if (!btn) return;
+    const id = btn.getAttribute("data-id");
+    const action = btn.getAttribute("data-action");
+    if (action === "edit") openEdit(id);
+    if (action === "del") deleteUser(id);
+  });
+
+  (async () => {
+    const ok = await ensureLogged();
+    if (!ok) { window.location.href = "./auth.html"; return; }
+    await loadUsers();
+  })();
+</script>
+
+</body>
+</html>

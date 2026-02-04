@@ -1,27 +1,18 @@
-"""
-Authentication URL patterns
-"""
-from django.urls import path
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
 from rest_framework_simplejwt.views import TokenRefreshView
 
-from .views import (
-    RegisterView,
-    CustomTokenObtainPairView,
-    get_current_user,
-    logout,
-)
+from .views import StaffLoginView, me, logout, StaffUserViewSet
+
+router = DefaultRouter()
+router.register(r"staff-users", StaffUserViewSet, basename="staff-users")
 
 urlpatterns = [
-    # Registro
-    path('register/', RegisterView.as_view(), name='register'),
-    
-    # Login (JWT)
-    path('login/', CustomTokenObtainPairView.as_view(), name='token_obtain_pair'),
-    path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    
-    # Usuario actual
-    path('me/', get_current_user, name='current_user'),
-    
-    # Logout
-    path('logout/', logout, name='logout'),
+    path("login/", StaffLoginView.as_view(), name="staff_login"),
+    path("token/refresh/", TokenRefreshView.as_view(), name="token_refresh"),
+    path("me/", me, name="me"),
+    path("logout/", logout, name="logout"),
+
+    # ✅ Nuevo módulo CRUD
+    path("", include(router.urls)),
 ]

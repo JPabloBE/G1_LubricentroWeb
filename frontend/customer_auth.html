@@ -1,0 +1,161 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>Clientes | Login</title>
+  <style>
+    body{font-family:Arial; background:#111; color:#111; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;}
+    .box{background:#fff; width:420px; border-radius:12px; padding:22px;}
+    h2{margin:0 0 6px;}
+    .tabs{display:flex; gap:8px; margin:12px 0;}
+    .tabs button{flex:1; padding:10px; border:1px solid #ddd; background:#f5f5f5; cursor:pointer; border-radius:8px;}
+    .tabs button.active{background:#111; color:#fff; border-color:#111;}
+    .row{margin:10px 0;}
+    label{display:block; font-weight:700; margin-bottom:6px;}
+    input{width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;}
+    .msg{display:none; padding:10px; border-radius:8px; margin:10px 0;}
+    .msg.ok{background:#eaffea; border:1px solid #bde5bd;}
+    .msg.err{background:#ffecec; border:1px solid #f5bcbc;}
+    .btn{width:100%; padding:10px; background:#111; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;}
+  </style>
+</head>
+<body>
+  <div class="box">
+    <h2>Clientes</h2>
+    <div style="color:#444;">Login / Registro solo para clientes</div>
+
+    <div class="tabs">
+      <button id="tabLogin" class="active">Login</button>
+      <button id="tabRegister">Registro</button>
+    </div>
+
+    <div id="msg" class="msg"></div>
+
+    <!-- LOGIN -->
+    <form id="loginForm">
+      <div class="row">
+        <label>Email</label>
+        <input id="l_email" type="email" required/>
+      </div>
+      <div class="row">
+        <label>Contraseña</label>
+        <input id="l_pass" type="password" required/>
+      </div>
+      <button class="btn" type="submit">Entrar</button>
+    </form>
+
+    <!-- REGISTER -->
+    <form id="registerForm" style="display:none;">
+      <div class="row">
+        <label>Nombre completo</label>
+        <input id="r_name" required/>
+      </div>
+      <div class="row">
+        <label>Email</label>
+        <input id="r_email" type="email" required/>
+      </div>
+      <div class="row">
+        <label>Teléfono (opcional)</label>
+        <input id="r_phone"/>
+      </div>
+      <div class="row">
+        <label>Contraseña</label>
+        <input id="r_pass" type="password" minlength="8" required/>
+      </div>
+      <div class="row">
+        <label>Confirmar contraseña</label>
+        <input id="r_pass2" type="password" minlength="8" required/>
+      </div>
+      <button class="btn" type="submit">Crear cuenta</button>
+    </form>
+  </div>
+
+<script>
+  const API_BASE = "http://localhost:8000";
+  const LOGIN_URL = `${API_BASE}/api/customer-auth/login/`;
+  const REG_URL = `${API_BASE}/api/customer-auth/register/`;
+
+  function show(text, ok=true){
+    const el = document.getElementById("msg");
+    el.textContent = text;
+    el.className = `msg ${ok ? "ok":"err"}`;
+    el.style.display = "block";
+  }
+
+  document.getElementById("tabLogin").onclick = () => {
+    document.getElementById("tabLogin").classList.add("active");
+    document.getElementById("tabRegister").classList.remove("active");
+    document.getElementById("loginForm").style.display = "block";
+    document.getElementById("registerForm").style.display = "none";
+    document.getElementById("msg").style.display = "none";
+  };
+
+  document.getElementById("tabRegister").onclick = () => {
+    document.getElementById("tabRegister").classList.add("active");
+    document.getElementById("tabLogin").classList.remove("active");
+    document.getElementById("loginForm").style.display = "none";
+    document.getElementById("registerForm").style.display = "block";
+    document.getElementById("msg").style.display = "none";
+  };
+
+  document.getElementById("loginForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = {
+      email: document.getElementById("l_email").value.trim(),
+      password: document.getElementById("l_pass").value
+    };
+
+    const res = await fetch(LOGIN_URL, {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(()=>({}));
+
+    if(!res.ok){
+      show(data.detail || "Credenciales inválidas.", false);
+      return;
+    }
+
+    // guardamos token customer aparte
+    localStorage.setItem("customer_access_token", data.access);
+    show("Login exitoso. Token guardado.", true);
+  });
+
+  document.getElementById("registerForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const p1 = document.getElementById("r_pass").value;
+    const p2 = document.getElementById("r_pass2").value;
+    if(p1 !== p2){
+      show("Las contraseñas no coinciden.", false);
+      return;
+    }
+
+    const payload = {
+      full_name: document.getElementById("r_name").value.trim(),
+      email: document.getElementById("r_email").value.trim(),
+      phone: document.getElementById("r_phone").value.trim(),
+      password: p1,
+      password2: p2
+    };
+
+    const res = await fetch(REG_URL, {
+      method:"POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(payload)
+    });
+    const data = await res.json().catch(()=>({}));
+
+    if(!res.ok){
+      const msg = data.detail || Object.values(data).flat().join(", ") || "No se pudo registrar.";
+      show(msg, false);
+      return;
+    }
+
+    show("Registro exitoso. Ahora podés iniciar sesión.", true);
+    document.getElementById("tabLogin").click();
+  });
+</script>
+</body>
+</html>
