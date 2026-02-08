@@ -1,0 +1,135 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lubricentro | Inicio</title>
+
+  <!-- Inter font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+
+  <!-- Bootstrap (solo para layout rápido) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+  <!-- Bootstrap Icons (para redes / íconos) -->
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
+  <link rel="stylesheet" href="./assets/css/main.css" />
+</head>
+
+<body>
+  <!-- TOP BAR -->
+  <header class="topbar">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+      <!-- Logo (solo imagen) -->
+      <a class="brand text-decoration-none" href="#">
+        <img class="brand-logo" src="./assets/img/logo.png" alt="Logo">
+      </a>
+
+      <!-- Right Info -->
+      <div class="topbar-info d-none d-md-flex align-items-center gap-4">
+        <div class="info-chip">
+          <div class="info-icon"><i class="bi bi-telephone"></i></div>
+          <div>
+            <div class="info-label">¡Llámanos ahora!</div>
+            <div class="info-value">+(506) 2443-6139</div>
+          </div>
+        </div>
+
+        <div class="info-chip">
+          <div class="info-icon"><i class="bi bi-clock"></i></div>
+          <div>
+            <div class="info-label">Horario de atención</div>
+            <div class="info-value">Lun-Sáb : 09:00-19:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- NAVBAR -->
+  <nav class="mainnav">
+    <div class="container d-flex align-items-center">
+      <ul class="navlinks d-none d-lg-flex">
+        <li><a class="active" href="#">Inicio</a></li>
+        <li><a href="#">Nosotros</a></li>
+        <li class="has-dd">
+          <a href="#">Servicios <i class="bi bi-chevron-down"></i></a>
+          <div class="dd">
+            <a href="#">Servicio 1</a>
+            <a href="#">Servicio 2</a>
+            <a href="#">Servicio 3</a>
+          </div>
+        </li>
+        <li><a href="#">Contacto</a></li>
+        <li class="has-dd">
+          <a href="#">Páginas <i class="bi bi-chevron-down"></i></a>
+          <div class="dd">
+            <a href="#">Página 1</a>
+            <a href="#">Página 2</a>
+          </div>
+        </li>
+      </ul>
+
+      <!-- Mobile menu button -->
+      <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
+        <i class="bi bi-list"></i>
+      </button>
+
+      <!-- Social -->
+      <div class="social ms-auto d-none d-lg-flex">
+        <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+        <a href="#" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>
+        <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+        <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+        <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+      </div>
+    </div>
+
+    <!-- Mobile drawer -->
+    <div class="mobile-drawer" id="mobileDrawer">
+      <a class="active" href="#">Inicio</a>
+      <a href="#">Nosotros</a>
+      <a href="#">Servicios</a>
+      <a href="#">Contacto</a>
+      <a href="#">Páginas</a>
+    </div>
+  </nav>
+
+  <!-- HERO -->
+  <main class="hero">
+    <!-- Carrusel slide -->
+    <div class="hero-carousel" id="heroCarousel" aria-hidden="true">
+      <div class="hero-slide hero-slide--active" id="heroSlideA"></div>
+      <div class="hero-slide hero-slide--next" id="heroSlideB"></div>
+    </div>
+
+    <div class="hero-overlay"></div>
+    <div class="hero-right-stripes" aria-hidden="true"></div>
+
+    <div class="container hero-content">
+      <div class="hero-copy">
+        <h1 class="hero-title">
+          Tu aliado de confianza<br>
+          para todo lo que tu<br>
+          auto necesita
+        </h1>
+
+        <p class="hero-sub">
+          Desde mantenimiento rutinario hasta reparaciones mayores,<br>
+          estamos listos para ayudarte.
+        </p>
+
+        <div class="hero-actions">
+          <a class="btn btn-hero" href="#" id="btnPrimaryCta">Cotizar ahora</a>
+          <div class="login-slot"></div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script src="./assets/js/main.js"></script>
+</body>
+</html>
