@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'apps.catalog',
     'apps.services',
     'apps.customers.apps.CustomersConfig',
+    "apps.vehicles.apps.VehiclesConfig",
 
 ]
 
