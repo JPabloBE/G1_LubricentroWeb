@@ -1,4 +1,8 @@
-const API_BASE = "http://127.0.0.1:8000";
+const API_BASE = "http://localhost:8000";
+
+// Este JS se usa dentro de /admin/
+// Necesitas el puente: frontend/admin/auth.html -> ../auth_admin.html
+const LOGIN_REDIRECT = "./auth.html";
 
 function getToken() {
   return localStorage.getItem("access_token");
@@ -24,7 +28,6 @@ async function fetchJSON(url, options = {}) {
 }
 
 function isAdmin(me) {
-  // Aceptamos admin/staff y flags Django
   return (
     me?.user_type === "admin" ||
     me?.user_type === "staff" ||
@@ -51,6 +54,8 @@ function renderDemoOrders() {
   ];
 
   const tbody = document.getElementById("ordersTbody");
+  if (!tbody) return;
+
   tbody.innerHTML = "";
 
   for (const o of demo) {
@@ -77,7 +82,7 @@ function renderDemoOrders() {
 async function init() {
   const token = getToken();
   if (!token) {
-    window.location.href = "./auth.html";
+    window.location.href = LOGIN_REDIRECT;
     return;
   }
 
@@ -85,31 +90,38 @@ async function init() {
     const me = await fetchJSON(`${API_BASE}/api/auth/me/`, { headers: authHeaders() });
 
     if (!isAdmin(me)) {
-      // No admin => fuera
-      window.location.href = "./auth.html";
+      window.location.href = LOGIN_REDIRECT;
       return;
     }
 
-    // Header user
     const displayName = me?.full_name || me?.username || me?.email || "Admin";
-    document.getElementById("userName").textContent = displayName;
-    document.getElementById("userRole").textContent = me?.user_type || "admin";
-    document.getElementById("userInitials").textContent = initialsFromName(displayName);
+
+    const elName = document.getElementById("userName");
+    const elRole = document.getElementById("userRole");
+    const elInit = document.getElementById("userInitials");
+
+    if (elName) elName.textContent = displayName;
+    if (elRole) elRole.textContent = me?.user_type || (me?.is_superuser ? "admin" : "staff");
+    if (elInit) elInit.textContent = initialsFromName(displayName);
 
     renderDemoOrders();
-  } catch (e) {
-    // token inválido o error => login
-    window.location.href = "./auth.html";
+  } catch (_) {
+    window.location.href = LOGIN_REDIRECT;
+    return;
   }
 
-  document.getElementById("btnLogout").addEventListener("click", async () => {
-    try {
-      await fetchJSON(`${API_BASE}/api/auth/logout/`, { method: "POST", headers: authHeaders() });
-    } catch (_) {}
-    localStorage.removeItem("access_token");
-    localStorage.removeItem("refresh_token");
-    window.location.href = "./auth.html";
-  });
+  const btn = document.getElementById("btnLogout");
+  if (btn) {
+    btn.addEventListener("click", async () => {
+      try {
+        await fetchJSON(`${API_BASE}/api/auth/logout/`, { method: "POST", headers: authHeaders() });
+      } catch (_) {}
+
+      localStorage.removeItem("access_token");
+      localStorage.removeItem("refresh_token");
+      window.location.href = LOGIN_REDIRECT;
+    });
+  }
 }
 
 init();

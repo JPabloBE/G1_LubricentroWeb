@@ -72,6 +72,17 @@
       color:#666;
       text-align:center;
     }
+    .links{
+      margin-top:12px;
+      text-align:center;
+      font-size:13px;
+    }
+    .links a{
+      color:#111;
+      text-decoration:none;
+      font-weight:700;
+    }
+    .links a:hover{ text-decoration:underline; }
   </style>
 </head>
 
@@ -97,6 +108,11 @@
     <div class="hint">
       Si necesitás un usuario, pedile a un admin/staff que lo cree desde el dashboard.
     </div>
+
+    <!-- opcional -->
+    <div class="links">
+      ¿Sos cliente? <a href="./auth_client.html">Ir al login de cliente</a>
+    </div>
   </div>
 
   <script>
@@ -114,18 +130,34 @@
       document.getElementById("message").style.display = "none";
     }
 
+    function isAdminUser(me) {
+      return me.user_type === "admin" || me.is_staff === true || me.is_superuser === true;
+    }
+
     async function tryAutoRedirect() {
       if (!accessToken) return;
+
       try {
         const meRes = await fetch(`${API_URL}/me/`, {
           headers: { "Authorization": `Bearer ${accessToken}` }
         });
-        if (meRes.ok) {
-          window.location.href = "./dashboard.html";
-        } else {
+
+        if (!meRes.ok) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
+          return;
         }
+
+        const me = await meRes.json().catch(() => null);
+        if (!me || !isAdminUser(me)) {
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          showMessage("Tu usuario no tiene permisos de Staff/Admin.", "error");
+          return;
+        }
+
+        // IMPORTANTE: ahora el dashboard está dentro de /admin/
+        window.location.href = "./admin/dashboard.html";
       } catch (_) {
         // nada
       }
@@ -154,11 +186,36 @@
           return;
         }
 
+        if (!data.access) {
+          showMessage("No se recibió access_token.", "error");
+          return;
+        }
+
         localStorage.setItem("access_token", data.access);
-        localStorage.setItem("refresh_token", data.refresh);
+        if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
         accessToken = data.access;
 
-        window.location.href = "./dashboard.html";
+        // Verificación extra: asegurar que este usuario sea admin/staff
+        const meRes = await fetch(`${API_URL}/me/`, {
+          headers: { "Authorization": `Bearer ${accessToken}` }
+        });
+
+        if (!meRes.ok) {
+          showMessage("No se pudo validar la sesión.", "error");
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          return;
+        }
+
+        const me = await meRes.json().catch(() => null);
+        if (!me || !isAdminUser(me)) {
+          showMessage("Este usuario no tiene permisos de Staff/Admin.", "error");
+          localStorage.removeItem("access_token");
+          localStorage.removeItem("refresh_token");
+          return;
+        }
+
+        window.location.href = "./admin/dashboard.html";
       } catch (err) {
         console.error(err);
         showMessage("Error de conexión con el servidor.", "error");
