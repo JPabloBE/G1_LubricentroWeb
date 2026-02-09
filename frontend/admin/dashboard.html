@@ -20,7 +20,6 @@
 
 <div class="container-fluid">
   <div class="row">
-    <!-- Sidebar -->
     <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height: calc(100vh - 56px);">
       <div class="p-3">
         <div class="fw-semibold">Menú</div>
@@ -35,11 +34,11 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_vehicles.html">Autos</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
         </div>
       </div>
     </aside>
 
-    <!-- Main -->
     <main class="col-12 col-md-9 col-lg-10 p-4">
 
       <div id="msg" class="alert d-none" role="alert"></div>
@@ -49,7 +48,6 @@
         Acceso exclusivo para <b>Staff/Admin</b>. Usa el menú para gestionar módulos.
       </p>
 
-      <!-- Quick cards -->
       <div class="row g-3">
 
         <div class="col-12 col-md-6 col-xl-4">
@@ -82,7 +80,6 @@
           </div>
         </div>
 
-        <!-- NEW: Autos -->
         <div class="col-12 col-md-6 col-xl-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -93,7 +90,6 @@
           </div>
         </div>
 
-        <!-- (Opcional) Servicios -->
         <div class="col-12 col-md-6 col-xl-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -110,6 +106,39 @@
               <h5 class="card-title">Usuarios (Staff/Admin)</h5>
               <p class="card-text text-muted">Gestión de usuarios del negocio.</p>
               <a class="btn btn-dark btn-sm" href="./dashboard_staff_users.html">Ir a Usuarios</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NUEVO: Citas -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Citas</h5>
+              <p class="card-text text-muted">Ver y gestionar citas de clientes, estados y progreso.</p>
+              <a class="btn btn-dark btn-sm" href="./dashboard_appointments.html">Ir a Citas</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NUEVO: Horarios de Citas -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Horarios de Citas</h5>
+              <p class="card-text text-muted">Crear y administrar los slots disponibles para agendar citas.</p>
+              <a class="btn btn-dark btn-sm" href="./dashboard_appointment_slots.html">Ir a Horarios</a>
+            </div>
+          </div>
+        </div>
+
+        <!-- ✅ NUEVO: Órdenes de Trabajo -->
+        <div class="col-12 col-md-6 col-xl-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title">Órdenes de Trabajo</h5>
+              <p class="card-text text-muted">Crear órdenes desde citas, gestionar diagnóstico, servicios, productos y stock.</p>
+              <a class="btn btn-dark btn-sm" href="./dashboard_work_orders.html">Ir a Órdenes</a>
             </div>
           </div>
         </div>

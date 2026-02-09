@@ -1,0 +1,855 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lubricentro | Órdenes de Trabajo</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">Lubricentro | Dashboard</span>
+    <div class="d-flex gap-2 align-items-center">
+      <span id="whoami" class="text-white-50 small"></span>
+      <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height: calc(100vh - 56px);">
+      <div class="p-3">
+        <div class="fw-semibold">Menú</div>
+        <hr>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_categories.html">Catálogo → Categorías</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_products.html">Catálogo → Productos</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_customers.html">Clientes</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_services.html">Servicios</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_staff_users.html">Usuarios (Staff/Admin)</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_vehicles.html">Autos</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
+          <a class="list-group-item list-group-item-action active" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
+        </div>
+      </div>
+    </aside>
+
+    <main class="col-12 col-md-9 col-lg-10 p-4">
+      <div id="msg" class="alert d-none" role="alert"></div>
+
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
+        <h3 class="m-0">Órdenes de Trabajo</h3>
+        <div class="d-flex gap-2">
+          <select id="filterStatus" class="form-select form-select-sm" style="width: 220px;">
+            <option value="">Todos los estados</option>
+            <option value="open">open</option>
+            <option value="diagnosing">diagnosing</option>
+            <option value="awaiting_authorization">awaiting_authorization</option>
+            <option value="authorized">authorized</option>
+            <option value="in_progress">in_progress</option>
+            <option value="waiting_parts">waiting_parts</option>
+            <option value="ready">ready</option>
+            <option value="closed">closed</option>
+            <option value="cancelled">cancelled</option>
+          </select>
+          <button id="btnReload" class="btn btn-sm btn-dark">Recargar</button>
+        </div>
+      </div>
+
+      <div class="card shadow-sm mb-3">
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2 align-items-center justify-content-between">
+            <div>
+              <h5 class="m-0">Citas abiertas</h5>
+              <div class="small text-muted">Seleccioná una cita y creá la orden de trabajo sin usar IDs.</div>
+            </div>
+            <div class="d-flex gap-2">
+              <select id="apStatusFilter" class="form-select form-select-sm" style="width: 320px;">
+                <option value="pending,scheduled,accepted,in_progress">Pendientes / Agendadas / Aceptadas / En progreso</option>
+                <option value="pending,scheduled">Pendientes / Agendadas</option>
+                <option value="accepted,in_progress">Aceptadas / En progreso</option>
+              </select>
+              <button id="btnReloadApps" class="btn btn-sm btn-outline-dark">Recargar</button>
+            </div>
+          </div>
+          <div id="appsGrid" class="row g-3 mt-2"></div>
+        </div>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table class="table table-striped table-hover m-0 align-middle">
+              <thead class="table-light">
+                <tr>
+                  <th>Work Order</th>
+                  <th>Cliente</th>
+                  <th>Placa</th>
+                  <th>Estado</th>
+                  <th>Autorización</th>
+                  <th>Abierta</th>
+                  <th style="width: 280px;">Acciones</th>
+                </tr>
+              </thead>
+              <tbody id="tbody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <div class="modal fade" id="detailModal" tabindex="-1">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+          <div class="modal-content">
+            <div class="modal-header">
+              <div>
+                <h5 class="modal-title m-0">Detalle Work Order</h5>
+                <div class="small text-muted" id="detailSubtitle"></div>
+              </div>
+              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+
+            <div class="modal-body">
+              <div class="row g-3">
+                <div class="col-12 col-lg-5">
+                  <div class="card">
+                    <div class="card-body">
+                      <div class="d-flex gap-2">
+                        <select id="woStatus" class="form-select form-select-sm">
+                          <option value="open">open</option>
+                          <option value="diagnosing">diagnosing</option>
+                          <option value="awaiting_authorization">awaiting_authorization</option>
+                          <option value="authorized">authorized</option>
+                          <option value="in_progress">in_progress</option>
+                          <option value="waiting_parts">waiting_parts</option>
+                          <option value="ready">ready</option>
+                          <option value="closed">closed</option>
+                          <option value="cancelled">cancelled</option>
+                        </select>
+                        <select id="woAuth" class="form-select form-select-sm">
+                          <option value="pending">pending</option>
+                          <option value="approved">approved</option>
+                          <option value="rejected">rejected</option>
+                        </select>
+                        <button id="btnSaveWo" class="btn btn-sm btn-dark">Guardar</button>
+                      </div>
+
+                      <label class="form-label small mt-3 mb-1">Notas</label>
+                      <textarea id="woNotes" class="form-control form-control-sm" rows="4"></textarea>
+
+                      <div class="row g-2 mt-2">
+                        <div class="col-6">
+                          <label class="form-label small mb-1">Estimated Total</label>
+                          <input id="woEstimated" class="form-control form-control-sm" placeholder="0.00" readonly>
+                          <div class="small text-muted mt-1">Se calcula automáticamente.</div>
+                        </div>
+                        <div class="col-6">
+                          <label class="form-label small mb-1">Assigned Mechanic (uuid)</label>
+                          <input id="woMechanic" class="form-control form-control-sm" placeholder="uuid">
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="d-grid mt-3 gap-2">
+                    <button id="btnDeleteWo" class="btn btn-sm btn-danger">Eliminar Work Order (revierte stock)</button>
+                  </div>
+                </div>
+
+                <div class="col-12 col-lg-7">
+                  <ul class="nav nav-tabs" role="tablist">
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabServices" type="button">Servicios</button>
+                    </li>
+                    <li class="nav-item" role="presentation">
+                      <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabProducts" type="button">Productos</button>
+                    </li>
+                  </ul>
+
+                  <div class="tab-content border border-top-0 bg-white p-3 rounded-bottom">
+                    <div class="tab-pane fade show active" id="tabServices">
+                      <div class="row g-2 mb-2">
+                        <div class="col-7">
+                          <select id="svcServiceSelect" class="form-select form-select-sm"></select>
+                        </div>
+                        <div class="col-2">
+                          <input id="svcQty" class="form-control form-control-sm" placeholder="qty" value="1">
+                        </div>
+                        <div class="col-3">
+                          <button id="btnAddService" class="btn btn-sm btn-primary w-100">Agregar</button>
+                        </div>
+                      </div>
+
+                      <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                          <thead>
+                            <tr>
+                              <th>Servicio</th>
+                              <th>Qty</th>
+                              <th>Precio</th>
+                              <th>Estado</th>
+                              <th style="width:220px;">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody id="svcTbody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                    <div class="tab-pane fade" id="tabProducts">
+                      <div class="row g-2 mb-2">
+                        <div class="col-7">
+                          <select id="prdProductSelect" class="form-select form-select-sm"></select>
+                        </div>
+                        <div class="col-2">
+                          <input id="prdQty" class="form-control form-control-sm" placeholder="qty" value="1">
+                        </div>
+                        <div class="col-3">
+                          <button id="btnAddProduct" class="btn btn-sm btn-primary w-100">Agregar</button>
+                        </div>
+                      </div>
+
+                      <div class="small text-muted mb-2">Stock se ajusta automáticamente por qty (agregar/editar/eliminar).</div>
+
+                      <div class="table-responsive">
+                        <table class="table table-sm table-striped align-middle">
+                          <thead>
+                            <tr>
+                              <th>Producto</th>
+                              <th>SKU</th>
+                              <th>Qty</th>
+                              <th>Precio</th>
+                              <th style="width:170px;">Acciones</th>
+                            </tr>
+                          </thead>
+                          <tbody id="prdTbody"></tbody>
+                        </table>
+                      </div>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+            <div class="modal-footer">
+              <button class="btn btn-sm btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("access_token");
+
+  const WO_URL = `${API_BASE}/api/work-orders/`;
+  const WO_FROM_APP_URL = `${API_BASE}/api/work-orders/create-from-appointment/`;
+  const OPEN_APPS_URL = `${API_BASE}/api/open-appointments/`;
+  const WOS_URL = `${API_BASE}/api/work-order-services/`;
+  const WOP_URL = `${API_BASE}/api/work-order-products/`;
+
+  const SERVICES_URL = `${API_BASE}/api/services/`;
+  const PRODUCTS_URL = `${API_BASE}/api/catalog/products/`;
+
+  let currentWo = null;
+  let servicesCache = [];
+  let productsCache = [];
+  let svcLines = [];
+  let prdLines = [];
+  let totalSaveTimer = null;
+
+  const modal = new bootstrap.Modal(document.getElementById("detailModal"));
+
+  function showMsg(text, type="danger", autoHideMs=3500) {
+    const el = document.getElementById("msg");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+    if (autoHideMs) {
+      setTimeout(() => el.classList.add("d-none"), autoHideMs);
+    }
+  }
+
+  async function fetchJSON(url, options = {}) {
+    const res = await fetch(url, options);
+    let data = null;
+    try { data = await res.json(); } catch (_) {}
+    if (!res.ok) throw new Error(data?.detail || JSON.stringify(data) || res.statusText);
+    return data;
+  }
+
+  async function ensureStaffOrAdmin() {
+    if (!token) return null;
+    const res = await fetch(`${API_BASE}/api/auth/me/`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+    if (!res.ok) return null;
+    return await res.json();
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function fmt(dt) {
+    if (!dt) return "";
+    try { return new Date(dt).toLocaleString(); } catch (_) { return dt; }
+  }
+
+  function badgeForStatus(st) {
+    const s = String(st || "").toLowerCase();
+    if (s === "pending") return "text-bg-warning";
+    if (s === "scheduled") return "text-bg-info";
+    if (s === "accepted") return "text-bg-primary";
+    if (s === "in_progress") return "text-bg-success";
+    return "text-bg-secondary";
+  }
+
+  function normalizeList(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.results)) return data.results;
+    return [];
+  }
+
+  function toNum(x) {
+    const n = Number(String(x ?? "").replace(",", "."));
+    return Number.isFinite(n) ? n : 0;
+  }
+
+  function money(n) {
+    const v = Number.isFinite(n) ? n : 0;
+    return v.toFixed(2);
+  }
+
+  function calcTotal() {
+    let total = 0;
+    for (const s of svcLines) {
+      total += toNum(s.qty) * toNum(s.unit_price);
+    }
+    for (const p of prdLines) {
+      total += toNum(p.qty) * toNum(p.unit_price);
+    }
+    return total;
+  }
+
+  function setEstimatedUI(total) {
+    document.getElementById("woEstimated").value = money(total);
+  }
+
+  function scheduleSaveEstimated(total) {
+    if (!currentWo) return;
+    if (totalSaveTimer) clearTimeout(totalSaveTimer);
+    totalSaveTimer = setTimeout(async () => {
+      try {
+        await fetchJSON(`${WO_URL}${currentWo.work_order_id}/`, {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+          body: JSON.stringify({ estimated_total: money(total) })
+        });
+      } catch (_) {}
+    }, 550);
+  }
+
+  function refreshEstimatedTotal() {
+    const total = calcTotal();
+    setEstimatedUI(total);
+    scheduleSaveEstimated(total);
+  }
+
+  async function loadCatalogs() {
+    const [svc, prd] = await Promise.all([
+      fetchJSON(SERVICES_URL, { headers: { "Authorization": `Bearer ${token}` } }),
+      fetchJSON(PRODUCTS_URL, { headers: { "Authorization": `Bearer ${token}` } })
+    ]);
+
+    servicesCache = normalizeList(svc);
+    productsCache = normalizeList(prd);
+
+    const svcSel = document.getElementById("svcServiceSelect");
+    svcSel.innerHTML = "";
+    const svcDefault = document.createElement("option");
+    svcDefault.value = "";
+    svcDefault.textContent = "Seleccionar servicio...";
+    svcSel.appendChild(svcDefault);
+
+    for (const s of servicesCache) {
+      const id = s.service_id || s.id;
+      const name = s.name || "Servicio";
+      const price = s.base_price ?? s.unit_price ?? s.price ?? 0;
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = `${name} - ₡${price}`;
+      opt.dataset.price = price;
+      svcSel.appendChild(opt);
+    }
+
+    const prdSel = document.getElementById("prdProductSelect");
+    prdSel.innerHTML = "";
+    const prdDefault = document.createElement("option");
+    prdDefault.value = "";
+    prdDefault.textContent = "Seleccionar producto...";
+    prdSel.appendChild(prdDefault);
+
+    for (const p of productsCache) {
+      const id = p.product_id || p.id;
+      const name = p.name || "Producto";
+      const sku = p.sku || "";
+      const price = p.unit_price ?? 0;
+      const stock = p.stock_qty ?? 0;
+      const opt = document.createElement("option");
+      opt.value = id;
+      opt.textContent = `${name}${sku ? " (" + sku + ")" : ""} - Stock: ${stock} - ₡${price}`;
+      opt.dataset.price = price;
+      prdSel.appendChild(opt);
+    }
+  }
+
+  async function loadOpenAppointments() {
+    const statuses = document.getElementById("apStatusFilter").value;
+    const data = await fetchJSON(`${OPEN_APPS_URL}?statuses=${encodeURIComponent(statuses)}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    const grid = document.getElementById("appsGrid");
+    grid.innerHTML = "";
+
+    if (!data.length) {
+      grid.innerHTML = `<div class="col-12"><div class="alert alert-light border m-0">No hay citas abiertas en este filtro.</div></div>`;
+      return;
+    }
+
+    for (const ap of data) {
+      const v = ap.vehicle || {};
+      const c = ap.customer || {};
+      const vehicleLabel = `${v.plate || ""} ${v.make || ""} ${v.model || ""} ${v.year || ""}`.trim();
+
+      const col = document.createElement("div");
+      col.className = "col-12 col-md-6 col-xl-4";
+      col.innerHTML = `
+        <div class="card h-100 shadow-sm">
+          <div class="card-body">
+            <div class="d-flex justify-content-between align-items-start gap-2">
+              <div>
+                <div class="fw-semibold">${escapeHtml(vehicleLabel || "Vehículo")}</div>
+                <div class="small text-muted">${escapeHtml(c.full_name || "")} • ${escapeHtml(c.email || "")}</div>
+              </div>
+              <span class="badge ${badgeForStatus(ap.status)}">${escapeHtml(ap.status)}</span>
+            </div>
+            <div class="small mt-2"><b>Inicio:</b> ${escapeHtml(fmt(ap.scheduled_start))}</div>
+            <div class="small text-muted mt-1">${escapeHtml(ap.requested_work || "Sin descripción")}</div>
+            <div class="d-grid mt-3">
+              <button class="btn btn-sm btn-primary" data-create>Crear orden de trabajo</button>
+            </div>
+          </div>
+        </div>
+      `;
+
+      col.querySelector("[data-create]").onclick = async () => {
+        try {
+          const wo = await fetchJSON(WO_FROM_APP_URL, {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ appointment_id: ap.appointment_id })
+          });
+          showMsg("Orden de trabajo creada/abierta correctamente.", "success");
+          await loadWorkOrders();
+          await openDetail(wo.work_order_id);
+        } catch (e) {
+          showMsg(e.message || "No se pudo crear la orden de trabajo.", "danger", 5500);
+        }
+      };
+
+      grid.appendChild(col);
+    }
+  }
+
+  async function loadWorkOrders() {
+    const st = document.getElementById("filterStatus").value;
+    const url = st ? `${WO_URL}?status=${encodeURIComponent(st)}` : WO_URL;
+
+    try {
+      const data = await fetchJSON(url, { headers: { "Authorization": `Bearer ${token}` } });
+      const rows = normalizeList(data);
+
+      const tbody = document.getElementById("tbody");
+      tbody.innerHTML = "";
+
+      for (const wo of rows) {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td class="small">${escapeHtml(wo.work_order_id)}</td>
+          <td>
+            <div class="fw-semibold">${escapeHtml(wo.customer_name || "")}</div>
+            <div class="small text-muted">${escapeHtml(wo.customer_email || "")}</div>
+          </td>
+          <td class="fw-semibold">${escapeHtml(wo.vehicle_plate || "")}</td>
+          <td><span class="badge text-bg-secondary">${escapeHtml(wo.status || "")}</span></td>
+          <td><span class="badge text-bg-info">${escapeHtml(wo.authorization_status || "")}</span></td>
+          <td class="small">${fmt(wo.opened_at)}</td>
+          <td class="text-end">
+            <button class="btn btn-sm btn-outline-dark me-1" data-act="view">Ver</button>
+            <button class="btn btn-sm btn-danger" data-act="delete">Eliminar</button>
+          </td>
+        `;
+        tr.querySelector('[data-act="view"]').onclick = () => openDetail(wo.work_order_id);
+        tr.querySelector('[data-act="delete"]').onclick = async () => {
+          try {
+            await deleteWo(wo.work_order_id);
+          } catch (e) {
+            showMsg(e.message || "No se pudo eliminar.", "danger", 5500);
+          }
+        };
+        tbody.appendChild(tr);
+      }
+    } catch (e) {
+      showMsg(e.message || "Error cargando órdenes de trabajo.", "danger", 5500);
+    }
+  }
+
+  async function openDetail(work_order_id) {
+    try {
+      const wo = await fetchJSON(`${WO_URL}${work_order_id}/`, {
+        headers: { "Authorization": `Bearer ${token}` }
+      });
+      currentWo = wo;
+
+      document.getElementById("detailSubtitle").textContent = `${wo.customer_name || ""} • ${wo.vehicle_plate || ""} • ${wo.work_order_id}`;
+      document.getElementById("woStatus").value = wo.status || "open";
+      document.getElementById("woAuth").value = wo.authorization_status || "pending";
+      document.getElementById("woNotes").value = wo.notes || "";
+      document.getElementById("woMechanic").value = wo.assigned_mechanic_id || "";
+
+      await loadServices(wo.work_order_id);
+      await loadProducts(wo.work_order_id);
+      refreshEstimatedTotal();
+
+      modal.show();
+      showMsg("Work Order cargada.", "success", 1800);
+    } catch (e) {
+      showMsg(e.message || "No se pudo abrir el detalle.", "danger", 5500);
+    }
+  }
+
+  function serviceStatusSelectHtml(selected) {
+    const s = String(selected || "pending");
+    const opts = ["pending", "in_progress", "done", "cancelled"];
+    return `
+      <select class="form-select form-select-sm" data-svc-status style="min-width: 140px;">
+        ${opts.map(o => `<option value="${o}" ${o === s ? "selected" : ""}>${o}</option>`).join("")}
+      </select>
+    `;
+  }
+
+  async function loadServices(work_order_id) {
+    const data = await fetchJSON(`${WOS_URL}?work_order_id=${encodeURIComponent(work_order_id)}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    svcLines = normalizeList(data);
+    const tb = document.getElementById("svcTbody");
+    tb.innerHTML = "";
+
+    for (const r of svcLines) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <div class="fw-semibold">${escapeHtml(r.service_name || "")}</div>
+          <div class="small text-muted">${escapeHtml(r.description || "")}</div>
+        </td>
+        <td class="small">${escapeHtml(r.qty)}</td>
+        <td class="small">${escapeHtml(r.unit_price)}</td>
+        <td>${serviceStatusSelectHtml(r.status)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-dark me-1" data-save>Guardar</button>
+          <button class="btn btn-sm btn-outline-danger" data-del>Eliminar</button>
+        </td>
+      `;
+
+      tr.querySelector("[data-save]").onclick = async () => {
+        const newStatus = tr.querySelector("[data-svc-status]").value;
+        try {
+          await fetchJSON(`${WOS_URL}${r.work_order_service_id}/`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ status: newStatus })
+          });
+          showMsg("Estado del servicio actualizado.", "success");
+          await loadServices(work_order_id);
+          refreshEstimatedTotal();
+        } catch (e) {
+          showMsg(e.message || "No se pudo actualizar el estado del servicio.", "danger", 5500);
+        }
+      };
+
+      tr.querySelector("[data-del]").onclick = async () => {
+        try {
+          const res = await fetch(`${WOS_URL}${r.work_order_service_id}/`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) {
+            let d = null;
+            try { d = await res.json(); } catch (_) {}
+            throw new Error(d?.detail || "No se pudo eliminar el servicio.");
+          }
+          showMsg("Servicio eliminado.", "success");
+          await loadServices(work_order_id);
+          refreshEstimatedTotal();
+        } catch (e) {
+          showMsg(e.message || "No se pudo eliminar el servicio.", "danger", 5500);
+        }
+      };
+
+      tb.appendChild(tr);
+    }
+  }
+
+  async function loadProducts(work_order_id) {
+    const data = await fetchJSON(`${WOP_URL}?work_order_id=${encodeURIComponent(work_order_id)}`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    prdLines = normalizeList(data);
+    const tb = document.getElementById("prdTbody");
+    tb.innerHTML = "";
+
+    for (const r of prdLines) {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>
+          <div class="fw-semibold">${escapeHtml(r.product_name || "")}</div>
+          <div class="small text-muted">${escapeHtml(r.description || "")}</div>
+        </td>
+        <td class="small">${escapeHtml(r.product_sku || "")}</td>
+        <td class="small">
+          <input class="form-control form-control-sm" style="width:100px" value="${escapeHtml(r.qty)}" data-qty>
+        </td>
+        <td class="small">${escapeHtml(r.unit_price)}</td>
+        <td class="text-end">
+          <button class="btn btn-sm btn-outline-dark me-1" data-save>Guardar</button>
+          <button class="btn btn-sm btn-outline-danger" data-del>Eliminar</button>
+        </td>
+      `;
+
+      tr.querySelector("[data-save]").onclick = async () => {
+        const newQty = tr.querySelector("[data-qty]").value;
+        try {
+          await fetchJSON(`${WOP_URL}${r.work_order_product_id}/`, {
+            method: "PATCH",
+            headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+            body: JSON.stringify({ qty: newQty })
+          });
+          showMsg("Producto actualizado (qty).", "success");
+          await loadProducts(work_order_id);
+          refreshEstimatedTotal();
+          try { await loadCatalogs(); } catch (_) {}
+        } catch (e) {
+          showMsg(e.message || "No se pudo actualizar el producto (qty).", "danger", 5500);
+        }
+      };
+
+      tr.querySelector("[data-del]").onclick = async () => {
+        try {
+          const res = await fetch(`${WOP_URL}${r.work_order_product_id}/`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+          });
+          if (!res.ok) {
+            let d = null;
+            try { d = await res.json(); } catch (_) {}
+            throw new Error(d?.detail || "No se pudo eliminar el producto.");
+          }
+          showMsg("Producto eliminado (stock revertido).", "success");
+          await loadProducts(work_order_id);
+          refreshEstimatedTotal();
+          try { await loadCatalogs(); } catch (_) {}
+        } catch (e) {
+          showMsg(e.message || "No se pudo eliminar el producto.", "danger", 5500);
+        }
+      };
+
+      tb.appendChild(tr);
+    }
+  }
+
+  async function deleteWo(work_order_id) {
+    if (!confirm("¿Eliminar esta Work Order? Esto borrará líneas y revertirá stock.")) return;
+
+    const res = await fetch(`${WO_URL}${work_order_id}/`, {
+      method: "DELETE",
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    if (!res.ok) {
+      let data = null;
+      try { data = await res.json(); } catch (_) {}
+      throw new Error(data?.detail || "No se pudo eliminar la work order.");
+    }
+
+    showMsg("Work Order eliminada correctamente (stock revertido).", "success");
+    await loadWorkOrders();
+    try { await loadCatalogs(); } catch (_) {}
+  }
+
+  document.getElementById("btnReload").onclick = () => loadWorkOrders();
+  document.getElementById("btnReloadApps").onclick = () => loadOpenAppointments();
+  document.getElementById("apStatusFilter").onchange = () => loadOpenAppointments();
+
+  document.getElementById("btnSaveWo").onclick = async () => {
+    if (!currentWo) return;
+
+    try {
+      const total = calcTotal();
+      setEstimatedUI(total);
+
+      const payload = {
+        status: document.getElementById("woStatus").value,
+        authorization_status: document.getElementById("woAuth").value,
+        notes: document.getElementById("woNotes").value,
+        estimated_total: money(total),
+        assigned_mechanic_id: document.getElementById("woMechanic").value.trim() || null
+      };
+
+      await fetchJSON(`${WO_URL}${currentWo.work_order_id}/`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify(payload)
+      });
+
+      showMsg("Work Order actualizada correctamente.", "success");
+      await loadWorkOrders();
+    } catch (e) {
+      showMsg(e.message || "Error guardando Work Order.", "danger", 5500);
+    }
+  };
+
+  document.getElementById("btnDeleteWo").onclick = async () => {
+    if (!currentWo) return;
+    try {
+      await deleteWo(currentWo.work_order_id);
+      modal.hide();
+    } catch (e) {
+      showMsg(e.message || "No se pudo eliminar.", "danger", 5500);
+    }
+  };
+
+  document.getElementById("btnAddService").onclick = async () => {
+    if (!currentWo) return;
+
+    const sel = document.getElementById("svcServiceSelect");
+    const service_id = sel.value;
+    if (!service_id) {
+      showMsg("Seleccioná un servicio.", "warning");
+      return;
+    }
+
+    const qty = document.getElementById("svcQty").value;
+    const unit_price = sel.selectedOptions[0]?.dataset?.price ?? "0";
+
+    try {
+      await fetchJSON(WOS_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          work_order_id: currentWo.work_order_id,
+          service_id,
+          qty,
+          unit_price
+        })
+      });
+
+      document.getElementById("svcQty").value = "1";
+      sel.value = "";
+
+      showMsg("Servicio agregado correctamente.", "success");
+      await loadServices(currentWo.work_order_id);
+      refreshEstimatedTotal();
+    } catch (e) {
+      showMsg(e.message || "Error agregando servicio.", "danger", 5500);
+    }
+  };
+
+  document.getElementById("btnAddProduct").onclick = async () => {
+    if (!currentWo) return;
+
+    const sel = document.getElementById("prdProductSelect");
+    const product_id = sel.value;
+    if (!product_id) {
+      showMsg("Seleccioná un producto.", "warning");
+      return;
+    }
+
+    const qty = document.getElementById("prdQty").value;
+    const unit_price = sel.selectedOptions[0]?.dataset?.price ?? "0";
+
+    try {
+      await fetchJSON(WOP_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({
+          work_order_id: currentWo.work_order_id,
+          product_id,
+          qty,
+          unit_price
+        })
+      });
+
+      document.getElementById("prdQty").value = "1";
+      sel.value = "";
+
+      showMsg("Producto agregado correctamente (stock descontado).", "success");
+      await loadProducts(currentWo.work_order_id);
+      refreshEstimatedTotal();
+      try { await loadCatalogs(); } catch (_) {}
+    } catch (e) {
+      showMsg(e.message || "Error agregando producto (posible stock insuficiente).", "danger", 5500);
+    }
+  };
+
+  document.getElementById("btnLogout").addEventListener("click", async () => {
+    try {
+      await fetch(`${API_BASE}/api/auth/logout/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` }
+      });
+    } catch (_) {}
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "../auth_admin.html";
+  });
+
+  (async () => {
+    const me = await ensureStaffOrAdmin();
+    if (!me) {
+      showMsg("Sesión inválida o expirada. Iniciá sesión nuevamente.", "warning", 5500);
+      setTimeout(() => (window.location.href = "../auth_admin.html"), 900);
+      return;
+    }
+    document.getElementById("whoami").textContent = `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
+
+    try {
+      await loadCatalogs();
+    } catch (_) {
+      showMsg("No se pudieron cargar servicios/productos. Revisá endpoints.", "warning", 5500);
+    }
+
+    await loadOpenAppointments();
+    await loadWorkOrders();
+  })();
+</script>
+
+</body>
+</html>

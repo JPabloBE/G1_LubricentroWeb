@@ -42,12 +42,12 @@ INSTALLED_APPS = [
     'apps.customers.apps.CustomersConfig',
     "apps.vehicles.apps.VehiclesConfig",
     "apps.appointments.apps.AppointmentsConfig",
-
+    "apps.work_orders.apps.WorkOrdersConfig",
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  # DEBE IR ARRIBA (después de SecurityMiddleware está bien)
+    'corsheaders.middleware.CorsMiddleware',  
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',

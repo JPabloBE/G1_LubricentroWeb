@@ -22,19 +22,48 @@
   <div id="msg" class="alert d-none" role="alert"></div>
 
   <h3 class="mb-2">Mi panel</h3>
-  <p class="text-muted mb-4">Desde aquí podés gestionar tus citas y ver tus vehículos.</p>
+  <p class="text-muted mb-4">Desde aquí podés gestionar tus citas, autos y ver tus órdenes de trabajo.</p>
 
   <div class="row g-3">
+    <!-- Citas -->
     <div class="col-12 col-md-6 col-xl-4">
       <div class="card shadow-sm h-100">
         <div class="card-body">
-          <h5 class="card-title">Citas</h5>
-          <p class="card-text text-muted">Crear una cita nueva y ver tus citas activas e historial.</p>
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <h5 class="card-title">Citas</h5>
+              <p class="card-text text-muted">Crear una cita nueva y ver tus citas activas e historial.</p>
+            </div>
+            <span id="apBadge" class="badge text-bg-secondary">—</span>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Pend.</div>
+                <div id="apPending" class="fw-semibold">—</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Prog.</div>
+                <div id="apScheduled" class="fw-semibold">—</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Cancel.</div>
+                <div id="apCancelled" class="fw-semibold">—</div>
+              </div>
+            </div>
+          </div>
+
           <a class="btn btn-dark btn-sm" href="./appointments.html">Ir a Citas</a>
         </div>
       </div>
     </div>
 
+    <!-- Autos -->
     <div class="col-12 col-md-6 col-xl-4">
       <div class="card shadow-sm h-100">
         <div class="card-body">
@@ -44,12 +73,57 @@
         </div>
       </div>
     </div>
+
+    <!-- Work Orders -->
+    <div class="col-12 col-md-6 col-xl-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body">
+          <div class="d-flex align-items-start justify-content-between gap-2">
+            <div>
+              <h5 class="card-title">Órdenes de trabajo</h5>
+              <p class="card-text text-muted">Ver el estado de tu reparación, notas y detalle de servicios/productos.</p>
+            </div>
+            <span id="woBadge" class="badge text-bg-secondary">—</span>
+          </div>
+
+          <div class="row g-2 mb-3">
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Abiertas</div>
+                <div id="woOpen" class="fw-semibold">—</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Listas</div>
+                <div id="woReady" class="fw-semibold">—</div>
+              </div>
+            </div>
+            <div class="col-4">
+              <div class="border rounded p-2 bg-light">
+                <div class="small text-muted">Cancel.</div>
+                <div id="woCancelled" class="fw-semibold">—</div>
+              </div>
+            </div>
+          </div>
+
+          <a class="btn btn-dark btn-sm" href="./work_orders.html">Ver mis órdenes</a>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
   const API_BASE = "http://127.0.0.1:8000";
+
+  // ✅ Cliente usa ESTE token (según tu auth_client.html)
   const token = localStorage.getItem("customer_access_token");
+
+  // ✅ Endpoints correctos para cliente
+  const ME_URL = `${API_BASE}/api/customer-auth/me/`;
+  const CUSTOMER_APPOINTMENTS_URL = `${API_BASE}/api/customer-appointments/`;
+  const CUSTOMER_WO_URL = `${API_BASE}/api/customer-work-orders/`;
 
   function showMsg(text, type="danger"){
     const el = document.getElementById("msg");
@@ -58,18 +132,78 @@
     el.classList.remove("d-none");
   }
 
+  function authHeaders(){
+    return {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${token}`
+    };
+  }
+
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, options);
     let data = null;
     try { data = await res.json(); } catch (_) {}
-    if (!res.ok) throw new Error(data?.detail || JSON.stringify(data) || res.statusText);
+
+    if (!res.ok) {
+      const detail = data?.detail || res.statusText || `HTTP ${res.status}`;
+      const err = new Error(detail);
+      err.status = res.status;
+      err.body = data;
+      throw err;
+    }
     return data;
   }
 
+  function normalizeList(data) {
+    if (Array.isArray(data)) return data;
+    if (data && Array.isArray(data.results)) return data.results;
+    return [];
+  }
+
+  function countByStatus(list, statuses){
+    const set = new Set(statuses.map(s => s.toLowerCase()));
+    return list.filter(x => set.has(String(x.status || "").toLowerCase())).length;
+  }
+
   async function loadCustomerMe(){
-    return await fetchJSON(`${API_BASE}/api/customer-auth/me/`, {
-      headers: { "Authorization": `Bearer ${token}` }
-    });
+    return await fetchJSON(ME_URL, { headers: authHeaders() });
+  }
+
+  async function loadAppointmentsSummary(){
+    const data = await fetchJSON(CUSTOMER_APPOINTMENTS_URL, { headers: authHeaders() });
+    const rows = normalizeList(data);
+
+    // Ajustá estos statuses si en tu DB usás otros nombres.
+    const pending = countByStatus(rows, ["pending"]);
+    const scheduled = countByStatus(rows, ["scheduled", "accepted", "in_progress"]);
+    const cancelled = countByStatus(rows, ["cancelled"]);
+
+    document.getElementById("apPending").textContent = pending;
+    document.getElementById("apScheduled").textContent = scheduled;
+    document.getElementById("apCancelled").textContent = cancelled;
+
+    const total = rows.length;
+    const badge = document.getElementById("apBadge");
+    badge.textContent = `${total}`;
+    badge.className = `badge ${total > 0 ? "text-bg-primary" : "text-bg-secondary"}`;
+  }
+
+  async function loadWorkOrdersSummary(){
+    const data = await fetchJSON(CUSTOMER_WO_URL, { headers: authHeaders() });
+    const rows = normalizeList(data);
+
+    const open = countByStatus(rows, ["open","diagnosing","awaiting_authorization","authorized","in_progress","waiting_parts"]);
+    const ready = countByStatus(rows, ["ready"]);
+    const cancelled = countByStatus(rows, ["cancelled"]);
+
+    document.getElementById("woOpen").textContent = open;
+    document.getElementById("woReady").textContent = ready;
+    document.getElementById("woCancelled").textContent = cancelled;
+
+    const total = rows.length;
+    const badge = document.getElementById("woBadge");
+    badge.textContent = `${total}`;
+    badge.className = `badge ${total > 0 ? "text-bg-primary" : "text-bg-secondary"}`;
   }
 
   document.getElementById("btnLogout").addEventListener("click", () => {
@@ -83,15 +217,36 @@
       return;
     }
 
+    // 1) validar sesión cliente
     try{
       const me = await loadCustomerMe();
       const label = me?.full_name ? `${me.full_name}` : (me?.email || "Cliente");
       document.getElementById("whoami").textContent = label;
     }catch(err){
+      // si el token expiró o es inválido
       showMsg("Sesión inválida o expirada. Iniciá sesión nuevamente.", "warning");
+      localStorage.removeItem("customer_access_token");
       setTimeout(() => (window.location.href = "../auth_client.html"), 900);
+      return;
+    }
+
+    // 2) cargar resúmenes
+    try{
+      await loadAppointmentsSummary();
+    }catch(err){
+      console.error("Appointments summary error:", err);
+      showMsg("No se pudo cargar el resumen de citas.", "warning");
+    }
+
+    try{
+      await loadWorkOrdersSummary();
+    }catch(err){
+      console.error("Work orders summary error:", err);
+      showMsg("No se pudo cargar el resumen de órdenes de trabajo.", "warning");
     }
   })();
 </script>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
