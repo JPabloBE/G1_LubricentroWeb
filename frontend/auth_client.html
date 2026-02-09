@@ -5,21 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <title>Clientes | Login</title>
   <style>
-    body{font-family:Arial; background:#111; color:#111; display:flex; min-height:100vh; align-items:center; justify-content:center; padding:20px;}
-    .box{background:#fff; width:420px; border-radius:12px; padding:22px;}
+    body{font-family:Arial;background:#111;color:#111;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;}
+    .box{background:#fff;width:420px;border-radius:12px;padding:22px;}
     h2{margin:0 0 6px;}
-    .tabs{display:flex; gap:8px; margin:12px 0;}
-    .tabs button{flex:1; padding:10px; border:1px solid #ddd; background:#f5f5f5; cursor:pointer; border-radius:8px;}
-    .tabs button.active{background:#111; color:#fff; border-color:#111;}
+    .tabs{display:flex;gap:8px;margin:12px 0;}
+    .tabs button{flex:1;padding:10px;border:1px solid #ddd;background:#f5f5f5;cursor:pointer;border-radius:8px;}
+    .tabs button.active{background:#111;color:#fff;border-color:#111;}
     .row{margin:10px 0;}
-    label{display:block; font-weight:700; margin-bottom:6px;}
-    input{width:100%; padding:10px; border:1px solid #ddd; border-radius:8px;}
-    .msg{display:none; padding:10px; border-radius:8px; margin:10px 0;}
-    .msg.ok{background:#eaffea; border:1px solid #bde5bd;}
-    .msg.err{background:#ffecec; border:1px solid #f5bcbc;}
-    .btn{width:100%; padding:10px; background:#111; color:#fff; border:none; border-radius:8px; font-weight:800; cursor:pointer;}
-    .links{margin-top:12px; text-align:center; font-size:13px; color:#444;}
-    .links a{color:#111; font-weight:800; text-decoration:none;}
+    label{display:block;font-weight:700;margin-bottom:6px;}
+    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;}
+    .msg{display:none;padding:10px;border-radius:8px;margin:10px 0;}
+    .msg.ok{background:#eaffea;border:1px solid #bde5bd;}
+    .msg.err{background:#ffecec;border:1px solid #f5bcbc;}
+    .btn{width:100%;padding:10px;background:#111;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;}
+    .links{margin-top:12px;text-align:center;font-size:13px;color:#444;}
+    .links a{color:#111;font-weight:800;text-decoration:none;}
     .links a:hover{text-decoration:underline;}
   </style>
 </head>
@@ -35,7 +35,6 @@
 
     <div id="msg" class="msg"></div>
 
-    <!-- LOGIN -->
     <form id="loginForm">
       <div class="row">
         <label>Email</label>
@@ -48,7 +47,6 @@
       <button class="btn" type="submit">Entrar</button>
     </form>
 
-    <!-- REGISTER -->
     <form id="registerForm" style="display:none;">
       <div class="row">
         <label>Nombre completo</label>
@@ -82,7 +80,6 @@
   const API_BASE = "http://localhost:8000";
   const LOGIN_URL = `${API_BASE}/api/customer-auth/login/`;
   const REG_URL = `${API_BASE}/api/customer-auth/register/`;
-
   const ADMIN_ME_URL = `${API_BASE}/api/auth/me/`;
 
   function show(text, ok=true){
@@ -107,11 +104,11 @@
   document.getElementById("tabLogin").onclick = () => setTab(true);
   document.getElementById("tabRegister").onclick = () => setTab(false);
 
-  async function redirectIfAdminSession() {
+  async function redirectIfAdminSession(){
     const adminToken = localStorage.getItem("access_token");
     if (!adminToken) return;
 
-    try {
+    try{
       const res = await fetch(ADMIN_ME_URL, {
         headers: { "Authorization": `Bearer ${adminToken}` }
       });
@@ -119,25 +116,22 @@
       if (!res.ok) return;
 
       const me = await res.json().catch(() => null);
-      const isAdmin = me && (me.user_type === "admin" || me.is_staff === true || me.is_superuser === true);
+      const isAdmin = !!(me && (me.user_type === "admin" || me.user_type === "staff" || me.is_staff === true || me.is_superuser === true));
 
-      if (isAdmin) {
+      if (isAdmin){
         window.location.href = "./admin/dashboard.html";
       }
-    } catch (_) {}
+    }catch(_){}
   }
 
-  function showIfCustomerSession() {
+  function redirectIfCustomerSession(){
     const customerToken = localStorage.getItem("customer_access_token");
     if (!customerToken) return;
-
-    // window.location.href = "./client/home.html";
-
-    show("Ya estás logueado como cliente.", true);
+    window.location.href = "./client/dashboard.html";
   }
 
   redirectIfAdminSession();
-  showIfCustomerSession();
+  redirectIfCustomerSession();
 
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -148,7 +142,7 @@
       password: document.getElementById("l_pass").value
     };
 
-    try {
+    try{
       const res = await fetch(LOGIN_URL, {
         method:"POST",
         headers: {"Content-Type":"application/json"},
@@ -162,17 +156,14 @@
         return;
       }
 
-      if (!data.access) {
+      if(!data.access){
         show("No se recibió el token del cliente.", false);
         return;
       }
 
       localStorage.setItem("customer_access_token", data.access);
-
-      // window.location.href = "./client/home.html";
-
-      show("Login exitoso. Token guardado.", true);
-    } catch (err) {
+      window.location.href = "./client/dashboard.html";
+    }catch(err){
       console.error(err);
       show("Error de conexión con el servidor.", false);
     }
@@ -198,7 +189,7 @@
       password2: p2
     };
 
-    try {
+    try{
       const res = await fetch(REG_URL, {
         method:"POST",
         headers: {"Content-Type":"application/json"},
@@ -215,7 +206,7 @@
 
       show("Registro exitoso. Ahora podés iniciar sesión.", true);
       setTab(true);
-    } catch (err) {
+    }catch(err){
       console.error(err);
       show("Error de conexión con el servidor.", false);
     }

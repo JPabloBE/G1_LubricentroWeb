@@ -4,18 +4,19 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.authentication.permissions import IsStaffOrAdmin
+from apps.customers.auth import CustomerJWTAuthentication
+from apps.customers.permissions import IsAuthenticatedCustomer
 
 from .models import Vehicle
-from .serializers import VehicleSerializer
+from .serializers import VehicleLiteSerializer, VehicleSerializer
 
 
 class VehicleViewSet(viewsets.ModelViewSet):
-
     serializer_class = VehicleSerializer
     permission_classes = [IsAuthenticated, IsStaffOrAdmin]
 
     def get_queryset(self):
-        qs = Vehicle.objects.select_related("customer").all().order_by("-created_at")
+        qs = Vehicle.objects.select_related("customer").all().order_by("plate")
 
         customer_id = self.request.query_params.get("customer_id")
         if customer_id:
@@ -31,30 +32,19 @@ class VehicleViewSet(viewsets.ModelViewSet):
         data = request.data or {}
 
         customer_id = data.get("customer_id")
-        plate = (data.get("plate") or "").strip().upper()
-
+        plate = (data.get("plate") or "").strip()
         make = (data.get("make") or "").strip() or None
         model = (data.get("model") or "").strip() or None
-        year = data.get("year")
+        year = data.get("year") or None
         vin = (data.get("vin") or "").strip() or None
         color = (data.get("color") or "").strip() or None
         notes = (data.get("notes") or "").strip() or None
-
         image_url = (data.get("image_url") or "").strip() or None
 
         if not customer_id:
-            return Response({"detail": "customer_id is required."}, status=400)
+            return Response({"detail": "customer_id es requerido."}, status=400)
         if not plate:
-            return Response({"detail": "plate is required."}, status=400)
-
-        # Normalize year
-        if year in ("", None):
-            year = None
-        else:
-            try:
-                year = int(year)
-            except Exception:
-                return Response({"detail": "year must be an integer."}, status=400)
+            return Response({"detail": "plate es requerido."}, status=400)
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -69,11 +59,11 @@ class VehicleViewSet(viewsets.ModelViewSet):
             )
             vehicle_id = cursor.fetchone()[0]
 
-        vehicle = Vehicle.objects.select_related("customer").get(vehicle_id=vehicle_id)
-        return Response(VehicleSerializer(vehicle).data, status=status.HTTP_201_CREATED)
+        v = Vehicle.objects.select_related("customer").get(vehicle_id=vehicle_id)
+        return Response(self.get_serializer(v).data, status=status.HTTP_201_CREATED)
 
     def partial_update(self, request, *args, **kwargs):
-        vehicle = self.get_object()
+        v = self.get_object()
         data = request.data or {}
 
         sets = []
@@ -82,66 +72,34 @@ class VehicleViewSet(viewsets.ModelViewSet):
         if "customer_id" in data:
             customer_id = data.get("customer_id")
             if not customer_id:
-                return Response({"detail": "customer_id cannot be empty."}, status=400)
+                return Response({"detail": "customer_id no puede ser vacío."}, status=400)
             sets.append("customer_id = %s")
             params.append(customer_id)
 
         if "plate" in data:
-            plate = (data.get("plate") or "").strip().upper()
+            plate = (data.get("plate") or "").strip()
             if not plate:
-                return Response({"detail": "plate cannot be empty."}, status=400)
+                return Response({"detail": "plate no puede ser vacío."}, status=400)
             sets.append("plate = %s")
             params.append(plate)
 
-        if "make" in data:
-            make = (data.get("make") or "").strip() or None
-            sets.append("make = %s")
-            params.append(make)
-
-        if "model" in data:
-            model = (data.get("model") or "").strip() or None
-            sets.append("model = %s")
-            params.append(model)
+        for field in ["make", "model", "vin", "color", "notes", "image_url"]:
+            if field in data:
+                val = (data.get(field) or "").strip() or None
+                sets.append(f"{field} = %s")
+                params.append(val)
 
         if "year" in data:
-            year = data.get("year")
-            if year in ("", None):
-                year = None
-            else:
-                try:
-                    year = int(year)
-                except Exception:
-                    return Response({"detail": "year must be an integer."}, status=400)
             sets.append("year = %s")
-            params.append(year)
-
-        if "vin" in data:
-            vin = (data.get("vin") or "").strip() or None
-            sets.append("vin = %s")
-            params.append(vin)
-
-        if "color" in data:
-            color = (data.get("color") or "").strip() or None
-            sets.append("color = %s")
-            params.append(color)
-
-        if "notes" in data:
-            notes = (data.get("notes") or "").strip() or None
-            sets.append("notes = %s")
-            params.append(notes)
-
-        # NEW
-        if "image_url" in data:
-            image_url = (data.get("image_url") or "").strip() or None
-            sets.append("image_url = %s")
-            params.append(image_url)
+            params.append(data.get("year") or None)
 
         if not sets:
-            vehicle.refresh_from_db()
-            return Response(VehicleSerializer(vehicle).data, status=200)
+            v.refresh_from_db()
+            v = Vehicle.objects.select_related("customer").get(vehicle_id=v.vehicle_id)
+            return Response(self.get_serializer(v).data, status=200)
 
         sets.append("updated_at = now()")
-        params.append(str(vehicle.vehicle_id))
+        params.append(str(v.vehicle_id))
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -149,12 +107,22 @@ class VehicleViewSet(viewsets.ModelViewSet):
                 params,
             )
 
-        vehicle.refresh_from_db()
-        vehicle = Vehicle.objects.select_related("customer").get(vehicle_id=vehicle.vehicle_id)
-        return Response(VehicleSerializer(vehicle).data, status=200)
+        v.refresh_from_db()
+        v = Vehicle.objects.select_related("customer").get(vehicle_id=v.vehicle_id)
+        return Response(self.get_serializer(v).data, status=200)
 
     def destroy(self, request, *args, **kwargs):
-        vehicle = self.get_object()
+        v = self.get_object()
         with connection.cursor() as cursor:
-            cursor.execute("delete from public.vehicles where vehicle_id = %s", [str(vehicle.vehicle_id)])
+            cursor.execute("delete from public.vehicles where vehicle_id = %s", [str(v.vehicle_id)])
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class CustomerVehicleViewSet(viewsets.ReadOnlyModelViewSet):
+    serializer_class = VehicleLiteSerializer
+    authentication_classes = [CustomerJWTAuthentication]
+    permission_classes = [IsAuthenticatedCustomer]
+
+    def get_queryset(self):
+        customer = self.request.user
+        return Vehicle.objects.filter(customer_id=customer.customer_id).order_by("plate")

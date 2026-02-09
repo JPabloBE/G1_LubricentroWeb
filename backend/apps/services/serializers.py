@@ -49,3 +49,9 @@ class ServiceSerializer(serializers.ModelSerializer):
     def update(self, instance, validated_data):
         validated_data["updated_at"] = timezone.now()
         return super().update(instance, validated_data)
+
+
+class ServiceLiteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Service
+        fields = ["service_id", "name", "base_price", "estimated_minutes", "requires_lift"]

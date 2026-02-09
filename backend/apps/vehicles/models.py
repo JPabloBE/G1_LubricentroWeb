@@ -5,14 +5,8 @@ from apps.customers.models import Customer
 
 
 class Vehicle(models.Model):
-    vehicle_id = models.UUIDField(
-        primary_key=True,
-        db_column="vehicle_id",
-        default=uuid.uuid4,
-        editable=False,
-    )
+    vehicle_id = models.UUIDField(primary_key=True, db_column="vehicle_id", default=uuid.uuid4, editable=False)
 
-    # FK real en DB: customer_id (NOT NULL)
     customer = models.ForeignKey(
         Customer,
         to_field="customer_id",
@@ -37,7 +31,7 @@ class Vehicle(models.Model):
     class Meta:
         db_table = "vehicles"
         managed = False
-        ordering = ["-created_at"]
+        ordering = ["plate"]
 
     def __str__(self) -> str:
         return f"{self.plate}"

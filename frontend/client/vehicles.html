@@ -1,0 +1,124 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cliente | Mis Autos</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-light">
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">Lubricentro | Cliente</span>
+    <div class="d-flex gap-2 align-items-center">
+      <a class="btn btn-outline-light btn-sm" href="./dashboard.html">Dashboard</a>
+      <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container py-4">
+  <div id="msg" class="alert d-none" role="alert"></div>
+
+  <div class="d-flex align-items-center justify-content-between mb-2">
+    <h5 class="m-0">Mis autos</h5>
+    <button id="btnReload" class="btn btn-sm btn-dark">Recargar</button>
+  </div>
+
+  <div class="card shadow-sm">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-striped table-hover m-0 align-middle">
+          <thead class="table-light">
+            <tr>
+              <th>Imagen</th>
+              <th>Placa</th>
+              <th>Marca</th>
+              <th>Modelo</th>
+              <th>Año</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const token = localStorage.getItem("customer_access_token");
+
+  function showMsg(text, type="danger"){
+    const el = document.getElementById("msg");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+  }
+
+  async function fetchJSON(url, options = {}) {
+    const res = await fetch(url, options);
+    let data = null;
+    try { data = await res.json(); } catch (_) {}
+    if (!res.ok) throw new Error(data?.detail || JSON.stringify(data) || res.statusText);
+    return data;
+  }
+
+  function escapeHtml(s){
+    return String(s ?? "").replace(/[&<>"']/g, (c) => ({
+      "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
+    }[c]));
+  }
+
+  function imgCell(url){
+    const safe = escapeHtml(url || "");
+    if (!safe) return `<div class="text-muted small">—</div>`;
+    return `<img src="${safe}" alt="img" style="width:72px;height:46px;object-fit:cover;border-radius:10px;border:1px solid #e5e7eb;">`;
+  }
+
+  async function loadVehicles(){
+    const data = await fetchJSON(`${API_BASE}/api/customer-vehicles/`, {
+      headers: { "Authorization": `Bearer ${token}` }
+    });
+
+    const rows = Array.isArray(data) ? data : (data.results || []);
+    const tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+
+    for (const v of rows){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${imgCell(v.image_url)}</td>
+        <td class="fw-semibold">${escapeHtml(v.plate)}</td>
+        <td>${escapeHtml(v.make || "")}</td>
+        <td>${escapeHtml(v.model || "")}</td>
+        <td>${escapeHtml(v.year || "")}</td>
+      `;
+      tbody.appendChild(tr);
+    }
+  }
+
+  document.getElementById("btnReload").addEventListener("click", () => loadVehicles());
+
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    localStorage.removeItem("customer_access_token");
+    window.location.href = "../auth_client.html";
+  });
+
+  (async () => {
+    if (!token){
+      window.location.href = "../auth_client.html";
+      return;
+    }
+
+    try{
+      await loadVehicles();
+    }catch(err){
+      showMsg("Sesión inválida o expirada. Iniciá sesión nuevamente.", "warning");
+      setTimeout(() => (window.location.href = "../auth_client.html"), 900);
+    }
+  })();
+</script>
+</body>
+</html>
