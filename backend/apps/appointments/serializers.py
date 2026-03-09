@@ -31,10 +31,21 @@ class AppointmentSerializer(serializers.ModelSerializer):
     customer_email = serializers.CharField(source="customer.email", read_only=True)
 
     vehicle_plate = serializers.CharField(source="vehicle.plate", read_only=True)
+    vehicle_make = serializers.CharField(source="vehicle.make", read_only=True)
+    vehicle_model = serializers.CharField(source="vehicle.model", read_only=True)
     service_name = serializers.CharField(source="service.name", read_only=True)
 
     slot_start = serializers.DateTimeField(source="slot.start_at", read_only=True)
     slot_end = serializers.DateTimeField(source="slot.end_at", read_only=True)
+
+    work_order_id = serializers.SerializerMethodField()
+
+    def get_work_order_id(self, obj):
+        try:
+            wo = obj.work_orders.first()
+            return str(wo.work_order_id) if wo else None
+        except Exception:
+            return None
 
     class Meta:
         model = Appointment
@@ -45,6 +56,8 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "customer_email",
             "vehicle_id",
             "vehicle_plate",
+            "vehicle_make",
+            "vehicle_model",
             "service_id",
             "service_name",
             "slot_id",
@@ -59,6 +72,7 @@ class AppointmentSerializer(serializers.ModelSerializer):
             "notes",
             "admin_message",
             "progress_percent",
+            "work_order_id",
             "created_at",
             "updated_at",
         ]

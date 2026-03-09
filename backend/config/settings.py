@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "apps.vehicles.apps.VehiclesConfig",
     "apps.appointments.apps.AppointmentsConfig",
     "apps.work_orders.apps.WorkOrdersConfig",
+    "apps.cash_register.apps.CashRegisterConfig",
 ]
 
 MIDDLEWARE = [

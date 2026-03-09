@@ -2,6 +2,7 @@
 from django.db import connection
 from django.utils import timezone
 from rest_framework import status, viewsets
+from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -17,8 +18,8 @@ from .serializers import (
     AppointmentSlotSerializer,
 )
 
-CLOSED_FOR_CAPACITY = ("cancelled", "rejected")
-ALLOWED_STATUSES = ("scheduled", "confirmed", "in_progress", "completed", "cancelled", "no_show", "rejected")
+CLOSED_FOR_CAPACITY = ("cancelled",)
+ALLOWED_STATUSES = ("scheduled", "confirmed", "in_progress", "completed", "cancelled")
 
 
 def _count_used_capacity(slot_id: str) -> int:
@@ -28,7 +29,7 @@ def _count_used_capacity(slot_id: str) -> int:
             select count(*)
             from public.appointments
             where slot_id = %s
-              and coalesce(status,'') not in ('cancelled','rejected')
+              and coalesce(status,'') not in ('cancelled')
             """,
             [slot_id],
         )
@@ -176,7 +177,7 @@ class AppointmentAdminViewSet(viewsets.ModelViewSet):
     permission_classes = [IsAuthenticated, IsStaffOrAdmin]
 
     def get_queryset(self):
-        qs = Appointment.objects.select_related("customer", "vehicle", "service", "slot").all().order_by("-scheduled_start")
+        qs = Appointment.objects.select_related("customer", "vehicle", "service", "slot").prefetch_related("work_orders").all().order_by("-scheduled_start")
 
         status_q = self.request.query_params.get("status")
         if status_q:
@@ -252,6 +253,71 @@ class AppointmentAdminViewSet(viewsets.ModelViewSet):
         ap.refresh_from_db()
         ap = Appointment.objects.select_related("customer", "vehicle", "service", "slot").get(appointment_id=ap.appointment_id)
         return Response(self.get_serializer(ap).data, status=200)
+
+    @action(detail=True, methods=["post"], url_path="confirm")
+    def confirm(self, request, pk=None):
+        """Confirma la cita y crea automáticamente una OT vinculada si no existe.
+        Funciona desde cualquier estado activo (scheduled, confirmed, in_progress)."""
+        ap = self.get_object()
+
+        if ap.status == "cancelled":
+            return Response(
+                {"detail": "No se puede operar sobre una cita cancelada."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+
+        work_order_id = None
+        with connection.cursor() as cursor:
+            # Verificar si ya existe una OT vinculada
+            cursor.execute(
+                "SELECT work_order_id FROM public.work_orders WHERE appointment_id = %s LIMIT 1",
+                [str(ap.appointment_id)],
+            )
+            row = cursor.fetchone()
+            if row:
+                work_order_id = str(row[0])
+            else:
+                # Crear OT con SQL puro (consistente con el resto del módulo)
+                symptoms = (ap.requested_work or "").strip() or None
+                mechanic = str(ap.assigned_mechanic_id) if ap.assigned_mechanic_id else None
+                created_by = str(request.user.id)
+                cursor.execute(
+                    """
+                    INSERT INTO public.work_orders
+                      (appointment_id, customer_id, vehicle_id, status,
+                       customer_symptoms, assigned_mechanic_id, created_by,
+                       opened_at, created_at, updated_at)
+                    VALUES (%s, %s, %s, 'open', %s, %s, %s, now(), now(), now())
+                    RETURNING work_order_id
+                    """,
+                    [
+                        str(ap.appointment_id),
+                        str(ap.customer_id),
+                        str(ap.vehicle_id),
+                        symptoms,
+                        mechanic,
+                        created_by,
+                    ],
+                )
+                work_order_id = str(cursor.fetchone()[0])
+
+            # Actualizar estado de la cita solo si está en "scheduled"
+            if ap.status == "scheduled":
+                cursor.execute(
+                    "UPDATE public.appointments SET status = 'confirmed', updated_at = now() WHERE appointment_id = %s",
+                    [str(ap.appointment_id)],
+                )
+
+        ap = Appointment.objects.select_related("customer", "vehicle", "service", "slot").get(
+            appointment_id=ap.appointment_id
+        )
+        return Response(
+            {
+                "appointment": self.get_serializer(ap).data,
+                "work_order_id": work_order_id,
+            },
+            status=status.HTTP_200_OK,
+        )
 
 
 class AppointmentCustomerViewSet(viewsets.ModelViewSet):

@@ -32,7 +32,10 @@ class WorkOrderSerializer(serializers.ModelSerializer):
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["work_order_id", "created_at", "updated_at"]
+        read_only_fields = [
+            "work_order_id", "created_at", "updated_at",
+            "authorization_status", "authorized_at", "authorized_by",
+        ]
 
 class WorkOrderServiceSerializer(serializers.ModelSerializer):
     service_name = serializers.CharField(source="service.name", read_only=True)
