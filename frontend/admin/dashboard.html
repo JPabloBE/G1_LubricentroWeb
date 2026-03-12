@@ -17,6 +17,23 @@
     .kpi-value { font-size: 2rem; font-weight: 800; line-height: 1.1; }
     .kpi-label { font-size: .78rem; text-transform: uppercase; letter-spacing: .05em; }
     .kpi-link  { font-size: .78rem; }
+
+    /* Agenda */
+    .agenda-row td { vertical-align: middle; font-size: .875rem; }
+    .agenda-hour   { font-weight: 700; white-space: nowrap; color: #495057; }
+    .agenda-empty  { color: #adb5bd; font-style: italic; }
+
+    /* Quick sale product list */
+    .qs-product-item { cursor: pointer; border-left: 3px solid transparent; transition: all .12s; }
+    .qs-product-item:hover { border-left-color: #0d6efd; background: #f0f5ff; }
+    .qs-product-item.selected { border-left-color: #0d6efd; background: #e8f0fe; }
+    .qs-product-item.out-of-stock { opacity: .45; cursor: not-allowed; }
+    .qs-product-item.pending { border-left-color: #198754; background: #f0fff4; }
+
+    /* Cart items */
+    .vr-cart-item { display: flex; align-items: center; justify-content: space-between;
+                    padding: .4rem .75rem; border-bottom: 1px solid #dee2e6; font-size: .875rem; }
+    .vr-cart-item:last-child { border-bottom: none; }
   </style>
 </head>
 
@@ -59,23 +76,64 @@
     <main class="col-12 col-md-9 col-lg-10 p-4">
       <div id="msg" class="alert d-none" role="alert"></div>
 
+      <!-- Header -->
       <div class="d-flex align-items-center justify-content-between mb-4">
         <div>
           <h3 class="mb-0">Panel de administración</h3>
           <p class="text-muted small mb-0" id="monthLabel">Cargando métricas...</p>
         </div>
-        <button class="btn btn-sm btn-outline-secondary" id="btnReload">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-            <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-            <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-          </svg>
-          Actualizar
-        </button>
+        <div class="d-flex gap-2">
+          <button class="btn btn-sm btn-success" id="btnVentaRapida">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="me-1" viewBox="0 0 16 16">
+              <path d="M0 1.5A.5.5 0 0 1 .5 1H2a.5.5 0 0 1 .485.379L2.89 3H14.5a.5.5 0 0 1 .491.592l-1.5 8A.5.5 0 0 1 13 12H4a.5.5 0 0 1-.491-.408L2.01 3.607 1.61 2H.5a.5.5 0 0 1-.5-.5zM5 12a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm7 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4zm-7 1a1 1 0 1 1 0 2 1 1 0 0 1 0-2zm7 0a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+            </svg>
+            Venta rápida
+          </button>
+          <button class="btn btn-sm btn-outline-secondary" id="btnReload">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+              <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
+              <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
+            </svg>
+            Actualizar
+          </button>
+        </div>
+      </div>
+
+      <!-- ── Agenda del taller ─────────────────────────────────────────────────── -->
+      <div class="card shadow-sm mb-4">
+        <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+          <span class="fw-semibold">📅 Agenda del taller</span>
+          <div class="d-flex align-items-center gap-2">
+            <div class="btn-group btn-group-sm" role="group">
+              <button type="button" class="btn btn-primary" id="agendaToday">Hoy</button>
+              <button type="button" class="btn btn-outline-secondary" id="agendaUpcoming">Próximas</button>
+            </div>
+            <span id="agendaDateLabel" class="text-muted small"></span>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div id="agendaLoading" class="text-center text-muted py-3 small">Cargando...</div>
+          <div id="agendaEmpty"   class="text-center agenda-empty py-3 d-none">Sin citas para este período</div>
+          <div class="table-responsive d-none" id="agendaTableWrap">
+            <table class="table table-hover mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th class="ps-3" style="width:90px;">Hora</th>
+                  <th>Cliente</th>
+                  <th>Vehículo</th>
+                  <th>Servicio</th>
+                  <th style="width:110px;">Estado</th>
+                  <th style="width:90px;" class="text-center">OT</th>
+                </tr>
+              </thead>
+              <tbody id="agendaTbody"></tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
       <!-- Fila 1: KPIs accionables -->
       <div class="row g-3 mb-3">
-        <!-- Autos en taller -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card blue shadow-sm h-100">
             <div class="card-body py-3">
@@ -87,7 +145,6 @@
             </div>
           </div>
         </div>
-        <!-- Listos para entrega -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card teal shadow-sm h-100">
             <div class="card-body py-3">
@@ -99,12 +156,11 @@
             </div>
           </div>
         </div>
-        <!-- Citas pendientes -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card indigo shadow-sm h-100">
             <div class="card-body py-3">
               <div class="kpi-label text-muted mb-1">📅 Citas pendientes</div>
-              <div class="kpi-value text-indigo" id="kpiCitas" style="color:#6610f2;">—</div>
+              <div class="kpi-value" id="kpiCitas" style="color:#6610f2;">—</div>
               <div class="kpi-link mt-1">
                 <a href="./dashboard_appointments.html" class="text-decoration-none" style="color:#6610f2;">Ver citas →</a>
               </div>
@@ -115,7 +171,6 @@
 
       <!-- Fila 2: KPIs financieros / operativos -->
       <div class="row g-3 mb-4">
-        <!-- Ingresos del mes -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card green shadow-sm h-100">
             <div class="card-body py-3">
@@ -125,7 +180,6 @@
             </div>
           </div>
         </div>
-        <!-- OTs cerradas este mes -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card dark shadow-sm h-100">
             <div class="card-body py-3">
@@ -135,7 +189,6 @@
             </div>
           </div>
         </div>
-        <!-- Sesión de caja -->
         <div class="col-12 col-sm-6 col-xl-4">
           <div class="card kpi-card amber shadow-sm h-100">
             <div class="card-body py-3">
@@ -153,7 +206,6 @@
 
       <!-- Gráficos -->
       <div class="row g-4">
-        <!-- Ingresos diarios -->
         <div class="col-12 col-lg-8">
           <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -163,7 +215,6 @@
             </div>
           </div>
         </div>
-        <!-- Pipeline OTs -->
         <div class="col-12 col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
@@ -179,17 +230,174 @@
   </div>
 </div>
 
+<!-- ── Modal Venta Rápida ──────────────────────────────────────────────────── -->
+<div class="modal fade" id="modalVentaRapida" tabindex="-1" aria-labelledby="modalVRLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalVRLabel">🛒 Venta rápida</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+
+        <!-- Alerta sin sesión de caja -->
+        <div id="vrNoCaja" class="alert alert-warning d-none">
+          <strong>No hay sesión de caja abierta.</strong>
+          Debes abrir una sesión antes de registrar ventas.
+          <a href="./dashboard_cash_register.html" class="alert-link ms-1">Ir a Caja →</a>
+        </div>
+
+        <!-- Contenido principal -->
+        <div id="vrMain">
+
+          <!-- Tabs -->
+          <ul class="nav nav-tabs mb-3" id="vrTabs">
+            <li class="nav-item">
+              <a class="nav-link active" href="#" data-vrtab="product">Producto</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-vrtab="service">Servicio</a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="#" data-vrtab="labor">Mano de obra</a>
+            </li>
+          </ul>
+
+          <!-- Tab: Producto -->
+          <div id="vrTabProduct">
+            <div class="mb-2">
+              <input type="text" class="form-control" id="vrSearch" placeholder="Buscar por nombre o SKU...">
+            </div>
+            <div id="vrProductList" class="border rounded mb-2" style="max-height:210px; overflow-y:auto;">
+              <div class="text-center text-muted py-3 small" id="vrProductLoading">Cargando productos...</div>
+            </div>
+            <!-- Producto pendiente: ajustar cantidad antes de agregar -->
+            <div id="vrPending" class="d-none">
+              <div class="border rounded bg-light p-2">
+                <div class="row g-2 align-items-center">
+                  <div class="col-12 col-sm-5">
+                    <div class="fw-semibold small" id="vrPendName">—</div>
+                    <div class="text-muted" style="font-size:.75rem;">
+                      Precio: <span class="fw-bold text-success" id="vrPendPrice">—</span>
+                      &nbsp;|&nbsp; Stock: <span id="vrPendStock">—</span>
+                    </div>
+                  </div>
+                  <div class="col-5 col-sm-3">
+                    <input type="number" class="form-control form-control-sm" id="vrPendQty" min="1" value="1" placeholder="Cant.">
+                  </div>
+                  <div class="col-4 col-sm-2 fw-bold text-success small" id="vrPendSubtotal">₡0</div>
+                  <div class="col-3 col-sm-2">
+                    <button class="btn btn-success btn-sm w-100" id="vrAddToCart">+ Agregar</button>
+                  </div>
+                </div>
+                <div id="vrPendStockAlert" class="alert alert-danger mt-1 py-1 small d-none mb-0">
+                  Stock insuficiente para la cantidad ingresada.
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tab: Servicio -->
+          <div id="vrTabService" class="d-none">
+            <div class="mb-2">
+              <input type="text" class="form-control" id="vrServiceSearch" placeholder="Buscar servicio...">
+            </div>
+            <div id="vrServiceList" class="border rounded" style="max-height:260px; overflow-y:auto;">
+              <div class="text-center text-muted py-3 small" id="vrServiceLoading">Cargando servicios...</div>
+            </div>
+          </div>
+
+          <!-- Tab: Mano de obra -->
+          <div id="vrTabLabor" class="d-none">
+            <div class="row g-2 align-items-end">
+              <div class="col-12 col-sm-6">
+                <label class="form-label mb-1 small">Descripción</label>
+                <input type="text" class="form-control" id="vrLaborDesc" placeholder="Ej: Cambio de aceite, instalación...">
+              </div>
+              <div class="col-6 col-sm-3">
+                <label class="form-label mb-1 small">Monto (₡)</label>
+                <input type="number" class="form-control" id="vrLaborAmount" min="1" placeholder="5000">
+              </div>
+              <div class="col-6 col-sm-3">
+                <button class="btn btn-success w-100" id="vrAddLabor">+ Agregar</button>
+              </div>
+            </div>
+            <div id="vrLaborAlert" class="alert alert-danger mt-2 py-1 small d-none">
+              Descripción y monto son requeridos.
+            </div>
+          </div>
+
+          <!-- Carrito (siempre visible) -->
+          <div id="vrCartSection" class="mt-3">
+            <div class="d-flex align-items-center justify-content-between mb-1">
+              <span class="fw-semibold small text-muted text-uppercase" style="letter-spacing:.04em;">Artículos en esta venta</span>
+              <span class="badge bg-secondary" id="vrCartCount">0</span>
+            </div>
+            <div id="vrCartList" class="border rounded" style="min-height:52px;">
+              <div id="vrCartEmpty" class="text-center text-muted py-3 small">Aún no hay artículos agregados</div>
+            </div>
+          </div>
+
+          <!-- Total general -->
+          <div id="vrGrandTotalSection" class="d-none mt-3 pt-2 border-top">
+            <div class="d-flex justify-content-between align-items-center">
+              <span class="fw-bold">TOTAL</span>
+              <span class="fw-bold fs-5 text-success" id="vrGrandTotal">₡0</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="vrConfirm" disabled>Confirmar venta</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Modal Venta confirmada ──────────────────────────────────────────────── -->
+<div class="modal fade" id="modalVROk" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-sm modal-dialog-centered">
+    <div class="modal-content text-center">
+      <div class="modal-body py-4">
+        <div style="font-size:2.5rem;">✅</div>
+        <h5 class="mt-2">¡Venta registrada!</h5>
+        <p class="text-muted small mb-0" id="vrOkMsg"></p>
+      </div>
+      <div class="modal-footer justify-content-center border-0">
+        <button type="button" class="btn btn-success" data-bs-dismiss="modal">Listo</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 <script>
   const API_BASE = "http://127.0.0.1:8000";
-  const token = localStorage.getItem("access_token");
+  const token    = localStorage.getItem("access_token");
 
-  const WO_LABELS = { open: "Abierta", in_progress: "En curso", ready: "Lista", closed: "Cerrada", cancelled: "Cancelada" };
-  const WO_COLORS = { open: "#0d6efd", in_progress: "#ffc107", ready: "#20c997", closed: "#198754", cancelled: "#dc3545" };
+  const WO_LABELS = { open:"Abierta", in_progress:"En curso", ready:"Lista", closed:"Cerrada", cancelled:"Cancelada" };
+  const WO_COLORS = { open:"#0d6efd", in_progress:"#ffc107", ready:"#20c997", closed:"#198754", cancelled:"#dc3545" };
+
+  const APPT_BADGE = {
+    scheduled:   "bg-primary",
+    confirmed:   "bg-success",
+    in_progress: "bg-warning text-dark",
+    completed:   "bg-secondary",
+    cancelled:   "bg-danger",
+  };
+  const APPT_LABEL = {
+    scheduled:   "Programada",
+    confirmed:   "Confirmada",
+    in_progress: "En curso",
+    completed:   "Completada",
+    cancelled:   "Cancelada",
+  };
 
   let chartIncome = null, chartWO = null;
 
+  // ── Helpers ─────────────────────────────────────────────────────────────────
   function showMsg(text, type = "danger") {
     const el = document.getElementById("msg");
     el.className = `alert alert-${type}`;
@@ -201,47 +409,151 @@
     return "₡" + parseFloat(val || 0).toLocaleString("es-CR", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
   }
 
+  function todayStr() {
+    // YYYY-MM-DD en hora local
+    const d = new Date();
+    return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+  }
+
+  function authHeaders(extra = {}) {
+    return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", ...extra };
+  }
+
+  // ── AGENDA ──────────────────────────────────────────────────────────────────
+  let agendaMode = "today"; // "today" | "upcoming"
+  let allAppointments = [];
+
+  async function loadAgenda() {
+    document.getElementById("agendaLoading").classList.remove("d-none");
+    document.getElementById("agendaEmpty").classList.add("d-none");
+    document.getElementById("agendaTableWrap").classList.add("d-none");
+
+    try {
+      const res = await fetch(`${API_BASE}/api/appointments/`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!res.ok) { document.getElementById("agendaLoading").textContent = "Error al cargar citas."; return; }
+      const data = await res.json();
+      allAppointments = Array.isArray(data) ? data : (data.results || []);
+    } catch {
+      document.getElementById("agendaLoading").textContent = "No se pudo conectar.";
+      return;
+    }
+
+    renderAgenda();
+  }
+
+  function renderAgenda() {
+    const today = todayStr();
+    const cutoff = (() => {
+      const d = new Date(); d.setDate(d.getDate() + 7);
+      return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`;
+    })();
+
+    const excluded = ["cancelled", "completed"];
+    let rows = allAppointments.filter(a => {
+      const dayStr = (a.scheduled_start || "").slice(0, 10);
+      if (agendaMode === "today") return dayStr === today && !excluded.includes(a.status);
+      // upcoming: next 7 days (excluding today)
+      return dayStr > today && dayStr <= cutoff && !excluded.includes(a.status);
+    });
+
+    rows.sort((a, b) => (a.scheduled_start || "").localeCompare(b.scheduled_start || ""));
+
+    // Update label
+    const d = new Date();
+    document.getElementById("agendaDateLabel").textContent =
+      agendaMode === "today"
+        ? d.toLocaleDateString("es-CR", { weekday: "long", day: "numeric", month: "long" })
+        : "Próximos 7 días";
+
+    document.getElementById("agendaLoading").classList.add("d-none");
+
+    if (!rows.length) {
+      document.getElementById("agendaEmpty").classList.remove("d-none");
+      document.getElementById("agendaTableWrap").classList.add("d-none");
+      return;
+    }
+
+    document.getElementById("agendaEmpty").classList.add("d-none");
+    document.getElementById("agendaTableWrap").classList.remove("d-none");
+
+    const tbody = document.getElementById("agendaTbody");
+    tbody.innerHTML = rows.map(a => {
+      const hora = a.scheduled_start
+        ? new Date(a.scheduled_start).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" })
+        : "—";
+      const badge = APPT_BADGE[a.status] || "bg-secondary";
+      const label = APPT_LABEL[a.status] || a.status;
+
+      const otCell = a.work_order_id
+        ? `<a href="./dashboard_work_orders.html" class="btn btn-xs btn-outline-primary" style="font-size:.75rem;padding:2px 8px;">Ver OT</a>`
+        : `<span class="text-muted">—</span>`;
+
+      // Show day prefix in "upcoming" mode
+      const dayPrefix = agendaMode === "upcoming"
+        ? `<div class="text-muted" style="font-size:.72rem;">${new Date(a.scheduled_start).toLocaleDateString("es-CR",{weekday:"short",day:"numeric",month:"short"})}</div>`
+        : "";
+
+      return `<tr class="agenda-row">
+        <td class="ps-3 agenda-hour">${dayPrefix}${hora}</td>
+        <td>${a.customer_name || "—"}</td>
+        <td>${[a.vehicle_plate, a.vehicle_make, a.vehicle_model].filter(Boolean).join(" · ") || "—"}</td>
+        <td>${a.service_name || "—"}</td>
+        <td><span class="badge ${badge}">${label}</span></td>
+        <td class="text-center">${otCell}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  document.getElementById("agendaToday").addEventListener("click", () => {
+    agendaMode = "today";
+    document.getElementById("agendaToday").className    = "btn btn-primary btn-sm";
+    document.getElementById("agendaUpcoming").className = "btn btn-outline-secondary btn-sm";
+    renderAgenda();
+  });
+
+  document.getElementById("agendaUpcoming").addEventListener("click", () => {
+    agendaMode = "upcoming";
+    document.getElementById("agendaToday").className    = "btn btn-outline-secondary btn-sm";
+    document.getElementById("agendaUpcoming").className = "btn btn-primary btn-sm";
+    renderAgenda();
+  });
+
+  // ── MÉTRICAS ────────────────────────────────────────────────────────────────
   function renderMetrics(data) {
-    // ── KPI fila 1 ──────────────────────────────────────────────────────────────
-    const wo = data.work_orders_by_status || {};
-    const appt = data.appointments_by_status || {};
+    const wo   = data.work_orders_by_status   || {};
+    const appt = data.appointments_by_status  || {};
 
-    const inTaller = (wo["open"] || 0) + (wo["in_progress"] || 0);
-    const ready    = wo["ready"] || 0;
-    const citas    = (appt["scheduled"] || 0) + (appt["confirmed"] || 0);
+    document.getElementById("kpiInTaller").textContent = (wo["open"] || 0) + (wo["in_progress"] || 0);
 
-    document.getElementById("kpiInTaller").textContent = inTaller;
+    const ready = wo["ready"] || 0;
     const kpiReadyEl = document.getElementById("kpiReady");
-    kpiReadyEl.textContent = ready;
-    // Destacar si hay listos para entregar
-    kpiReadyEl.style.color = ready > 0 ? "#0f9e6e" : "#20c997";
-    document.getElementById("kpiCitas").textContent = citas;
+    kpiReadyEl.textContent   = ready;
+    kpiReadyEl.style.color   = ready > 0 ? "#0f9e6e" : "#20c997";
 
-    // ── KPI fila 2 ──────────────────────────────────────────────────────────────
+    document.getElementById("kpiCitas").textContent =
+      (appt["scheduled"] || 0) + (appt["confirmed"] || 0);
+
     const totalIncome = (data.daily_income || []).reduce((s, d) => s + d.amount, 0);
-    document.getElementById("kpiIncome").textContent = fmtMoney(totalIncome);
+    document.getElementById("kpiIncome").textContent     = fmtMoney(totalIncome);
     document.getElementById("kpiIncomeLabel").textContent = data.month_label || "";
-    document.getElementById("kpiClosed").textContent = data.wo_closed_month ?? "—";
+    document.getElementById("kpiClosed").textContent     = data.wo_closed_month ?? "—";
 
-    // Badge sesión de caja
     const badge = document.getElementById("kpiCashBadge");
     if (data.cash_session_open) {
-      badge.className = "badge fs-6 px-3 py-2 bg-success";
+      badge.className  = "badge fs-6 px-3 py-2 bg-success";
       badge.textContent = "Abierta";
     } else {
-      badge.className = "badge fs-6 px-3 py-2 bg-danger";
+      badge.className  = "badge fs-6 px-3 py-2 bg-danger";
       badge.textContent = "Sin sesión activa";
     }
 
-    // ── Mes label ───────────────────────────────────────────────────────────────
-    document.getElementById("monthLabel").textContent =
-      `Resumen de ${data.month_label || "este mes"}`;
-    document.getElementById("incomeTitle").textContent =
-      `Ingresos diarios — ${data.month_label || ""}`;
+    document.getElementById("monthLabel").textContent  = `Resumen de ${data.month_label || "este mes"}`;
+    document.getElementById("incomeTitle").textContent = `Ingresos diarios — ${data.month_label || ""}`;
 
-    // ── Gráfico 1: ingresos diarios ──────────────────────────────────────────────
+    // Gráfico 1: ingresos diarios
     if (chartIncome) { chartIncome.destroy(); chartIncome = null; }
-
     const daily = data.daily_income || [];
     if (daily.length) {
       document.getElementById("emptyIncome").classList.add("d-none");
@@ -249,29 +561,14 @@
       chartIncome = new Chart(document.getElementById("chartIncome"), {
         type: "bar",
         data: {
-          labels: daily.map(d => {
-            const dt = new Date(d.day + "T12:00:00");
-            return dt.toLocaleDateString("es-CR", { day: "2-digit", month: "short" });
-          }),
-          datasets: [{
-            label: "Ingresos (₡)",
-            data: daily.map(d => d.amount),
-            backgroundColor: "rgba(25, 135, 84, 0.75)",
-            borderColor: "#198754",
-            borderWidth: 1,
-            borderRadius: 4,
-          }],
+          labels: daily.map(d => new Date(d.day + "T12:00:00").toLocaleDateString("es-CR", { day:"2-digit", month:"short" })),
+          datasets: [{ label:"Ingresos (₡)", data: daily.map(d => d.amount),
+            backgroundColor:"rgba(25,135,84,.75)", borderColor:"#198754", borderWidth:1, borderRadius:4 }],
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: true,
+          responsive: true, maintainAspectRatio: true,
           plugins: { legend: { display: false } },
-          scales: {
-            y: {
-              beginAtZero: true,
-              ticks: { callback: v => "₡" + v.toLocaleString("es-CR") },
-            },
-          },
+          scales: { y: { beginAtZero: true, ticks: { callback: v => "₡" + v.toLocaleString("es-CR") } } },
         },
       });
     } else {
@@ -279,10 +576,9 @@
       document.getElementById("emptyIncome").classList.remove("d-none");
     }
 
-    // ── Gráfico 2: pipeline OTs (donut) ──────────────────────────────────────────
+    // Gráfico 2: pipeline OTs (donut)
     if (chartWO) { chartWO.destroy(); chartWO = null; }
-
-    const woKeys = Object.keys(data.work_orders_by_status || {});
+    const woKeys = Object.keys(wo);
     if (woKeys.length) {
       document.getElementById("emptyWO").classList.add("d-none");
       document.getElementById("chartWO").classList.remove("d-none");
@@ -290,18 +586,12 @@
         type: "doughnut",
         data: {
           labels: woKeys.map(k => WO_LABELS[k] || k),
-          datasets: [{
-            data: woKeys.map(k => data.work_orders_by_status[k]),
-            backgroundColor: woKeys.map(k => WO_COLORS[k] || "#adb5bd"),
-            borderWidth: 2,
-            borderColor: "#fff",
-          }],
+          datasets: [{ data: woKeys.map(k => wo[k]),
+            backgroundColor: woKeys.map(k => WO_COLORS[k] || "#adb5bd"), borderWidth: 2, borderColor: "#fff" }],
         },
         options: {
           responsive: true,
-          plugins: {
-            legend: { position: "bottom", labels: { boxWidth: 12, padding: 10, font: { size: 12 } } },
-          },
+          plugins: { legend: { position:"bottom", labels: { boxWidth:12, padding:10, font:{ size:12 } } } },
         },
       });
     } else {
@@ -317,19 +607,331 @@
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (res.status === 401) { doLogout(); return; }
-      if (!res.ok) {
-        showMsg("Error al cargar métricas del dashboard.", "warning");
-        document.getElementById("monthLabel").textContent = "";
-        return;
-      }
-      const data = await res.json();
-      renderMetrics(data);
+      if (!res.ok) { showMsg("Error al cargar métricas.", "warning"); document.getElementById("monthLabel").textContent = ""; return; }
+      renderMetrics(await res.json());
     } catch {
       showMsg("No se pudo conectar con el servidor.", "warning");
       document.getElementById("monthLabel").textContent = "";
     }
   }
 
+  // ── VENTA RÁPIDA ────────────────────────────────────────────────────────────
+  let vrProducts  = [];
+  let vrServices  = [];
+  let vrPending   = null;
+  let vrSessionId = null;
+  let vrCart      = [];
+  let vrActiveTab = "product";
+
+  const vrModal   = new bootstrap.Modal(document.getElementById("modalVentaRapida"));
+  const vrOkModal = new bootstrap.Modal(document.getElementById("modalVROk"));
+
+  function switchVrTab(tab) {
+    vrActiveTab = tab;
+    ["product", "service", "labor"].forEach(t => {
+      const tabId = `vrTab${t.charAt(0).toUpperCase() + t.slice(1)}`;
+      document.getElementById(tabId).classList.toggle("d-none", t !== tab);
+      const link = document.querySelector(`[data-vrtab="${t}"]`);
+      if (link) link.classList.toggle("active", t === tab);
+    });
+    if (tab !== "product") {
+      vrPending = null;
+      document.getElementById("vrPending").classList.add("d-none");
+      document.querySelectorAll(".qs-product-item").forEach(el => el.classList.remove("pending"));
+    }
+  }
+
+  async function openVentaRapida() {
+    vrPending = null; vrSessionId = null; vrCart = [];
+    switchVrTab("product");
+    document.getElementById("vrSearch").value        = "";
+    document.getElementById("vrServiceSearch").value = "";
+    document.getElementById("vrPending").classList.add("d-none");
+    document.getElementById("vrPendQty").value       = 1;
+    document.getElementById("vrPendSubtotal").textContent = "₡0";
+    document.getElementById("vrPendStockAlert").classList.add("d-none");
+    document.getElementById("vrLaborDesc").value     = "";
+    document.getElementById("vrLaborAmount").value   = "";
+    document.getElementById("vrLaborAlert").classList.add("d-none");
+    document.getElementById("vrCartList").innerHTML = '<div id="vrCartEmpty" class="text-center text-muted py-3 small">Aún no hay artículos agregados</div>';
+    document.getElementById("vrCartCount").textContent = "0";
+    document.getElementById("vrGrandTotalSection").classList.add("d-none");
+    document.getElementById("vrConfirm").disabled    = true;
+    document.getElementById("vrConfirm").textContent = "Confirmar venta";
+    document.getElementById("vrNoCaja").classList.add("d-none");
+    document.getElementById("vrMain").classList.remove("d-none");
+    document.getElementById("vrProductLoading").textContent = "Cargando productos...";
+    document.getElementById("vrProductLoading").classList.remove("d-none");
+    document.getElementById("vrServiceLoading").textContent = "Cargando servicios...";
+    document.getElementById("vrServiceLoading").classList.remove("d-none");
+
+    vrModal.show();
+
+    // Verificar sesión de caja activa
+    try {
+      const sesRes = await fetch(`${API_BASE}/api/cash/sessions/active/`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (sesRes.status === 404) {
+        document.getElementById("vrNoCaja").classList.remove("d-none");
+        document.getElementById("vrMain").classList.add("d-none");
+        document.getElementById("vrConfirm").disabled = true;
+        document.getElementById("vrProductLoading").classList.add("d-none");
+        document.getElementById("vrServiceLoading").classList.add("d-none");
+        return;
+      }
+      if (sesRes.ok) { const ses = await sesRes.json(); vrSessionId = ses.cash_session_id; }
+    } catch { /* continúa sin session id */ }
+
+    // Cargar productos y servicios en paralelo
+    const [prodRes, svcRes] = await Promise.allSettled([
+      fetch(`${API_BASE}/api/catalog/products/`, { headers: { "Authorization": `Bearer ${token}` } }),
+      fetch(`${API_BASE}/api/services/`,          { headers: { "Authorization": `Bearer ${token}` } }),
+    ]);
+
+    if (prodRes.status === "fulfilled" && prodRes.value.ok) {
+      const data = await prodRes.value.json();
+      vrProducts = (Array.isArray(data) ? data : (data.results || [])).filter(p => p.is_active);
+    } else { vrProducts = []; }
+
+    if (svcRes.status === "fulfilled" && svcRes.value.ok) {
+      const data = await svcRes.value.json();
+      vrServices = (Array.isArray(data) ? data : (data.results || [])).filter(s => s.is_active);
+    } else { vrServices = []; }
+
+    renderVrProducts("");
+    renderVrServices("");
+  }
+
+  function renderVrProducts(query) {
+    const list = document.getElementById("vrProductList");
+    const q    = query.trim().toLowerCase();
+    const filtered = vrProducts.filter(p =>
+      !q || (p.name || "").toLowerCase().includes(q) || (p.sku || "").toLowerCase().includes(q)
+    );
+    document.getElementById("vrProductLoading").classList.add("d-none");
+    if (!filtered.length) {
+      list.innerHTML = `<div class="text-center text-muted py-3 small">Sin productos${q ? " para esta búsqueda" : ""}</div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(p => {
+      const outOfStock = parseFloat(p.stock_qty || 0) <= 0;
+      const isPending  = vrPending && vrPending.product_id === p.product_id;
+      return `<div class="qs-product-item p-2 d-flex justify-content-between align-items-center${outOfStock ? " out-of-stock" : ""}${isPending ? " pending" : ""}" data-id="${p.product_id}">
+        <div>
+          <div class="fw-semibold small">${p.name}</div>
+          <div class="text-muted" style="font-size:.75rem;">${p.sku ? `SKU: ${p.sku} · ` : ""}Stock: ${parseFloat(p.stock_qty || 0)}</div>
+        </div>
+        <div class="text-end d-flex align-items-center gap-2">
+          <div class="fw-bold text-success small">${fmtMoney(p.unit_price)}</div>
+          ${outOfStock
+            ? `<span class="badge bg-danger" style="font-size:.65rem;">Sin stock</span>`
+            : `<button class="btn btn-outline-success btn-sm py-0 px-2" style="font-size:.75rem;" onclick="selectVrProduct('${p.product_id}')">+ Agregar</button>`
+          }
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  function renderVrServices(query) {
+    const list = document.getElementById("vrServiceList");
+    const q    = query.trim().toLowerCase();
+    const filtered = vrServices.filter(s => !q || (s.name || "").toLowerCase().includes(q));
+    document.getElementById("vrServiceLoading").classList.add("d-none");
+    if (!filtered.length) {
+      list.innerHTML = `<div class="text-center text-muted py-3 small">Sin servicios${q ? " para esta búsqueda" : ""}</div>`;
+      return;
+    }
+    list.innerHTML = filtered.map(s =>
+      `<div class="qs-product-item p-2 d-flex justify-content-between align-items-center" data-id="${s.service_id}">
+        <div class="fw-semibold small">${s.name}</div>
+        <div class="d-flex align-items-center gap-2">
+          <div class="fw-bold text-success small">${fmtMoney(s.base_price)}</div>
+          <button class="btn btn-outline-primary btn-sm py-0 px-2" style="font-size:.75rem;" onclick="addServiceToCart('${s.service_id}')">+ Agregar</button>
+        </div>
+      </div>`
+    ).join("");
+  }
+
+  function addServiceToCart(serviceId) {
+    const svc = vrServices.find(s => s.service_id === serviceId);
+    if (!svc) return;
+    vrCart.push({ type: "service", service_id: svc.service_id, name: svc.name, amount: parseFloat(svc.base_price || 0) });
+    renderVrCart();
+  }
+
+  function selectVrProduct(productId) {
+    vrPending = vrProducts.find(p => p.product_id === productId);
+    if (!vrPending) return;
+    document.querySelectorAll(".qs-product-item").forEach(el => el.classList.remove("pending"));
+    const el = document.querySelector(`.qs-product-item[data-id="${productId}"]`);
+    if (el) el.classList.add("pending");
+    document.getElementById("vrPendName").textContent  = vrPending.name;
+    document.getElementById("vrPendPrice").textContent = fmtMoney(vrPending.unit_price);
+    const inCart = vrCart.find(i => i.type === "product" && i.product_id === vrPending.product_id);
+    const maxQty = parseFloat(vrPending.stock_qty || 0) - (inCart ? inCart.qty : 0);
+    document.getElementById("vrPendStock").textContent = maxQty;
+    document.getElementById("vrPendQty").value = 1;
+    document.getElementById("vrPendQty").max   = maxQty;
+    document.getElementById("vrPendStockAlert").classList.add("d-none");
+    document.getElementById("vrPending").classList.remove("d-none");
+    updateVrPendingSubtotal();
+  }
+
+  function updateVrPendingSubtotal() {
+    if (!vrPending) return;
+    const qty   = parseFloat(document.getElementById("vrPendQty").value) || 0;
+    const price = parseFloat(vrPending.unit_price || 0);
+    document.getElementById("vrPendSubtotal").textContent = fmtMoney(qty * price);
+    const inCart = vrCart.find(i => i.type === "product" && i.product_id === vrPending.product_id);
+    const maxQty = parseFloat(vrPending.stock_qty || 0) - (inCart ? inCart.qty : 0);
+    document.getElementById("vrPendStockAlert").classList.toggle("d-none", qty >= 1 && qty <= maxQty);
+  }
+
+  function renderVrCart() {
+    if (!vrCart.length) {
+      document.getElementById("vrCartList").innerHTML = '<div class="text-center text-muted py-3 small">Aún no hay artículos agregados</div>';
+      document.getElementById("vrCartCount").textContent = "0";
+      document.getElementById("vrGrandTotalSection").classList.add("d-none");
+      document.getElementById("vrConfirm").disabled    = true;
+      document.getElementById("vrConfirm").textContent = "Confirmar venta";
+      return;
+    }
+    document.getElementById("vrGrandTotalSection").classList.remove("d-none");
+    document.getElementById("vrCartCount").textContent = vrCart.length;
+    document.getElementById("vrCartList").innerHTML = vrCart.map((item, idx) => {
+      const label = item.type === "product"
+        ? `${item.name} <span class="text-muted">x${item.qty}</span>`
+        : item.type === "service"
+          ? `<span class="badge bg-primary me-1">Servicio</span>${item.name}`
+          : `<span class="badge bg-secondary me-1">Mano de obra</span>${item.description}`;
+      return `<div class="vr-cart-item">
+        <div>${label}</div>
+        <div class="d-flex align-items-center gap-2">
+          <span class="fw-bold text-success">${fmtMoney(item.amount)}</span>
+          <button class="btn btn-link btn-sm text-danger p-0 lh-1" onclick="removeVrCartItem(${idx})" title="Eliminar">✕</button>
+        </div>
+      </div>`;
+    }).join("");
+    const grandTotal = vrCart.reduce((s, i) => s + i.amount, 0);
+    document.getElementById("vrGrandTotal").textContent = fmtMoney(grandTotal);
+    const btn = document.getElementById("vrConfirm");
+    btn.disabled    = !vrSessionId;
+    btn.textContent = `Confirmar venta (${vrCart.length})`;
+  }
+
+  function removeVrCartItem(idx) {
+    vrCart.splice(idx, 1);
+    renderVrCart();
+  }
+
+  document.getElementById("vrAddToCart").addEventListener("click", () => {
+    if (!vrPending) return;
+    const qty    = parseFloat(document.getElementById("vrPendQty").value) || 0;
+    const inCart = vrCart.find(i => i.type === "product" && i.product_id === vrPending.product_id);
+    const maxQty = parseFloat(vrPending.stock_qty || 0) - (inCart ? inCart.qty : 0);
+    if (qty < 1 || qty > maxQty) {
+      document.getElementById("vrPendStockAlert").classList.remove("d-none");
+      return;
+    }
+    if (inCart) {
+      inCart.qty   += qty;
+      inCart.amount = inCart.qty * inCart.unit_price;
+    } else {
+      vrCart.push({
+        type: "product", product_id: vrPending.product_id, name: vrPending.name, qty,
+        unit_price: parseFloat(vrPending.unit_price || 0),
+        amount: qty * parseFloat(vrPending.unit_price || 0),
+      });
+    }
+    vrPending = null;
+    document.getElementById("vrPending").classList.add("d-none");
+    document.querySelectorAll(".qs-product-item").forEach(el => el.classList.remove("pending"));
+    renderVrCart();
+  });
+
+  document.getElementById("vrAddLabor").addEventListener("click", () => {
+    const desc   = document.getElementById("vrLaborDesc").value.trim();
+    const amount = parseFloat(document.getElementById("vrLaborAmount").value) || 0;
+    if (!desc || amount <= 0) {
+      document.getElementById("vrLaborAlert").classList.remove("d-none");
+      return;
+    }
+    document.getElementById("vrLaborAlert").classList.add("d-none");
+    vrCart.push({ type: "labor", description: desc, amount });
+    document.getElementById("vrLaborDesc").value   = "";
+    document.getElementById("vrLaborAmount").value = "";
+    renderVrCart();
+  });
+
+  document.querySelectorAll("[data-vrtab]").forEach(link => {
+    link.addEventListener("click", e => { e.preventDefault(); switchVrTab(link.dataset.vrtab); });
+  });
+
+  document.getElementById("vrSearch").addEventListener("input", e => renderVrProducts(e.target.value));
+  document.getElementById("vrServiceSearch").addEventListener("input", e => renderVrServices(e.target.value));
+  document.getElementById("vrPendQty").addEventListener("input", updateVrPendingSubtotal);
+
+  document.getElementById("vrConfirm").addEventListener("click", async () => {
+    if (!vrCart.length || !vrSessionId) return;
+    const btn = document.getElementById("vrConfirm");
+    btn.disabled    = true;
+    btn.textContent = "Registrando...";
+
+    const requests = vrCart.map(item => {
+      const payload = {
+        cash_session_id: vrSessionId,
+        movement_type:   "sale",
+        amount:          item.amount.toFixed(2),
+        description:     item.type === "product"
+          ? `Venta rápida: ${item.name} x${item.qty}`
+          : item.type === "service"
+            ? `Venta rápida: ${item.name}`
+            : item.description,
+      };
+      if (item.type === "product") {
+        payload.product_id  = item.product_id;
+        payload.product_qty = item.qty;
+      }
+      return fetch(`${API_BASE}/api/cash/movements/`, {
+        method: "POST", headers: authHeaders(), body: JSON.stringify(payload),
+      });
+    });
+
+    try {
+      const results = await Promise.all(requests);
+      const failed  = results.filter(r => !r.ok);
+      if (failed.length) {
+        if (failed.some(r => r.status === 409)) {
+          document.getElementById("vrPendStockAlert").classList.remove("d-none");
+          switchVrTab("product");
+        } else {
+          showMsg(`Error al registrar ${failed.length} movimiento(s). Intente nuevamente.`, "danger");
+        }
+        btn.disabled    = false;
+        btn.textContent = `Confirmar venta (${vrCart.length})`;
+        return;
+      }
+      const grandTotal = vrCart.reduce((s, i) => s + i.amount, 0);
+      const count      = vrCart.length;
+      vrCart.filter(i => i.type === "product").forEach(item => {
+        const p = vrProducts.find(p => p.product_id === item.product_id);
+        if (p) p.stock_qty = parseFloat(p.stock_qty || 0) - item.qty;
+      });
+      vrModal.hide();
+      document.getElementById("vrOkMsg").textContent = `${count} artículo(s) — Total: ${fmtMoney(grandTotal)}`;
+      vrOkModal.show();
+      loadMetrics();
+    } catch {
+      showMsg("No se pudo conectar al registrar la venta.", "danger");
+      btn.disabled    = false;
+      btn.textContent = `Confirmar venta (${vrCart.length})`;
+    }
+  });
+
+  document.getElementById("btnVentaRapida").addEventListener("click", openVentaRapida);
+
+  // ── Auth / init ──────────────────────────────────────────────────────────────
   function doLogout() {
     localStorage.clear();
     window.location.href = "./auth.html";
@@ -339,7 +941,7 @@
     try {
       await fetch(`${API_BASE}/api/auth/logout/`, {
         method: "POST",
-        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        headers: authHeaders(),
       });
     } catch (_) {}
     localStorage.removeItem("access_token");
@@ -347,9 +949,11 @@
     window.location.href = "./auth.html";
   });
 
-  document.getElementById("btnReload").addEventListener("click", loadMetrics);
+  document.getElementById("btnReload").addEventListener("click", () => {
+    loadMetrics();
+    loadAgenda();
+  });
 
-  // ── Init ──────────────────────────────────────────────────────────────────────
   (async () => {
     if (!token) { doLogout(); return; }
 
@@ -366,6 +970,7 @@
       `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
 
     loadMetrics();
+    loadAgenda();
   })();
 </script>
 </body>
