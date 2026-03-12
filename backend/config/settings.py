@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "apps.appointments.apps.AppointmentsConfig",
     "apps.work_orders.apps.WorkOrdersConfig",
     "apps.cash_register.apps.CashRegisterConfig",
+    "apps.period_closures.apps.PeriodClosuresConfig",
 ]
 
 MIDDLEWARE = [
