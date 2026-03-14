@@ -16,6 +16,15 @@
     .changelog-timeline li.ct-deactivated::before { background: #dc3545; }
     .changelog-timeline li.ct-reactivated::before { background: #20c997; }
     .changelog-timeline li.ct-price_change::before { background: #fd7e14; }
+    /* Movimientos de stock (en timeline unificado) */
+    .changelog-timeline li.ct-sale::before              { background: #dc3545; }
+    .changelog-timeline li.ct-work_order::before        { background: #fd7e14; }
+    .changelog-timeline li.ct-work_order_refund::before { background: #198754; }
+    .changelog-timeline li.ct-manual_adjustment::before { background: #0d6efd; }
+    .changelog-timeline li.ct-purchase::before          { background: #0dcaf0; }
+    .changelog-timeline li.ct-deactivation::before      { background: #6c757d; }
+    /* Permite que los dropdowns escapen el overflow del table-responsive */
+    .table-responsive:has(.dropdown-menu.show) { overflow: visible !important; }
   </style>
 </head>
 <body class="bg-light">
@@ -46,6 +55,7 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_inventory_report.html">Reporte Inventario</a>
         </div>
       </div>
     </aside>
@@ -404,11 +414,20 @@
           <label class="form-label small mb-1">Tipo de cambio</label>
           <select class="form-select form-select-sm" id="clFilterType">
             <option value="">Todos</option>
-            <option value="create">Alta</option>
-            <option value="update">Modificación</option>
-            <option value="price_change">Cambio de precio</option>
-            <option value="deactivated">Desactivado</option>
-            <option value="reactivated">Reactivado</option>
+            <optgroup label="Movimientos de stock">
+              <option value="mv_purchase">Ingresos de stock</option>
+              <option value="mv_sale">Ventas</option>
+              <option value="mv_work_order">Consumos en OT</option>
+              <option value="mv_work_order_refund">Devoluciones OT</option>
+              <option value="mv_manual_adjustment">Ajustes manuales</option>
+            </optgroup>
+            <optgroup label="Cambios de datos">
+              <option value="cl_create">Alta</option>
+              <option value="cl_price_change">Cambio de precio</option>
+              <option value="cl_deactivated">Desactivado</option>
+              <option value="cl_reactivated">Reactivado</option>
+              <option value="cl_update">Modificación</option>
+            </optgroup>
           </select>
         </div>
         <div class="col-6 col-sm-3">
@@ -439,6 +458,47 @@
       <p id="changelogEmpty" class="text-muted text-center py-4 d-none">Sin cambios registrados.</p>
     </div>
 
+  </div>
+</div>
+
+
+<!-- Modal: Ajuste de stock -->
+<div class="modal fade" id="adjustStockModal" tabindex="-1">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="adjModalTitle">Ingresar stock</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="adjProductId">
+        <input type="hidden" id="adjMode">
+        <div class="mb-3">
+          <label class="form-label small">Producto</label>
+          <input class="form-control form-control-sm" id="adjProductName" readonly>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small">Stock actual</label>
+          <input class="form-control form-control-sm" id="adjCurrentStock" readonly>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Cantidad <span class="text-danger">*</span></label>
+          <input class="form-control" id="adjQty" type="number" min="0.01" step="0.01" placeholder="Ej: 10">
+          <div class="form-text" id="adjQtyHelp"></div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Motivo <span class="text-danger">*</span></label>
+          <textarea class="form-control" id="adjReason" rows="2" placeholder="Descripción del motivo..."></textarea>
+        </div>
+        <div id="adjError" class="alert alert-danger d-none"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button type="button" class="btn btn-success" id="btnConfirmAdj">
+          <i class="bi bi-check-lg me-1"></i>Confirmar
+        </button>
+      </div>
+    </div>
   </div>
 </div>
 
@@ -560,15 +620,26 @@ function renderProducts() {
       </td>
       <td class="text-end" style="white-space:nowrap">
         <div class="d-inline-flex gap-1">
-          <button class="btn btn-sm btn-outline-secondary" title="Editar" onclick="editProduct('${p.product_id}')">
-            <i class="bi bi-pencil"></i>
+          <button class="btn btn-sm btn-outline-primary" onclick="editProduct('${p.product_id}')">
+            <i class="bi bi-pencil"></i> Editar
           </button>
-          <button class="btn btn-sm btn-outline-info" title="Historial" onclick="openChangelog('product','${p.product_id}','${p.name.replace(/'/g,"\\'")}')">
-            <i class="bi bi-clock-history"></i>
-          </button>
-          <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="deleteProduct('${p.product_id}')">
-            <i class="bi bi-trash"></i>
-          </button>
+          <div class="dropdown">
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-three-dots-vertical"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','${p.name.replace(/'/g,"\\'")}',${p.stock_qty},'purchase');return false;">
+                <i class="bi bi-arrow-up-circle text-success me-1"></i>Ingresar stock</a></li>
+              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','${p.name.replace(/'/g,"\\'")}',${p.stock_qty},'deduct');return false;">
+                <i class="bi bi-arrow-down-circle text-danger me-1"></i>Descontar stock</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item" href="#" onclick="openChangelog('product','${p.product_id}','${p.name.replace(/'/g,"\\'")}');return false;">
+                <i class="bi bi-clock-history me-1"></i>Ver historial</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" onclick="deleteProduct('${p.product_id}');return false;">
+                <i class="bi bi-trash me-1"></i>Eliminar</a></li>
+            </ul>
+          </div>
         </div>
       </td>
     </tr>`;
@@ -734,15 +805,21 @@ function renderServices(query = "") {
     <td class="small text-muted text-nowrap">${new Date(s.created_at).toLocaleDateString("es-CR")}</td>
     <td class="text-end" style="white-space:nowrap">
       <div class="d-inline-flex gap-1">
-        <button class="btn btn-sm btn-outline-secondary" title="Editar" onclick="editService('${s.service_id}')">
-          <i class="bi bi-pencil"></i>
+        <button class="btn btn-sm btn-outline-primary" onclick="editService('${s.service_id}')">
+          <i class="bi bi-pencil"></i> Editar
         </button>
-        <button class="btn btn-sm btn-outline-info" title="Historial" onclick="openChangelog('service','${s.service_id}','${s.name.replace(/'/g,"\\'")}')">
-          <i class="bi bi-clock-history"></i>
-        </button>
-        <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="deleteService('${s.service_id}')">
-          <i class="bi bi-trash"></i>
-        </button>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-three-dots-vertical"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item" href="#" onclick="openChangelog('service','${s.service_id}','${s.name.replace(/'/g,"\\'")}');return false;">
+              <i class="bi bi-clock-history me-1"></i>Ver historial</a></li>
+            <li><hr class="dropdown-divider"></li>
+            <li><a class="dropdown-item text-danger" href="#" onclick="deleteService('${s.service_id}');return false;">
+              <i class="bi bi-trash me-1"></i>Eliminar</a></li>
+          </ul>
+        </div>
       </div>
     </td>
   </tr>`).join("");
@@ -835,12 +912,18 @@ function renderCategories() {
     <td class="small text-muted text-nowrap">${new Date(c.created_at).toLocaleDateString("es-CR")}</td>
     <td class="text-end" style="white-space:nowrap">
       <div class="d-inline-flex gap-1">
-        <button class="btn btn-sm btn-outline-secondary" title="Editar" onclick="editCategory('${c.category_id}')">
-          <i class="bi bi-pencil"></i>
+        <button class="btn btn-sm btn-outline-primary" onclick="editCategory('${c.category_id}')">
+          <i class="bi bi-pencil"></i> Editar
         </button>
-        <button class="btn btn-sm btn-outline-danger" title="Eliminar" onclick="deleteCategory('${c.category_id}')">
-          <i class="bi bi-trash"></i>
-        </button>
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-three-dots-vertical"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">
+            <li><a class="dropdown-item text-danger" href="#" onclick="deleteCategory('${c.category_id}');return false;">
+              <i class="bi bi-trash me-1"></i>Eliminar</a></li>
+          </ul>
+        </div>
       </div>
     </td>
   </tr>`).join("");
@@ -912,10 +995,10 @@ async function deleteCategory(id) {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-//  CHANGELOG (productos y servicios)
+//  CHANGELOG + MOVIMIENTOS DE STOCK (timeline unificado)
 // ═══════════════════════════════════════════════════════════════════════════════
 const changelogOffcanvas = new bootstrap.Offcanvas(document.getElementById("changelogOffcanvas"));
-let changelogRaw = [];
+let timelineRaw = [];   // array mezclado con _kind='changelog' | 'movement'
 
 const CT_LABELS = {
   create:       "Alta",
@@ -926,6 +1009,15 @@ const CT_LABELS = {
   delete:       "Eliminado",
 };
 
+const MOV_LABELS = {
+  sale:               "Venta",
+  work_order:         "Consumo en OT",
+  work_order_refund:  "Devolución OT",
+  manual_adjustment:  "Ajuste manual",
+  purchase:           "Ingreso de stock",
+  deactivation:       "Desactivación",
+};
+
 const FIELD_LABELS = {
   name: "Nombre", description: "Descripción", base_price: "Precio base",
   unit_price: "Precio unitario", cost: "Costo",
@@ -933,24 +1025,44 @@ const FIELD_LABELS = {
   is_active: "Activo",
 };
 
-function renderChangelogItems(logs) {
+function renderChangelogItems(items) {
   const list = document.getElementById("changelogList");
   const empty = document.getElementById("changelogEmpty");
-  if (!logs.length) {
+  if (!items.length) {
     list.innerHTML = "";
     empty.classList.remove("d-none");
     return;
   }
   empty.classList.add("d-none");
-  list.innerHTML = logs.map(l => {
-    const date    = new Date(l.changed_at).toLocaleString("es-CR");
-    const ctLabel = CT_LABELS[l.change_type] || l.change_type;
-    const fLabel  = l.field_name ? (FIELD_LABELS[l.field_name] || l.field_name) : null;
-    let detail = "";
-    if (l.old_value !== null && l.new_value !== null && l.field_name) {
-      detail = `<div class="small text-muted mt-1">${fLabel}: <span class="text-danger">${l.old_value}</span> → <span class="text-success">${l.new_value}</span></div>`;
+  list.innerHTML = items.map(item => {
+    if (item._kind === "movement") {
+      const date  = new Date(item.created_at).toLocaleString("es-CR");
+      const label = MOV_LABELS[item.movement_type] || item.movement_type;
+      const change = parseFloat(item.qty_change);
+      const sign   = change >= 0 ? "+" : "";
+      const chgCls = change >= 0 ? "text-success" : "text-danger";
+      return `<li class="ct-${item.movement_type}">
+        <div class="d-flex justify-content-between align-items-start">
+          <span class="fw-semibold small">${label}</span>
+          <span class="text-muted small ms-2" style="white-space:nowrap;">${date}</span>
+        </div>
+        <div class="small mt-1">
+          <span class="text-muted">${item.qty_before}</span>
+          <span class="${chgCls} fw-semibold mx-1">${sign}${item.qty_change}</span>
+          <span class="text-muted">→ <strong>${item.qty_after}</strong></span>
+        </div>
+        ${item.reason ? `<div class="small text-muted">${item.reason}</div>` : ""}
+      </li>`;
     }
-    return `<li class="ct-${l.change_type}">
+    // _kind === 'changelog'
+    const date    = new Date(item.changed_at).toLocaleString("es-CR");
+    const ctLabel = CT_LABELS[item.change_type] || item.change_type;
+    const fLabel  = item.field_name ? (FIELD_LABELS[item.field_name] || item.field_name) : null;
+    let detail = "";
+    if (item.old_value !== null && item.new_value !== null && item.field_name) {
+      detail = `<div class="small text-muted mt-1">${fLabel}: <span class="text-danger">${item.old_value}</span> → <span class="text-success">${item.new_value}</span></div>`;
+    }
+    return `<li class="ct-${item.change_type}">
       <div class="d-flex justify-content-between align-items-start">
         <span class="fw-semibold small">${ctLabel}${fLabel && !detail ? " — " + fLabel : ""}</span>
         <span class="text-muted small ms-2" style="white-space:nowrap;">${date}</span>
@@ -964,10 +1076,20 @@ function applyChangelogFilters() {
   const type = document.getElementById("clFilterType").value;
   const from = document.getElementById("clFilterFrom").value;
   const to   = document.getElementById("clFilterTo").value;
-  let filtered = changelogRaw;
-  if (type) filtered = filtered.filter(l => l.change_type === type);
-  if (from) filtered = filtered.filter(l => new Date(l.changed_at) >= new Date(from));
-  if (to)   filtered = filtered.filter(l => new Date(l.changed_at) <= new Date(to + "T23:59:59"));
+  let filtered = timelineRaw;
+
+  if (type) {
+    if (type.startsWith("mv_")) {
+      const mvType = type.substring(3);
+      filtered = filtered.filter(i => i._kind === "movement" && i.movement_type === mvType);
+    } else if (type.startsWith("cl_")) {
+      const clType = type.substring(3);
+      filtered = filtered.filter(i => i._kind === "changelog" && i.change_type === clType);
+    }
+  }
+
+  if (from) filtered = filtered.filter(i => new Date(i.changed_at ?? i.created_at) >= new Date(from));
+  if (to)   filtered = filtered.filter(i => new Date(i.changed_at ?? i.created_at) <= new Date(to + "T23:59:59"));
   renderChangelogItems(filtered);
 }
 
@@ -976,7 +1098,7 @@ document.getElementById("btnClClear").addEventListener("click", () => {
   document.getElementById("clFilterType").value = "";
   document.getElementById("clFilterFrom").value = "";
   document.getElementById("clFilterTo").value   = "";
-  renderChangelogItems(changelogRaw);
+  renderChangelogItems(timelineRaw);
 });
 
 async function openChangelog(type, id, name) {
@@ -984,21 +1106,89 @@ async function openChangelog(type, id, name) {
   document.getElementById("changelogList").innerHTML    = "";
   document.getElementById("changelogEmpty").classList.add("d-none");
   document.getElementById("changelogLoading").classList.remove("d-none");
-  // Reset filters
   document.getElementById("clFilterType").value = "";
   document.getElementById("clFilterFrom").value = "";
   document.getElementById("clFilterTo").value   = "";
   changelogOffcanvas.show();
 
-  const url = type === "product"
-    ? `${API}/catalog/products/${id}/changelog/`
-    : `${API}/services/${id}/changelog/`;
-  const r = await fetch(url, { headers: authHeaders() });
-  changelogRaw = normalizeList(await r.json());
+  if (type === "product") {
+    // Fetch changelog + movements en paralelo y mezclar
+    const [clRes, mvRes] = await Promise.all([
+      fetch(`${API}/catalog/products/${id}/changelog/`, { headers: authHeaders() }),
+      fetch(`${API}/catalog/products/${id}/movements/`, { headers: authHeaders() }),
+    ]);
+    const clItems = normalizeList(await clRes.json()).map(x => ({ ...x, _kind: "changelog" }));
+    const mvItems = normalizeList(await mvRes.json()).map(x => ({ ...x, _kind: "movement" }));
+    timelineRaw = [...clItems, ...mvItems].sort((a, b) =>
+      new Date(b.changed_at ?? b.created_at) - new Date(a.changed_at ?? a.created_at)
+    );
+  } else {
+    const r = await fetch(`${API}/services/${id}/changelog/`, { headers: authHeaders() });
+    timelineRaw = normalizeList(await r.json()).map(x => ({ ...x, _kind: "changelog" }));
+  }
 
   document.getElementById("changelogLoading").classList.add("d-none");
-  renderChangelogItems(changelogRaw);
+  renderChangelogItems(timelineRaw);
 }
+
+// ═══════════════════════════════════════════════════════════════════════════════
+//  AJUSTE DE STOCK
+// ═══════════════════════════════════════════════════════════════════════════════
+const adjustStockModal = new bootstrap.Modal(document.getElementById("adjustStockModal"));
+
+function openAdjustStock(productId, productName, currentStock, mode) {
+  const isPurchase = mode === "purchase";
+  document.getElementById("adjModalTitle").textContent = isPurchase ? "Ingresar stock" : "Descontar stock";
+  document.getElementById("adjProductId").value    = productId;
+  document.getElementById("adjProductName").value  = productName;
+  document.getElementById("adjCurrentStock").value = currentStock;
+  document.getElementById("adjMode").value         = mode;
+  document.getElementById("adjQty").value          = "";
+  document.getElementById("adjReason").value       = "";
+  document.getElementById("adjQtyHelp").textContent = isPurchase
+    ? "Cantidad a sumar al stock actual."
+    : "Cantidad a restar del stock actual.";
+  document.getElementById("adjError").classList.add("d-none");
+  adjustStockModal.show();
+}
+
+document.getElementById("btnConfirmAdj").addEventListener("click", async () => {
+  const productId = document.getElementById("adjProductId").value;
+  const qty       = parseFloat(document.getElementById("adjQty").value);
+  const reason    = document.getElementById("adjReason").value.trim();
+  const mode      = document.getElementById("adjMode").value;
+  const errEl     = document.getElementById("adjError");
+
+  if (!qty || qty <= 0) { errEl.textContent = "Ingresa una cantidad mayor a cero."; errEl.classList.remove("d-none"); return; }
+  if (!reason)          { errEl.textContent = "El motivo es obligatorio."; errEl.classList.remove("d-none"); return; }
+  errEl.classList.add("d-none");
+
+  const qtyChange     = mode === "purchase" ? qty : -qty;
+  const movementType  = mode === "purchase" ? "purchase" : "manual_adjustment";
+
+  const r = await fetch(`${API}/catalog/products/${productId}/adjust-stock/`, {
+    method: "POST",
+    headers: authHeaders(),
+    body: JSON.stringify({ qty_change: qtyChange, reason, movement_type: movementType }),
+  });
+  if (!r.ok) {
+    const e = await r.json().catch(() => ({}));
+    errEl.textContent = e.detail || "Error al ajustar stock.";
+    errEl.classList.remove("d-none");
+    return;
+  }
+  const data = await r.json();
+  adjustStockModal.hide();
+  await loadProducts();
+  const toastEl = document.createElement("div");
+  toastEl.className = "toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3";
+  toastEl.setAttribute("role", "alert");
+  toastEl.style.zIndex = "1100";
+  toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">Stock actualizado: <strong>${data.new_stock_qty}</strong> unidades</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
+  document.body.appendChild(toastEl);
+  new bootstrap.Toast(toastEl, { delay: 3000 }).show();
+  toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+});
 
 // ── Start ────────────────────────────────────────────────────────────────────
 checkAuth();

@@ -1,5 +1,6 @@
 from decimal import Decimal
 
+from django.db import transaction
 from django.utils import timezone
 from rest_framework import viewsets, status
 from rest_framework.decorators import action
@@ -8,6 +9,7 @@ from rest_framework.response import Response
 
 from apps.authentication.permissions import IsStaffOrAdmin
 from apps.catalog.models import Product
+from apps.catalog.stock import apply_stock_change
 from apps.work_orders.models import WorkOrder
 from .models import CashSession, CashMovement, CashClosing
 from .serializers import (
@@ -199,6 +201,7 @@ class CashMovementViewSet(viewsets.ModelViewSet):
             qs = qs.filter(cash_session_id=session_id)
         return qs
 
+    @transaction.atomic
     def create(self, request, *args, **kwargs):
         session_id = request.data.get("cash_session_id")
         try:
@@ -211,8 +214,9 @@ class CashMovementViewSet(viewsets.ModelViewSet):
         # Descuento de inventario si es venta directa de producto
         product_id  = request.data.get("product_id")
         product_qty = request.data.get("product_qty")
-        product = None
-        if product_id and product_qty:
+        has_product = bool(product_id and product_qty)
+        qty = None
+        if has_product:
             try:
                 product = Product.objects.get(pk=product_id, is_active=True)
             except Product.DoesNotExist:
@@ -220,6 +224,7 @@ class CashMovementViewSet(viewsets.ModelViewSet):
             qty = Decimal(str(product_qty))
             if qty <= 0:
                 return Response({"detail": "La cantidad debe ser mayor a cero."}, status=status.HTTP_400_BAD_REQUEST)
+            # Validación optimista de stock (apply_stock_change hará la definitiva con FOR UPDATE)
             if product.stock_qty < qty:
                 return Response(
                     {"detail": f"Stock insuficiente. Disponible: {product.stock_qty}"},
@@ -230,10 +235,16 @@ class CashMovementViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save(created_by=request.user.id)
 
-        if product is not None:
-            product.stock_qty -= Decimal(str(product_qty))
-            product.updated_at = timezone.now()
-            product.save(update_fields=["stock_qty", "updated_at"])
+        if has_product:
+            apply_stock_change(
+                product_id=str(product_id),
+                qty_change=-qty,
+                movement_type="sale",
+                performed_by=request.user.id,
+                reason=request.data.get("description") or "Venta directa",
+                reference_id=serializer.instance.cash_movement_id,
+                reference_type="cash_movement",
+            )
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 

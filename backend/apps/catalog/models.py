@@ -2,6 +2,39 @@ import uuid
 from django.db import models
 
 
+class ProductMovement(models.Model):
+    MOVEMENT_TYPES = [
+        ('sale', 'sale'),
+        ('work_order', 'work_order'),
+        ('work_order_refund', 'work_order_refund'),
+        ('manual_adjustment', 'manual_adjustment'),
+        ('purchase', 'purchase'),
+        ('deactivation', 'deactivation'),
+    ]
+
+    movement_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.DO_NOTHING,
+        db_column='product_id',
+        related_name='movements',
+    )
+    movement_type = models.TextField(choices=MOVEMENT_TYPES)
+    qty_before = models.DecimalField(max_digits=12, decimal_places=2)
+    qty_change = models.DecimalField(max_digits=12, decimal_places=2)
+    qty_after = models.DecimalField(max_digits=12, decimal_places=2)
+    reason = models.TextField(null=True, blank=True)
+    reference_id = models.UUIDField(null=True, blank=True)
+    reference_type = models.TextField(null=True, blank=True)
+    performed_by = models.UUIDField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        managed = False
+        db_table = 'product_movements'
+        ordering = ['-created_at']
+
+
 class ProductChangeLog(models.Model):
     log_id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     product = models.ForeignKey(

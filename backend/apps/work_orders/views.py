@@ -7,6 +7,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
 from apps.authentication.permissions import IsStaffOrAdmin
+from apps.catalog.stock import log_stock_movement
 from apps.customers.auth import CustomerJWTAuthentication
 from apps.customers.permissions import IsAuthenticatedCustomer
 
@@ -328,6 +329,8 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
                     continue
 
                 current_stock = Decimal(str(pr[0] or 0))
+                qty_dec = Decimal(str(qty))
+                new_stock = current_stock + qty_dec
                 cursor.execute(
                     f"""
                     update public.products
@@ -335,7 +338,15 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
                         updated_at = now()
                     where product_id = %s
                     """,
-                    [str(current_stock + Decimal(str(qty))), str(product_id)],
+                    [str(new_stock), str(product_id)],
+                )
+                log_stock_movement(
+                    product_id=str(product_id),
+                    qty_before=current_stock,
+                    qty_change=qty_dec,
+                    qty_after=new_stock,
+                    movement_type="work_order_refund",
+                    reason=f"Cancelación OT {wo_id}",
                 )
 
             cursor.execute("delete from public.work_order_products where work_order_id = %s", [wo_id])
@@ -463,7 +474,8 @@ class WorkOrderProductAdminViewSet(viewsets.ModelViewSet):
         if current_stock < qty:
             return Response({"detail": "Stock insuficiente para este producto."}, status=409)
 
-        _update_product_stock(str(product_id), current_stock - qty)
+        new_stock = current_stock - qty
+        _update_product_stock(str(product_id), new_stock)
 
         with connection.cursor() as cursor:
             cursor.execute(
@@ -477,6 +489,18 @@ class WorkOrderProductAdminViewSet(viewsets.ModelViewSet):
                 [work_order_id, product_id, desc, str(qty), str(unit_price)],
             )
             line_id = cursor.fetchone()[0]
+
+        log_stock_movement(
+            product_id=str(product_id),
+            qty_before=current_stock,
+            qty_change=-qty,
+            qty_after=new_stock,
+            movement_type="work_order",
+            performed_by=request.user.id,
+            reason=f"OT {work_order_id}",
+            reference_id=line_id,
+            reference_type="work_order_product",
+        )
 
         line = WorkOrderProduct.objects.select_related("work_order", "product").get(work_order_product_id=line_id)
         return Response(self.get_serializer(line).data, status=201)
@@ -527,9 +551,33 @@ class WorkOrderProductAdminViewSet(viewsets.ModelViewSet):
                 if delta > 0:
                     if current_stock < delta:
                         return Response({"detail": "Stock insuficiente para aumentar la cantidad."}, status=409)
-                    _update_product_stock(str(line.product_id), current_stock - delta)
+                    new_stock = current_stock - delta
+                    _update_product_stock(str(line.product_id), new_stock)
+                    log_stock_movement(
+                        product_id=str(line.product_id),
+                        qty_before=current_stock,
+                        qty_change=-delta,
+                        qty_after=new_stock,
+                        movement_type="work_order",
+                        performed_by=request.user.id,
+                        reason=f"Ajuste qty OT {line.work_order_id}",
+                        reference_id=line.work_order_product_id,
+                        reference_type="work_order_product",
+                    )
                 elif delta < 0:
-                    _update_product_stock(str(line.product_id), current_stock + (-delta))
+                    new_stock = current_stock + (-delta)
+                    _update_product_stock(str(line.product_id), new_stock)
+                    log_stock_movement(
+                        product_id=str(line.product_id),
+                        qty_before=current_stock,
+                        qty_change=-delta,
+                        qty_after=new_stock,
+                        movement_type="work_order_refund",
+                        performed_by=request.user.id,
+                        reason=f"Ajuste qty OT {line.work_order_id}",
+                        reference_id=line.work_order_product_id,
+                        reference_type="work_order_product",
+                    )
 
             sets.append("qty = %s")
             params.append(str(new_qty))
@@ -565,7 +613,20 @@ class WorkOrderProductAdminViewSet(viewsets.ModelViewSet):
                 current_stock = _lock_product_and_get_stock(str(line.product_id))
             except ValueError as e:
                 return Response({"detail": str(e)}, status=404)
-            _update_product_stock(str(line.product_id), current_stock + Decimal(str(line.qty)))
+            qty_dec = Decimal(str(line.qty))
+            new_stock = current_stock + qty_dec
+            _update_product_stock(str(line.product_id), new_stock)
+            log_stock_movement(
+                product_id=str(line.product_id),
+                qty_before=current_stock,
+                qty_change=qty_dec,
+                qty_after=new_stock,
+                movement_type="work_order_refund",
+                performed_by=request.user.id,
+                reason=f"Eliminación de línea OT {line.work_order_id}",
+                reference_id=line.work_order_product_id,
+                reference_type="work_order_product",
+            )
 
         with connection.cursor() as cursor:
             cursor.execute(
