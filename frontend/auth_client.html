@@ -3,128 +3,351 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Clientes | Login</title>
+  <title>Portal Cliente | Lubricentro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
   <style>
-    body{font-family:Arial;background:#111;color:#111;display:flex;min-height:100vh;align-items:center;justify-content:center;padding:20px;}
-    .box{background:#fff;width:420px;border-radius:12px;padding:22px;}
-    h2{margin:0 0 6px;}
-    .tabs{display:flex;gap:8px;margin:12px 0;}
-    .tabs button{flex:1;padding:10px;border:1px solid #ddd;background:#f5f5f5;cursor:pointer;border-radius:8px;}
-    .tabs button.active{background:#111;color:#fff;border-color:#111;}
-    .row{margin:10px 0;}
-    label{display:block;font-weight:700;margin-bottom:6px;}
-    input{width:100%;padding:10px;border:1px solid #ddd;border-radius:8px;}
-    .msg{display:none;padding:10px;border-radius:8px;margin:10px 0;}
-    .msg.ok{background:#eaffea;border:1px solid #bde5bd;}
-    .msg.err{background:#ffecec;border:1px solid #f5bcbc;}
-    .btn{width:100%;padding:10px;background:#111;color:#fff;border:none;border-radius:8px;font-weight:800;cursor:pointer;}
-    .links{margin-top:12px;text-align:center;font-size:13px;color:#444;}
-    .links a{color:#111;font-weight:800;text-decoration:none;}
-    .links a:hover{text-decoration:underline;}
+    :root {
+      --accent: #1d63ff;
+      --nav-blue-1: #0a3ea6;
+      --nav-blue-2: #062a73;
+      --nav-blue-3: #061a3b;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, Arial, sans-serif;
+      font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      background: #f0f4ff;
+    }
+
+    /* ── Nav (igual que .mainnav del sitio) ── */
+    .auth-nav {
+      background: linear-gradient(90deg, var(--nav-blue-1), var(--nav-blue-2), var(--nav-blue-3));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+
+    .auth-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .auth-nav img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
+    }
+
+    .auth-nav-back {
+      color: rgba(255,255,255,.75);
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
+    }
+    .auth-nav-back:hover { color: #fff; }
+
+    /* ── Main area ── */
+    .auth-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px 64px;
+    }
+
+    /* ── Form column ── */
+    .auth-wrap {
+      width: 100%;
+      max-width: 440px;
+    }
+
+    .auth-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--accent);
+      background: rgba(29,99,255,.08);
+      border: 1px solid rgba(29,99,255,.18);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
+    }
+
+    .auth-title {
+      font-size: 1.85rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -.025em;
+      margin: 0 0 6px;
+    }
+
+    .auth-sub {
+      color: #64748b;
+      font-size: .9rem;
+      margin: 0 0 28px;
+    }
+
+    /* ── Card ── */
+    .auth-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 2px 8px rgba(10,40,120,.06), 0 8px 32px rgba(10,40,120,.09);
+      padding: 32px;
+      border: 1px solid #e4eaf5;
+    }
+
+    /* Tabs */
+    .auth-tabs {
+      display: flex;
+      background: #f0f4ff;
+      border-radius: 10px;
+      padding: 4px;
+      margin-bottom: 24px;
+    }
+
+    .auth-tabs button {
+      flex: 1;
+      padding: 9px 0;
+      border: none;
+      background: transparent;
+      color: #64748b;
+      font-family: inherit;
+      font-size: .875rem;
+      font-weight: 600;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: background .15s, color .15s, box-shadow .15s;
+    }
+
+    .auth-tabs button.active {
+      background: #fff;
+      color: var(--accent);
+      box-shadow: 0 1px 6px rgba(0,0,0,.1);
+    }
+
+    /* Alert */
+    #msg {
+      padding: 11px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: .875rem;
+      font-weight: 500;
+      display: none;
+    }
+    #msg.ok  { background: #eaffea; border: 1.5px solid #bde5bd; color: #166534; }
+    #msg.err { background: #fff1f1; border: 1.5px solid #fecaca; color: #991b1b; }
+
+    /* Form */
+    .form-row { margin-bottom: 16px; }
+
+    .form-row label {
+      display: block;
+      font-weight: 600;
+      font-size: .83rem;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .form-row input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #dde5f5;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .9rem;
+      color: #0f172a;
+      outline: none;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .form-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29,99,255,.1);
+    }
+
+    .btn-auth {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 4px;
+    }
+    .btn-auth:hover { background: var(--nav-blue-1); }
+
+    .auth-footer-links {
+      margin-top: 20px;
+      text-align: center;
+      font-size: .82rem;
+      color: #64748b;
+    }
+
+    .auth-footer-links a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .auth-footer-links a:hover { text-decoration: underline; }
   </style>
 </head>
 <body>
-  <div class="box">
-    <h2>Clientes</h2>
-    <div style="color:#444;">Login / Registro solo para clientes</div>
 
-    <div class="tabs">
-      <button id="tabLogin" class="active" type="button">Login</button>
-      <button id="tabRegister" type="button">Registro</button>
+  <!-- Nav -->
+  <nav class="auth-nav">
+    <div class="auth-nav-inner">
+      <a href="./index.html">
+        <img src="./assets/img/logo.png" alt="Lubricentro">
+      </a>
+      <a href="./index.html" class="auth-nav-back">
+        <i class="bi bi-arrow-left"></i> Volver al inicio
+      </a>
     </div>
+  </nav>
 
-    <div id="msg" class="msg"></div>
+  <!-- Main -->
+  <main class="auth-main">
+    <div class="auth-wrap">
 
-    <form id="loginForm">
-      <div class="row">
-        <label>Email</label>
-        <input id="l_email" type="email" required/>
+      <div class="auth-eyebrow">
+        <i class="bi bi-person-circle"></i> Portal Cliente
       </div>
-      <div class="row">
-        <label>Contraseña</label>
-        <input id="l_pass" type="password" required/>
-      </div>
-      <button class="btn" type="submit">Entrar</button>
-    </form>
+      <h1 class="auth-title">Bienvenido/a</h1>
+      <p class="auth-sub">Accedé a tu portal o creá una cuenta nueva.</p>
 
-    <form id="registerForm" style="display:none;">
-      <div class="row">
-        <label>Nombre completo</label>
-        <input id="r_name" required/>
-      </div>
-      <div class="row">
-        <label>Email</label>
-        <input id="r_email" type="email" required/>
-      </div>
-      <div class="row">
-        <label>Teléfono (opcional)</label>
-        <input id="r_phone"/>
-      </div>
-      <div class="row">
-        <label>Contraseña</label>
-        <input id="r_pass" type="password" minlength="8" required/>
-      </div>
-      <div class="row">
-        <label>Confirmar contraseña</label>
-        <input id="r_pass2" type="password" minlength="8" required/>
-      </div>
-      <button class="btn" type="submit">Crear cuenta</button>
-    </form>
+      <div class="auth-card">
 
-    <div class="links">
-      ¿Sos admin/staff? <a href="./auth_admin.html">Ir al login admin</a>
+        <!-- Tabs -->
+        <div class="auth-tabs">
+          <button id="tabLogin" class="active" type="button">Iniciar sesión</button>
+          <button id="tabRegister" type="button">Crear cuenta</button>
+        </div>
+
+        <!-- Alert -->
+        <div id="msg"></div>
+
+        <!-- Login form -->
+        <form id="loginForm">
+          <div class="form-row">
+            <label for="l_email">Correo electrónico</label>
+            <input id="l_email" type="email" placeholder="tucorreo@email.com" required/>
+          </div>
+          <div class="form-row">
+            <label for="l_pass">Contraseña</label>
+            <input id="l_pass" type="password" placeholder="••••••••" required/>
+          </div>
+          <button class="btn-auth" type="submit">Entrar <i class="bi bi-arrow-right ms-1"></i></button>
+        </form>
+
+        <!-- Register form -->
+        <form id="registerForm" style="display:none;">
+          <div class="form-row">
+            <label for="r_name">Nombre completo</label>
+            <input id="r_name" placeholder="Juan Pérez" required/>
+          </div>
+          <div class="form-row">
+            <label for="r_email">Correo electrónico</label>
+            <input id="r_email" type="email" placeholder="tucorreo@email.com" required/>
+          </div>
+          <div class="form-row">
+            <label for="r_phone">Teléfono <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
+            <input id="r_phone" placeholder="+(506) 0000-0000"/>
+          </div>
+          <div class="form-row">
+            <label for="r_pass">Contraseña</label>
+            <input id="r_pass" type="password" placeholder="Mínimo 8 caracteres" minlength="8" required/>
+          </div>
+          <div class="form-row">
+            <label for="r_pass2">Confirmar contraseña</label>
+            <input id="r_pass2" type="password" placeholder="Repetí tu contraseña" minlength="8" required/>
+          </div>
+          <button class="btn-auth" type="submit">Crear cuenta <i class="bi bi-arrow-right ms-1"></i></button>
+        </form>
+
+        <div class="auth-footer-links">
+          ¿Sos admin/staff? <a href="./auth_admin.html">Ir al acceso staff</a>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </main>
 
 <script>
-  const API_BASE = "http://localhost:8000";
-  const LOGIN_URL = `${API_BASE}/api/customer-auth/login/`;
-  const REG_URL = `${API_BASE}/api/customer-auth/register/`;
+  const API_BASE    = "http://localhost:8000";
+  const LOGIN_URL   = `${API_BASE}/api/customer-auth/login/`;
+  const REG_URL     = `${API_BASE}/api/customer-auth/register/`;
   const ADMIN_ME_URL = `${API_BASE}/api/auth/me/`;
 
-  function show(text, ok=true){
+  function show(text, ok = true) {
     const el = document.getElementById("msg");
     el.textContent = text;
-    el.className = `msg ${ok ? "ok":"err"}`;
+    el.className = ok ? "ok" : "err";
     el.style.display = "block";
   }
 
-  function hideMsg(){
-    document.getElementById("msg").style.display = "none";
+  function hideMsg() {
+    const el = document.getElementById("msg");
+    el.style.display = "none";
   }
 
-  function setTab(isLogin){
+  function setTab(isLogin) {
     document.getElementById("tabLogin").classList.toggle("active", isLogin);
     document.getElementById("tabRegister").classList.toggle("active", !isLogin);
-    document.getElementById("loginForm").style.display = isLogin ? "block" : "none";
+    document.getElementById("loginForm").style.display    = isLogin ? "block" : "none";
     document.getElementById("registerForm").style.display = isLogin ? "none" : "block";
     hideMsg();
   }
 
-  document.getElementById("tabLogin").onclick = () => setTab(true);
+  document.getElementById("tabLogin").onclick    = () => setTab(true);
   document.getElementById("tabRegister").onclick = () => setTab(false);
 
-  async function redirectIfAdminSession(){
+  async function redirectIfAdminSession() {
     const adminToken = localStorage.getItem("access_token");
     if (!adminToken) return;
-
-    try{
-      const res = await fetch(ADMIN_ME_URL, {
-        headers: { "Authorization": `Bearer ${adminToken}` }
-      });
-
+    try {
+      const res = await fetch(ADMIN_ME_URL, { headers: { "Authorization": `Bearer ${adminToken}` } });
       if (!res.ok) return;
-
       const me = await res.json().catch(() => null);
       const isAdmin = !!(me && (me.user_type === "admin" || me.user_type === "staff" || me.is_staff === true || me.is_superuser === true));
-
-      if (isAdmin){
-        window.location.href = "./admin/dashboard.html";
-      }
-    }catch(_){}
+      if (isAdmin) window.location.href = "./admin/dashboard.html";
+    } catch (_) {}
   }
 
-  function redirectIfCustomerSession(){
+  function redirectIfCustomerSession() {
     const customerToken = localStorage.getItem("customer_access_token");
     if (!customerToken) return;
     window.location.href = "./client/dashboard.html";
@@ -136,34 +359,18 @@
   document.getElementById("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     hideMsg();
-
     const payload = {
-      email: document.getElementById("l_email").value.trim(),
+      email:    document.getElementById("l_email").value.trim(),
       password: document.getElementById("l_pass").value
     };
-
-    try{
-      const res = await fetch(LOGIN_URL, {
-        method:"POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json().catch(()=>({}));
-
-      if(!res.ok){
-        show(data.detail || "Credenciales inválidas.", false);
-        return;
-      }
-
-      if(!data.access){
-        show("No se recibió el token del cliente.", false);
-        return;
-      }
-
+    try {
+      const res  = await fetch(LOGIN_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) { show(data.detail || "Credenciales inválidas.", false); return; }
+      if (!data.access) { show("No se recibió el token del cliente.", false); return; }
       localStorage.setItem("customer_access_token", data.access);
       window.location.href = "./client/dashboard.html";
-    }catch(err){
+    } catch (err) {
       console.error(err);
       show("Error de conexión con el servidor.", false);
     }
@@ -172,41 +379,27 @@
   document.getElementById("registerForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     hideMsg();
-
     const p1 = document.getElementById("r_pass").value;
     const p2 = document.getElementById("r_pass2").value;
-
-    if(p1 !== p2){
-      show("Las contraseñas no coinciden.", false);
-      return;
-    }
-
+    if (p1 !== p2) { show("Las contraseñas no coinciden.", false); return; }
     const payload = {
       full_name: document.getElementById("r_name").value.trim(),
-      email: document.getElementById("r_email").value.trim(),
-      phone: document.getElementById("r_phone").value.trim(),
-      password: p1,
+      email:     document.getElementById("r_email").value.trim(),
+      phone:     document.getElementById("r_phone").value.trim(),
+      password:  p1,
       password2: p2
     };
-
-    try{
-      const res = await fetch(REG_URL, {
-        method:"POST",
-        headers: {"Content-Type":"application/json"},
-        body: JSON.stringify(payload)
-      });
-
-      const data = await res.json().catch(()=>({}));
-
-      if(!res.ok){
+    try {
+      const res  = await fetch(REG_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
         const msg = data.detail || Object.values(data).flat().join(", ") || "No se pudo registrar.";
         show(msg, false);
         return;
       }
-
       show("Registro exitoso. Ahora podés iniciar sesión.", true);
       setTab(true);
-    }catch(err){
+    } catch (err) {
       console.error(err);
       show("Error de conexión con el servidor.", false);
     }

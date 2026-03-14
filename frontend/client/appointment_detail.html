@@ -1,0 +1,558 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cliente | Detalle de Cita</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link rel="stylesheet" href="../assets/css/main.css">
+
+  <style>
+    body { background: #f8fafc; }
+
+    /* Nav user */
+    .nav-user { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+    .nav-user-name { color: rgba(255,255,255,.75); font-size: .875rem; font-weight: 500; }
+    .btn-logout {
+      background: rgba(255,255,255,.12); color: #fff;
+      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
+      padding: 5px 14px; font-size: .8rem; font-weight: 600;
+      cursor: pointer; transition: background .15s; white-space: nowrap;
+    }
+    .btn-logout:hover { background: rgba(255,255,255,.22); }
+
+    /* Back link */
+    .back-link {
+      display: inline-flex; align-items: center; gap: 6px;
+      color: #1d63ff; font-size: .85rem; font-weight: 700;
+      text-decoration: none; margin-bottom: 20px;
+    }
+    .back-link:hover { text-decoration: underline; color: #0a3ea6; }
+
+    /* Hero card */
+    .hero-card {
+      border: none; border-radius: 14px;
+      box-shadow: 0 2px 14px rgba(0,0,0,.08);
+      overflow: hidden; background: #fff; margin-bottom: 20px;
+    }
+    .hero-card-accent { height: 6px; background: #1d63ff; }
+    .hero-card-accent.ready { background: #16a34a; }
+    .hero-card-body { padding: 24px 26px 22px; }
+    .hero-plate { font-size: .75rem; font-weight: 700; color: #6c7a94; letter-spacing: .08em; text-transform: uppercase; }
+    .hero-vehicle { font-size: 1.45rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 4px 0 10px; }
+    .hero-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
+    .hero-meta-item { display: flex; align-items: center; gap: 6px; font-size: .87rem; color: #4b5563; }
+    .hero-meta-item i { color: #1d63ff; }
+
+    /* Status badge */
+    .ap-badge {
+      display: inline-flex; align-items: center; gap: 6px;
+      border-radius: 20px; padding: 5px 14px; font-size: .8rem; font-weight: 700;
+    }
+    .badge-pending  { background: #fff8e1; color: #854d0e; border: 1px solid #fde68a; }
+    .badge-active   { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
+    .badge-done     { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
+    .badge-cancelled{ background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
+
+    /* Section cards */
+    .detail-card {
+      border: none; border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,.06);
+      background: #fff; margin-bottom: 16px; overflow: hidden;
+    }
+    .detail-card-header {
+      padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
+      display: flex; align-items: center; gap: 10px;
+    }
+    .detail-card-header i { font-size: 1rem; color: #1d63ff; }
+    .detail-card-header h6 { font-size: .92rem; font-weight: 800; color: #0f172a; margin: 0; }
+    .detail-card-body { padding: 18px 20px; }
+
+    /* Progress */
+    .progress-track {
+      display: flex; gap: 0; margin-bottom: 18px;
+    }
+    .progress-step {
+      flex: 1; position: relative; text-align: center; padding-top: 10px;
+    }
+    .progress-step::before {
+      content: ""; position: absolute; top: 18px; left: 0; right: 0; height: 3px;
+      background: #e2e8f0; z-index: 0;
+    }
+    .progress-step:first-child::before { left: 50%; }
+    .progress-step:last-child::before  { right: 50%; }
+    .progress-dot {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: #e2e8f0; border: 3px solid #fff;
+      display: inline-block; position: relative; z-index: 1;
+      margin-bottom: 6px; box-shadow: 0 0 0 2px #e2e8f0;
+    }
+    .progress-step.done .progress-step::before { background: #1d63ff; }
+    .progress-step.active .progress-dot { background: #1d63ff; box-shadow: 0 0 0 3px rgba(29,99,255,.25); }
+    .progress-step.done   .progress-dot { background: #1d63ff; box-shadow: 0 0 0 2px #1d63ff; }
+    .progress-step.ready-step .progress-dot { background: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,.25); }
+    .progress-step-label { font-size: .7rem; font-weight: 600; color: #94a3b8; line-height: 1.3; }
+    .progress-step.active .progress-step-label,
+    .progress-step.done   .progress-step-label  { color: #1d63ff; }
+    .progress-step.ready-step .progress-step-label { color: #16a34a; }
+
+    .wo-progress-bar-wrap { margin-bottom: 8px; }
+    .wo-bar { height: 10px; border-radius: 99px; background: #e2e8f0; overflow: hidden; }
+    .wo-bar-fill { height: 100%; border-radius: 99px; background: #1d63ff; transition: width .5s; }
+    .wo-bar-fill.ready { background: #16a34a; }
+    .wo-bar-meta { display: flex; justify-content: space-between; margin-top: 6px; font-size: .82rem; }
+    .wo-bar-label { font-weight: 700; color: #0f172a; }
+    .wo-bar-pct   { font-weight: 700; color: #6c7a94; }
+    .wo-bar-pct.ready { color: #16a34a; }
+
+    /* Fields */
+    .field-row { margin-bottom: 14px; }
+    .field-label { font-size: .72rem; font-weight: 700; color: #6c7a94; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
+    .field-val   { font-size: .9rem; color: #0f172a; }
+
+    /* Line items table */
+    .line-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
+    .line-table th {
+      text-align: left; font-size: .7rem; font-weight: 700; color: #6c7a94;
+      text-transform: uppercase; letter-spacing: .05em;
+      padding: 6px 8px; border-bottom: 1.5px solid #f1f5f9;
+    }
+    .line-table td { padding: 8px; border-bottom: 1px solid #f8fafc; vertical-align: top; }
+    .line-table tr:last-child td { border-bottom: none; }
+    .line-name   { font-weight: 600; color: #0f172a; }
+    .line-sub    { font-size: .75rem; color: #6c7a94; margin-top: 2px; }
+    .line-amount { font-weight: 700; color: #0f172a; text-align: right; white-space: nowrap; }
+
+    /* Total row */
+    .total-row {
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 12px 0 0; border-top: 2px solid #f1f5f9; margin-top: 8px;
+    }
+    .total-label { font-size: .85rem; font-weight: 700; color: #374151; }
+    .total-val   { font-size: 1.1rem; font-weight: 800; color: #1d63ff; }
+
+    /* Cancel btn */
+    .btn-cancel {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: transparent; color: #dc2626; border: 1.5px solid #fca5a5;
+      border-radius: 8px; padding: 8px 20px; font-family: inherit;
+      font-size: .875rem; font-weight: 700; cursor: pointer; transition: background .15s;
+    }
+    .btn-cancel:hover { background: #fee2e2; }
+
+    /* Alert */
+    #msg { border-radius: 8px; margin-bottom: 16px; }
+
+    /* Empty/error */
+    .state-msg {
+      text-align: center; padding: 60px 20px;
+      background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
+    }
+    .state-msg i { font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
+    .state-msg p { color: #6c7a94; }
+
+    @media (max-width: 767px) {
+      .topbar-info { display: none !important; }
+      .hero-vehicle { font-size: 1.2rem; }
+      .progress-step-label { font-size: .62rem; }
+    }
+  </style>
+</head>
+
+<body>
+
+  <!-- ══ TOPBAR ══ -->
+  <header class="topbar">
+    <div class="container d-flex align-items-center justify-content-between gap-3">
+      <a class="brand text-decoration-none" href="../index.html">
+        <img class="brand-logo" src="../assets/img/logo.png" alt="Lubricentro">
+      </a>
+      <div class="topbar-info d-none d-md-flex align-items-center gap-4">
+        <div class="info-chip">
+          <div class="info-icon"><i class="bi bi-telephone"></i></div>
+          <div>
+            <div class="info-label">¡Llámanos ahora!</div>
+            <div class="info-value">+(506) 2443-6139</div>
+          </div>
+        </div>
+        <div class="info-chip">
+          <div class="info-icon"><i class="bi bi-clock"></i></div>
+          <div>
+            <div class="info-label">Horario de atención</div>
+            <div class="info-value">Lun-Sáb : 09:00-19:00</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ══ MAINNAV ══ -->
+  <nav class="mainnav">
+    <div class="container d-flex align-items-center">
+      <ul class="navlinks d-none d-lg-flex">
+        <li><a href="./dashboard.html">Dashboard</a></li>
+        <li><a class="active" href="./appointments.html">Mis Citas</a></li>
+        <li><a href="./vehicles.html">Mis Autos</a></li>
+        <li><a href="./work_orders.html">Órdenes</a></li>
+      </ul>
+      <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
+        <i class="bi bi-list"></i>
+      </button>
+      <div class="nav-user d-none d-lg-flex">
+        <span class="nav-user-name" id="whoami"></span>
+        <button class="btn-logout" id="btnLogout">
+          <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+        </button>
+      </div>
+    </div>
+    <div class="mobile-drawer" id="mobileDrawer">
+      <a href="./dashboard.html">Dashboard</a>
+      <a class="active" href="./appointments.html">Mis Citas</a>
+      <a href="./vehicles.html">Mis Autos</a>
+      <a href="./work_orders.html">Órdenes</a>
+      <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
+    </div>
+  </nav>
+
+  <!-- ══ MAIN ══ -->
+  <main class="container py-4" style="max-width:800px;">
+    <a class="back-link" href="./dashboard.html">
+      <i class="bi bi-arrow-left"></i>Volver al inicio
+    </a>
+
+    <div id="msg" class="alert d-none" role="alert"></div>
+    <div id="content"></div>
+  </main>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const token   = localStorage.getItem("customer_access_token");
+
+  function authHeaders() {
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
+
+  function showMsg(text, type = "danger") {
+    const el = document.getElementById("msg");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+  }
+
+  async function fetchJSON(url, options = {}) {
+    const res = await fetch(url, options);
+    let data = null;
+    try { data = await res.json(); } catch (_) {}
+    if (!res.ok) {
+      const detail = data?.detail || res.statusText || `HTTP ${res.status}`;
+      const err = new Error(detail);
+      err.status = res.status;
+      throw err;
+    }
+    return data;
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function fmt(dt) {
+    if (!dt) return "—";
+    try { return new Date(dt).toLocaleString("es-CR", { dateStyle: "medium", timeStyle: "short" }); }
+    catch (_) { return dt; }
+  }
+
+  function money(v) {
+    if (v === null || v === undefined || v === "") return "—";
+    const n = Number(v);
+    if (Number.isNaN(n)) return String(v);
+    return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
+  }
+
+  // ── Status maps ──────────────────────────────────────────────────────────────
+  const AP_STATUS_LABELS = {
+    pending: "Pendiente de confirmación", scheduled: "Confirmada",
+    accepted: "Aceptada", in_progress: "En progreso",
+    completed: "Completada", cancelled: "Cancelada",
+    no_show: "No se presentó", rejected: "Rechazada",
+  };
+
+  function apBadgeClass(status) {
+    const s = (status || "").toLowerCase();
+    if (s === "pending") return "badge-pending";
+    if (["completed", "ready"].includes(s)) return "badge-done";
+    if (["cancelled", "rejected", "no_show"].includes(s)) return "badge-cancelled";
+    return "badge-active";
+  }
+
+  const WO_PROGRESS = {
+    open:                   { pct: 25,  label: "Recibimos tu vehículo",        step: 1 },
+    diagnosing:             { pct: 25,  label: "Revisando tu vehículo",         step: 1 },
+    awaiting_authorization: { pct: 50,  label: "Esperando tu autorización",     step: 2 },
+    authorized:             { pct: 50,  label: "Listo para iniciar reparación", step: 2 },
+    in_progress:            { pct: 75,  label: "Trabajando en tu vehículo",     step: 3 },
+    waiting_parts:          { pct: 75,  label: "Esperando repuestos",           step: 3 },
+    ready:                  { pct: 100, label: "¡Listo para retirar!",          step: 4 },
+    closed:                 { pct: 100, label: "Orden cerrada",                 step: 4 },
+  };
+
+  const STEPS = [
+    { label: "Recibido",    icon: "bi-clipboard-check" },
+    { label: "Diagnóstico", icon: "bi-search" },
+    { label: "Reparación",  icon: "bi-tools" },
+    { label: "Listo",       icon: "bi-check-circle-fill" },
+  ];
+
+  // ── Render ───────────────────────────────────────────────────────────────────
+  function renderProgressBar(wo) {
+    const prog = WO_PROGRESS[wo.status] || { pct: 0, label: wo.status, step: 0 };
+    const isReady = wo.status === "ready" || wo.status === "closed";
+    const fillClass = isReady ? "ready" : "";
+    const pctClass  = isReady ? "ready" : "";
+
+    const stepsHtml = STEPS.map((s, i) => {
+      const stepNum = i + 1;
+      let cls = "";
+      if (stepNum < prog.step) cls = "done";
+      else if (stepNum === prog.step) cls = isReady ? "ready-step" : "active";
+      return `
+        <div class="progress-step ${cls}">
+          <div class="progress-dot"></div>
+          <div class="progress-step-label">${s.label}</div>
+        </div>`;
+    }).join("");
+
+    return `
+      <div class="wo-progress-bar-wrap">
+        <div class="wo-bar">
+          <div class="wo-bar-fill ${fillClass}" style="width:${prog.pct}%"></div>
+        </div>
+        <div class="wo-bar-meta">
+          <span class="wo-bar-label">${escapeHtml(prog.label)}</span>
+          <span class="wo-bar-pct ${pctClass}">${prog.pct}%</span>
+        </div>
+      </div>
+      <div class="progress-track">${stepsHtml}</div>`;
+  }
+
+  function renderLineTable(lines, kind) {
+    if (!lines || !lines.length) return `<p class="text-muted small mb-0">No hay ${kind} registrados.</p>`;
+    const rows = lines.map(ln => {
+      const name = kind === "servicios" ? (ln.service_name || "Servicio") : (ln.product_name || "Producto");
+      const sub  = kind === "productos" && ln.product_sku ? `SKU: ${escapeHtml(ln.product_sku)}` : "";
+      const desc = ln.description ? escapeHtml(ln.description) : "";
+      return `
+        <tr>
+          <td>
+            <div class="line-name">${escapeHtml(name)}</div>
+            ${sub  ? `<div class="line-sub">${sub}</div>` : ""}
+            ${desc ? `<div class="line-sub">${desc}</div>` : ""}
+          </td>
+          <td style="text-align:center;white-space:nowrap;">${escapeHtml(String(ln.qty ?? 1))}</td>
+          <td class="line-amount">${escapeHtml(money(ln.unit_price))}</td>
+          <td class="line-amount">${escapeHtml(money(ln.line_total))}</td>
+        </tr>`;
+    }).join("");
+    return `
+      <table class="line-table">
+        <thead>
+          <tr>
+            <th>Descripción</th>
+            <th style="text-align:center;">Cant.</th>
+            <th style="text-align:right;">Unit.</th>
+            <th style="text-align:right;">Total</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  function renderPage(appt, wo) {
+    const status  = (appt.status || "").toLowerCase();
+    const label   = AP_STATUS_LABELS[status] || appt.status;
+    const badgeClass = apBadgeClass(status);
+    const isReady    = wo?.status === "ready" || wo?.status === "closed";
+    const cancellable = status === "scheduled";
+
+    const vehicle = [appt.vehicle_make, appt.vehicle_model].filter(Boolean).join(" ") || "Vehículo";
+    const plate   = appt.vehicle_plate || "";
+    const slotTime = appt.slot_start || appt.scheduled_start;
+
+    // WO sections
+    let woStatusSection = "";
+    let woDetailSection  = "";
+    if (wo) {
+      woStatusSection = `
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <i class="bi bi-speedometer2"></i>
+            <h6>Estado de tu vehículo</h6>
+          </div>
+          <div class="detail-card-body">
+            ${renderProgressBar(wo)}
+          </div>
+        </div>`;
+
+      const services = wo.services || [];
+      const products  = wo.products  || [];
+      const hasLines  = services.length || products.length;
+      const hasInfo   = wo.customer_symptoms || wo.diagnosis || wo.notes;
+
+      woDetailSection = `
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <i class="bi bi-file-earmark-text"></i>
+            <h6>Tu orden de trabajo</h6>
+          </div>
+          <div class="detail-card-body">
+            ${hasInfo ? `
+              ${wo.customer_symptoms ? `<div class="field-row"><div class="field-label">Síntomas reportados</div><div class="field-val">${escapeHtml(wo.customer_symptoms)}</div></div>` : ""}
+              ${wo.diagnosis         ? `<div class="field-row"><div class="field-label">Diagnóstico del taller</div><div class="field-val">${escapeHtml(wo.diagnosis)}</div></div>` : ""}
+              ${wo.notes             ? `<div class="field-row"><div class="field-label">Notas</div><div class="field-val">${escapeHtml(wo.notes)}</div></div>` : ""}
+              ${hasLines ? `<hr style="border-color:#f1f5f9;margin:14px 0;">` : ""}
+            ` : ""}
+            ${services.length ? `
+              <div class="field-label mb-2"><i class="bi bi-wrench me-1"></i>Servicios</div>
+              ${renderLineTable(services, "servicios")}
+              ${products.length ? `<div style="height:14px;"></div>` : ""}
+            ` : ""}
+            ${products.length ? `
+              <div class="field-label mb-2"><i class="bi bi-box me-1"></i>Productos</div>
+              ${renderLineTable(products, "productos")}
+            ` : ""}
+            ${!hasInfo && !hasLines ? `<p class="text-muted small mb-0">Aún no hay información registrada en esta orden.</p>` : ""}
+            ${wo.computed_total != null ? `
+              <div class="total-row">
+                <span class="total-label">Total calculado</span>
+                <span class="total-val">${escapeHtml(money(wo.computed_total))}</span>
+              </div>` : ""}
+          </div>
+        </div>`;
+    }
+
+    // Appointment info section
+    const apptInfo = [
+      appt.requested_work ? `<div class="field-row"><div class="field-label">Trabajo solicitado</div><div class="field-val">${escapeHtml(appt.requested_work)}</div></div>` : "",
+      appt.notes          ? `<div class="field-row"><div class="field-label">Notas</div><div class="field-val">${escapeHtml(appt.notes)}</div></div>` : "",
+      appt.admin_message  ? `<div class="field-row"><div class="field-label" style="color:#1d63ff;"><i class="bi bi-chat-left-text me-1"></i>Mensaje del taller</div><div class="field-val">${escapeHtml(appt.admin_message)}</div></div>` : "",
+    ].filter(Boolean).join("");
+
+    const accentClass = isReady ? "ready" : "";
+
+    return `
+      <div class="hero-card">
+        <div class="hero-card-accent ${accentClass}"></div>
+        <div class="hero-card-body">
+          <div class="hero-plate">${escapeHtml(plate)}</div>
+          <div class="hero-vehicle">${escapeHtml(vehicle)}</div>
+          <div class="hero-meta">
+            ${appt.service_name ? `<div class="hero-meta-item"><i class="bi bi-wrench"></i>${escapeHtml(appt.service_name)}</div>` : ""}
+            ${slotTime ? `<div class="hero-meta-item"><i class="bi bi-calendar3"></i>${escapeHtml(fmt(slotTime))}</div>` : ""}
+          </div>
+          <span class="ap-badge ${badgeClass}">${escapeHtml(label)}</span>
+        </div>
+      </div>
+
+      ${woStatusSection}
+      ${woDetailSection}
+
+      ${apptInfo ? `
+        <div class="detail-card">
+          <div class="detail-card-header">
+            <i class="bi bi-info-circle"></i>
+            <h6>Información de la cita</h6>
+          </div>
+          <div class="detail-card-body">${apptInfo}</div>
+        </div>` : ""}
+
+      ${cancellable ? `
+        <div class="mt-2 mb-4">
+          <button class="btn-cancel" id="btnCancel" data-id="${escapeHtml(appt.appointment_id)}">
+            <i class="bi bi-x-circle"></i>Cancelar esta cita
+          </button>
+        </div>` : ""}
+    `;
+  }
+
+  // ── Cancel ───────────────────────────────────────────────────────────────────
+  document.getElementById("content").addEventListener("click", async (e) => {
+    const btn = e.target.closest("#btnCancel");
+    if (!btn) return;
+    if (!confirm("¿Seguro que querés cancelar esta cita?")) return;
+    try {
+      await fetchJSON(`${API_BASE}/api/customer-appointments/${btn.dataset.id}/`, {
+        method: "DELETE",
+        headers: authHeaders()
+      });
+      showMsg("Cita cancelada correctamente.", "success");
+      setTimeout(() => (window.location.href = "./appointments.html"), 1200);
+    } catch (err) {
+      showMsg(err.message || "No se pudo cancelar la cita.", "danger");
+    }
+  });
+
+  // ── Auth / Nav ───────────────────────────────────────────────────────────────
+  function logout() {
+    localStorage.removeItem("customer_access_token");
+    window.location.href = "../auth_client.html";
+  }
+  document.getElementById("btnLogout").addEventListener("click", logout);
+  document.getElementById("btnLogoutMobile").addEventListener("click", logout);
+  document.getElementById("btnMobileMenu").addEventListener("click", () => {
+    document.getElementById("mobileDrawer").classList.toggle("open");
+  });
+
+  // ── Init ─────────────────────────────────────────────────────────────────────
+  (async () => {
+    if (!token) { window.location.href = "../auth_client.html"; return; }
+
+    const appointmentId = new URLSearchParams(window.location.search).get("id");
+    if (!appointmentId) {
+      document.getElementById("content").innerHTML = `
+        <div class="state-msg">
+          <i class="bi bi-exclamation-triangle"></i>
+          <p>No se especificó una cita. <a href="./appointments.html">Ver mis citas</a></p>
+        </div>`;
+      return;
+    }
+
+    // Customer name
+    try {
+      const me = await fetchJSON(`${API_BASE}/api/customer-auth/me/`, { headers: authHeaders() });
+      document.getElementById("whoami").textContent = me?.full_name || me?.email || "Cliente";
+    } catch (_) {}
+
+    // Load appointment
+    let appt;
+    try {
+      appt = await fetchJSON(`${API_BASE}/api/customer-appointments/${appointmentId}/`, { headers: authHeaders() });
+    } catch (err) {
+      document.getElementById("content").innerHTML = `
+        <div class="state-msg">
+          <i class="bi bi-calendar-x"></i>
+          <p>No se encontró la cita. <a href="./appointments.html">Volver a mis citas</a></p>
+        </div>`;
+      return;
+    }
+
+    // Load work order if linked
+    let wo = null;
+    if (appt.work_order_id) {
+      try {
+        wo = await fetchJSON(`${API_BASE}/api/customer-work-orders/${appt.work_order_id}/`, { headers: authHeaders() });
+      } catch (_) {
+        // WO not accessible — render without it
+      }
+    }
+
+    document.getElementById("content").innerHTML = renderPage(appt, wo);
+  })();
+</script>
+</body>
+</html>

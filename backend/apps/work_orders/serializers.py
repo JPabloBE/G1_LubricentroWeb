@@ -148,6 +148,8 @@ class WorkOrderCustomerSerializer(serializers.ModelSerializer):
     class Meta:
         model = WorkOrder
         fields = [
+            "work_order_id",
+            "appointment_id",
             "vehicle_plate",
             "vehicle_make",
             "vehicle_model",

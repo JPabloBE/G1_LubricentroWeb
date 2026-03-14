@@ -68,3 +68,21 @@ if (btn && drawer) {
 
   setInterval(slideOnce, intervalMs);
 })();
+
+// Scroll reveal — IntersectionObserver
+(function scrollReveal() {
+  const io = new IntersectionObserver(
+    (entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add("revealed");
+          io.unobserve(entry.target);
+        }
+      });
+    },
+    { threshold: 0.1, rootMargin: "0px 0px -40px 0px" }
+  );
+
+  document.querySelectorAll(".reveal, .reveal-left, .reveal-right, .reveal-stagger")
+    .forEach(el => io.observe(el));
+})();

@@ -3,117 +3,266 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Lubricentro - Login Staff</title>
+  <title>Acceso Staff | Lubricentro</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+
   <style>
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body{
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background:#0f0f0f;
-      min-height:100vh;
-      display:flex;
-      justify-content:center;
-      align-items:center;
-      padding:20px;
-      color:#eaeaea;
+    :root {
+      --accent: #1d63ff;
+      --nav-blue-1: #0a3ea6;
+      --nav-blue-2: #062a73;
+      --nav-blue-3: #061a3b;
+      --amber: #f59e0b;
     }
-    .container{
-      background:#fff;
-      border-radius:15px;
-      box-shadow:0 10px 30px rgba(0,0,0,.45);
-      overflow:hidden;
-      max-width:420px;
-      width:100%;
-      color:#111;
-      border:1px solid #1f1f1f;
-      padding:28px;
+
+    *, *::before, *::after { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: "Inter", system-ui, -apple-system, Arial, sans-serif;
+      font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1;
+      -webkit-font-smoothing: antialiased;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      /* mismo fondo oscuro que la sección trust del sitio */
+      background: #10141e;
+      background-image:
+        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+      background-size: 44px 44px;
     }
-    h2{ text-align:center; margin-bottom:18px; }
-    .sub{ text-align:center; color:#444; margin-bottom:20px; }
-    .form-group{ margin-bottom:16px; }
-    label{ display:block; margin-bottom:6px; font-weight:600; color:#222; }
-    input{
-      width:100%;
-      padding:12px;
-      border:1px solid #cfcfcf;
-      border-radius:8px;
-      font-size:14px;
-      background:#fff;
-      color:#111;
+
+    /* ── Nav (idéntica al .mainnav del sitio) ── */
+    .auth-nav {
+      background: linear-gradient(90deg, var(--nav-blue-1), var(--nav-blue-2), var(--nav-blue-3));
+      border-bottom: 1px solid rgba(255,255,255,.08);
+      position: sticky;
+      top: 0;
+      z-index: 100;
     }
-    input:focus{
-      outline:none;
-      border-color:#111;
-      box-shadow:0 0 0 3px rgba(0,0,0,.08);
+
+    .auth-nav-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 0 24px;
+      height: 58px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
     }
-    button{
-      width:100%;
-      padding:12px;
-      background:#111;
-      color:#fff;
-      border:1px solid #111;
-      border-radius:8px;
-      font-size:16px;
-      font-weight:700;
-      cursor:pointer;
+
+    .auth-nav img {
+      height: 36px;
+      width: auto;
+      object-fit: contain;
+      filter: brightness(0) invert(1);
     }
-    button:hover{ background:#000; }
-    .message{
-      padding:12px;
-      border-radius:8px;
-      margin-bottom:14px;
-      display:none;
-      font-weight:600;
+
+    .auth-nav-back {
+      color: rgba(255,255,255,.75);
+      font-size: .82rem;
+      font-weight: 600;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: color .15s;
     }
-    .message.error{ background:#fee; color:#c33; border:1px solid #fcc; }
-    .message.success{ background:#efe; color:#2f7a2f; border:1px solid #cfc; }
-    .hint{
-      margin-top:14px;
-      font-size:13px;
-      color:#666;
-      text-align:center;
+    .auth-nav-back:hover { color: #fff; }
+
+    /* ── Main area ── */
+    .auth-main {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px 16px 64px;
     }
-    .links{
-      margin-top:12px;
-      text-align:center;
-      font-size:13px;
+
+    /* ── Form column ── */
+    .auth-wrap {
+      width: 100%;
+      max-width: 420px;
     }
-    .links a{
-      color:#111;
-      text-decoration:none;
-      font-weight:700;
+
+    .auth-eyebrow {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--amber);
+      background: rgba(245,158,11,.1);
+      border: 1px solid rgba(245,158,11,.3);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: .74rem;
+      font-weight: 700;
+      letter-spacing: .07em;
+      text-transform: uppercase;
+      margin-bottom: 16px;
     }
-    .links a:hover{ text-decoration:underline; }
+
+    .auth-title {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #f1f5f9;
+      letter-spacing: -.025em;
+      margin: 0 0 6px;
+    }
+
+    .auth-sub {
+      color: #64748b;
+      font-size: .9rem;
+      margin: 0 0 28px;
+    }
+
+    /* ── Card ── */
+    .auth-card {
+      background: #fff;
+      border-radius: 14px;
+      box-shadow: 0 4px 24px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.3);
+      padding: 32px;
+      border-left: 4px solid var(--amber);
+    }
+
+    /* Alert */
+    .message {
+      padding: 11px 14px;
+      border-radius: 8px;
+      margin-bottom: 16px;
+      font-size: .875rem;
+      font-weight: 500;
+      display: none;
+    }
+    .message.error   { background: #fff1f1; border: 1.5px solid #fecaca; color: #991b1b; }
+    .message.success { background: #eaffea; border: 1.5px solid #bde5bd; color: #166534; }
+
+    /* Form */
+    .form-group { margin-bottom: 16px; }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      font-size: .83rem;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+
+    .form-group input {
+      width: 100%;
+      padding: 10px 14px;
+      border: 1.5px solid #dde5f5;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .9rem;
+      color: #0f172a;
+      outline: none;
+      background: #fff;
+      transition: border-color .15s, box-shadow .15s;
+    }
+
+    .form-group input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(29,99,255,.1);
+    }
+
+    .btn-auth {
+      width: 100%;
+      padding: 11px;
+      background: var(--accent);
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      font-family: inherit;
+      font-size: .95rem;
+      font-weight: 700;
+      cursor: pointer;
+      transition: background .15s;
+      margin-top: 4px;
+    }
+    .btn-auth:hover { background: var(--nav-blue-1); }
+
+    .auth-footer-links {
+      margin-top: 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      align-items: center;
+      text-align: center;
+    }
+
+    .auth-footer-links .hint {
+      font-size: .78rem;
+      color: #9ca3af;
+    }
+
+    .auth-footer-links span {
+      font-size: .82rem;
+      color: #64748b;
+    }
+
+    .auth-footer-links a {
+      color: var(--accent);
+      font-weight: 700;
+      text-decoration: none;
+    }
+    .auth-footer-links a:hover { text-decoration: underline; }
   </style>
 </head>
 
 <body>
-  <div class="container">
-    <h2>Lubricentro</h2>
-    <div class="sub">Acceso exclusivo para <b>Staff / Admin</b></div>
 
-    <div id="message" class="message"></div>
-
-    <form id="login-form">
-      <div class="form-group">
-        <label for="login-username">Usuario</label>
-        <input type="text" id="login-username" required />
-      </div>
-      <div class="form-group">
-        <label for="login-password">Contraseña</label>
-        <input type="password" id="login-password" required />
-      </div>
-      <button type="submit">Iniciar Sesión</button>
-    </form>
-
-    <div class="hint">
-      Si necesitás un usuario, pedile a un admin/staff que lo cree desde el dashboard.
+  <!-- Nav -->
+  <nav class="auth-nav">
+    <div class="auth-nav-inner">
+      <a href="./index.html">
+        <img src="./assets/img/logo.png" alt="Lubricentro">
+      </a>
+      <a href="./index.html" class="auth-nav-back">
+        <i class="bi bi-arrow-left"></i> Volver al inicio
+      </a>
     </div>
+  </nav>
 
-    <!-- opcional -->
-    <div class="links">
-      ¿Sos cliente? <a href="./auth_client.html">Ir al login de cliente</a>
+  <!-- Main -->
+  <main class="auth-main">
+    <div class="auth-wrap">
+
+      <div class="auth-eyebrow">
+        <i class="bi bi-shield-lock"></i> Zona Restringida
+      </div>
+      <h1 class="auth-title">Acceso Staff / Admin</h1>
+      <p class="auth-sub">Ingresá con tus credenciales de personal.</p>
+
+      <div class="auth-card">
+
+        <div id="message" class="message"></div>
+
+        <form id="login-form">
+          <div class="form-group">
+            <label for="login-username">Usuario</label>
+            <input type="text" id="login-username" placeholder="nombre de usuario" required />
+          </div>
+          <div class="form-group">
+            <label for="login-password">Contraseña</label>
+            <input type="password" id="login-password" placeholder="••••••••" required />
+          </div>
+          <button type="submit" class="btn-auth">Iniciar sesión <i class="bi bi-arrow-right ms-1"></i></button>
+        </form>
+
+        <div class="auth-footer-links">
+          <span class="hint">Si necesitás un usuario, pedile a un admin que lo cree desde el dashboard.</span>
+          <span>¿Sos cliente? <a href="./auth_client.html">Ir al portal cliente</a></span>
+        </div>
+
+      </div>
     </div>
-  </div>
+  </main>
 
   <script>
     const API_URL = "http://localhost:8000/api/auth";
@@ -136,18 +285,15 @@
 
     async function tryAutoRedirect() {
       if (!accessToken) return;
-
       try {
         const meRes = await fetch(`${API_URL}/me/`, {
           headers: { "Authorization": `Bearer ${accessToken}` }
         });
-
         if (!meRes.ok) {
           localStorage.removeItem("access_token");
           localStorage.removeItem("refresh_token");
           return;
         }
-
         const me = await meRes.json().catch(() => null);
         if (!me || !isAdminUser(me)) {
           localStorage.removeItem("access_token");
@@ -155,12 +301,8 @@
           showMessage("Tu usuario no tiene permisos de Staff/Admin.", "error");
           return;
         }
-
-        // IMPORTANTE: ahora el dashboard está dentro de /admin/
         window.location.href = "./admin/dashboard.html";
-      } catch (_) {
-        // nada
-      }
+      } catch (_) {}
     }
 
     tryAutoRedirect();
@@ -195,7 +337,6 @@
         if (data.refresh) localStorage.setItem("refresh_token", data.refresh);
         accessToken = data.access;
 
-        // Verificación extra: asegurar que este usuario sea admin/staff
         const meRes = await fetch(`${API_URL}/me/`, {
           headers: { "Authorization": `Bearer ${accessToken}` }
         });

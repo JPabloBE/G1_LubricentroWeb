@@ -54,21 +54,23 @@
     <div class="container d-flex align-items-center">
       <ul class="navlinks d-none d-lg-flex">
         <li><a class="active" href="#">Inicio</a></li>
-        <li><a href="#">Nosotros</a></li>
+        <li><a href="#nosotros">Nosotros</a></li>
         <li class="has-dd">
-          <a href="#">Servicios <i class="bi bi-chevron-down"></i></a>
+          <a href="#servicios">Servicios <i class="bi bi-chevron-down"></i></a>
           <div class="dd">
-            <a href="#">Servicio 1</a>
-            <a href="#">Servicio 2</a>
-            <a href="#">Servicio 3</a>
+            <a href="#servicios">Revisión General</a>
+            <a href="#servicios">Cambio de Aceite y Filtro</a>
+            <a href="#servicios">Alineación y Balanceo</a>
+            <a href="#servicios">Servicio de Frenos</a>
+            <a href="#servicios">Diagnóstico Computarizado</a>
           </div>
         </li>
-        <li><a href="#">Contacto</a></li>
+        <li><a href="#contacto">Contacto</a></li>
         <li class="has-dd">
-          <a href="#">Páginas <i class="bi bi-chevron-down"></i></a>
+          <a href="#">Portal <i class="bi bi-chevron-down"></i></a>
           <div class="dd">
-            <a href="#">Página 1</a>
-            <a href="#">Página 2</a>
+            <a href="./auth_client.html"><i class="bi bi-person me-2"></i>Portal Cliente</a>
+            <a href="./auth_admin.html"><i class="bi bi-shield-lock me-2"></i>Acceso Staff</a>
           </div>
         </li>
       </ul>
@@ -86,15 +88,30 @@
         <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
         <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
       </div>
+
+      <!-- Login button -->
+      <div class="nav-login ms-3 d-none d-lg-flex">
+        <div class="has-dd">
+          <a href="#" class="nav-login-btn">
+            <i class="bi bi-person-circle"></i> Iniciar sesión <i class="bi bi-chevron-down" style="font-size:10px;opacity:.8;"></i>
+          </a>
+          <div class="dd">
+            <a href="./auth_client.html"><i class="bi bi-person me-2"></i>Portal Cliente</a>
+            <a href="./auth_admin.html"><i class="bi bi-shield-lock me-2"></i>Acceso Staff</a>
+          </div>
+        </div>
+      </div>
     </div>
 
     <!-- Mobile drawer -->
     <div class="mobile-drawer" id="mobileDrawer">
       <a class="active" href="#">Inicio</a>
-      <a href="#">Nosotros</a>
-      <a href="#">Servicios</a>
-      <a href="#">Contacto</a>
-      <a href="#">Páginas</a>
+      <a href="#nosotros">Nosotros</a>
+      <a href="#servicios">Servicios</a>
+      <a href="#contacto">Contacto</a>
+      <div style="border-top:1px solid rgba(255,255,255,.08);margin:8px 0;"></div>
+      <a href="./auth_client.html"><i class="bi bi-person me-2"></i>Portal Cliente</a>
+      <a href="./auth_admin.html"><i class="bi bi-shield-lock me-2"></i>Acceso Staff</a>
     </div>
   </nav>
 
@@ -130,6 +147,329 @@
     </div>
   </main>
 
+  <!-- ===================================================
+       ABOUT US
+  =================================================== -->
+  <section id="nosotros" class="section section-about">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <!-- Left: text -->
+        <div class="col-lg-6 reveal-left">
+          <div class="eyebrow">Quiénes somos</div>
+          <h2 class="section-title">Expertos en el cuidado<br>de tu vehículo</h2>
+          <p class="section-desc">Somos un lubricentro con más de 10 años de experiencia brindando servicios automotrices de alta calidad. Nuestro equipo de técnicos certificados trabaja con los mejores estándares para garantizar la seguridad y el rendimiento de tu vehículo.</p>
+          <p class="section-desc mb-4">Usamos equipos de diagnóstico de última generación y productos de primera línea para ofrecerte un servicio confiable, rápido y a precios accesibles.</p>
+          <a href="#servicios" class="btn-solid">Descubrir más &nbsp;<i class="bi bi-arrow-right"></i></a>
+        </div>
+        <!-- Right: photo grid -->
+        <div class="col-lg-6 reveal-right">
+          <div class="about-gallery">
+            <img class="about-main" src="https://picsum.photos/seed/lubeabout1/600/500" alt="Taller lubricentro">
+            <img class="about-sm" src="https://picsum.photos/seed/lubeabout2/400/240" alt="Mecánicos trabajando">
+            <img class="about-sm" src="https://picsum.photos/seed/lubeabout3/400/240" alt="Revisión de vehículo">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       TRUST — dark section
+  =================================================== -->
+  <section class="section-trust">
+    <div class="trust-inner">
+      <!-- Photo -->
+      <div class="trust-photo reveal-left">
+        <img src="https://picsum.photos/seed/lubetrust/700/600" alt="Técnico en taller">
+      </div>
+      <!-- Content -->
+      <div class="trust-content reveal-right">
+        <div class="eyebrow eyebrow-light">Profesionalismo garantizado</div>
+        <h2 class="trust-title">Confía tu auto a<br>nuestros técnicos</h2>
+        <p class="section-desc" style="color:rgba(255,255,255,.6);font-size:14px;margin-bottom:0;">Nuestros profesionales están capacitados para trabajar con todo tipo de vehículos, desde autos compactos hasta camionetas y SUVs.</p>
+        <div class="trust-checklist">
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Técnicos certificados</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Garantía en repuestos</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Diagnóstico preciso</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Atención personalizada</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Equipos de última generación</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Presupuesto sin costo</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Puntualidad garantizada</div>
+          <div class="check-item"><i class="bi bi-check-circle-fill"></i> Transparencia total</div>
+        </div>
+      </div>
+    </div>
+    <!-- Stats bar -->
+    <div class="stats-bar">
+      <div class="container">
+        <div class="stats-grid reveal-stagger">
+          <div class="stat-item">
+            <div class="stat-number">500+</div>
+            <div class="stat-label">Clientes satisfechos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">3,200+</div>
+            <div class="stat-label">Vehículos atendidos</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">98%</div>
+            <div class="stat-label">Satisfacción</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number">10+</div>
+            <div class="stat-label">Años de experiencia</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       SERVICES
+  =================================================== -->
+  <section id="servicios" class="section section-services">
+    <div class="container">
+      <div class="row align-items-end mb-5">
+        <div class="col-lg-6 reveal-left">
+          <div class="eyebrow">Lo que ofrecemos</div>
+          <h2 class="section-title mb-0">Nuestros Servicios</h2>
+        </div>
+        <div class="col-lg-6 reveal-right">
+          <p class="section-desc mb-0 mt-3 mt-lg-0">Ofrecemos soluciones integrales para el mantenimiento y la reparación de tu vehículo. Desde servicios preventivos hasta correcciones complejas.</p>
+        </div>
+      </div>
+      <div class="row g-4 reveal-stagger">
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Revisión General</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-clipboard2-check service-card-icon"></i>
+              <p class="service-card-desc">Evaluación completa del motor, niveles de líquidos, sistema de frenos, suspensión, dirección, luces y neumáticos.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Cambio de Aceite y Filtro</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-droplet-fill service-card-icon"></i>
+              <p class="service-card-desc">Sustitución del aceite del motor y filtro de aceite. Incluye revisión de nivel de líquidos y presión de neumáticos.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Alineación y Balanceo</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-record-circle service-card-icon"></i>
+              <p class="service-card-desc">Ajuste de geometría de ruedas y balanceo de neumáticos para una conducción segura y mayor vida útil de las llantas.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Servicio de Frenos</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-exclamation-circle service-card-icon"></i>
+              <p class="service-card-desc">Inspección y reemplazo de pastillas, discos y líquido de frenos. Incluye prueba de funcionamiento en pista de seguridad.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Diagnóstico Computarizado</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-cpu service-card-icon"></i>
+              <p class="service-card-desc">Análisis electrónico del sistema OBD para detectar fallas en motor, transmisión, ABS y airbags con equipos de última generación.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-6 col-lg-4">
+          <div class="service-card">
+            <div class="service-card-head"><p class="service-card-title">Mano de Obra Especializada</p></div>
+            <div class="service-card-body">
+              <i class="bi bi-tools service-card-icon"></i>
+              <p class="service-card-desc">Intervenciones técnicas especializadas por mecánicos certificados. Presupuesto personalizado según la necesidad de tu vehículo.</p>
+              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       WHY CHOOSE US
+  =================================================== -->
+  <section class="section section-why">
+    <div class="container">
+      <div class="row align-items-center g-5">
+        <!-- Left: features -->
+        <div class="col-lg-6 reveal-left">
+          <div class="eyebrow">Nuestras ventajas</div>
+          <h2 class="section-title">¿Por qué elegirnos?</h2>
+          <p class="section-desc">Nos diferenciamos por la calidad, rapidez y transparencia en cada servicio. Tu tranquilidad es nuestra prioridad.</p>
+          <div class="feature-list">
+            <div class="feature-row">
+              <div class="feature-icon"><i class="bi bi-shield-check"></i></div>
+              <div>
+                <div class="feature-title">Garantía en todos los servicios</div>
+                <div class="feature-desc">Respaldamos nuestro trabajo con garantía escrita en repuestos y mano de obra.</div>
+              </div>
+            </div>
+            <div class="feature-row">
+              <div class="feature-icon"><i class="bi bi-lightning-charge"></i></div>
+              <div>
+                <div class="feature-title">Servicio rápido y sin demoras</div>
+                <div class="feature-desc">Respetamos tu tiempo. La mayoría de servicios se completan el mismo día de la cita.</div>
+              </div>
+            </div>
+            <div class="feature-row">
+              <div class="feature-icon"><i class="bi bi-chat-square-text"></i></div>
+              <div>
+                <div class="feature-title">Comunicación transparente</div>
+                <div class="feature-desc">Te informamos de cada paso antes de realizar el trabajo. Sin sorpresas en el presupuesto final.</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Right: photo collage -->
+        <div class="col-lg-6 reveal-right">
+          <div class="why-collage">
+            <img class="why-img-1" src="https://picsum.photos/seed/lubewhy1/600/450" alt="Taller profesional">
+            <img class="why-img-2" src="https://picsum.photos/seed/lubewhy2/450/350" alt="Mecánico certificado">
+            <div class="why-accent-sq"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       CTA BANNER
+  =================================================== -->
+  <section class="section-cta">
+    <div class="cta-overlay"></div>
+    <div class="container cta-content reveal">
+      <h2 class="cta-title">¿Listo para darle a tu vehículo<br>el mantenimiento que merece?</h2>
+      <p class="cta-sub">Agendá tu cita en minutos y te atendemos el mismo día.</p>
+      <a href="./client/dashboard.html" class="btn-cta">Agendar cita ahora &nbsp;<i class="bi bi-arrow-right"></i></a>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       NEWS / TIPS
+  =================================================== -->
+  <section class="section section-news">
+    <div class="container">
+      <div class="d-flex align-items-end justify-content-between mb-5 flex-wrap gap-3">
+        <div class="reveal-left">
+          <div class="eyebrow">Blog &amp; Consejos</div>
+          <h2 class="section-title mb-0">Noticias y Tips para tu Auto</h2>
+        </div>
+        <a href="#" class="btn-solid reveal-right" style="flex-shrink:0;">Ver todos &nbsp;<i class="bi bi-arrow-right"></i></a>
+      </div>
+      <div class="row g-4 reveal-stagger">
+        <div class="col-md-4">
+          <div class="news-card">
+            <img class="news-img" src="https://picsum.photos/seed/lubenews1/600/380" alt="Cambio de aceite">
+            <div class="news-body">
+              <span class="news-cat">Mantenimiento</span>
+              <div class="news-title">5 señales de que tu auto necesita un cambio de aceite urgente</div>
+              <div class="news-meta"><i class="bi bi-person me-1"></i>Equipo Lubricentro &nbsp;·&nbsp; <i class="bi bi-calendar3 me-1"></i>10 Mar 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="news-card">
+            <img class="news-img" src="https://picsum.photos/seed/lubenews2/600/380" alt="Frenos">
+            <div class="news-body">
+              <span class="news-cat">Seguridad</span>
+              <div class="news-title">¿Cuándo es el momento correcto para revisar tus frenos?</div>
+              <div class="news-meta"><i class="bi bi-person me-1"></i>Equipo Lubricentro &nbsp;·&nbsp; <i class="bi bi-calendar3 me-1"></i>3 Mar 2026</div>
+            </div>
+          </div>
+        </div>
+        <div class="col-md-4">
+          <div class="news-card">
+            <img class="news-img" src="https://picsum.photos/seed/lubenews3/600/380" alt="Consejos de ahorro">
+            <div class="news-body">
+              <span class="news-cat">Consejos</span>
+              <div class="news-title">Cómo ahorrar dinero en el mantenimiento de tu vehículo</div>
+              <div class="news-meta"><i class="bi bi-person me-1"></i>Equipo Lubricentro &nbsp;·&nbsp; <i class="bi bi-calendar3 me-1"></i>24 Feb 2026</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===================================================
+       FOOTER
+  =================================================== -->
+  <footer class="site-footer">
+    <div class="container">
+      <div class="row g-5">
+        <!-- Brand -->
+        <div class="col-lg-4">
+          <div class="footer-brand">
+            <img src="./assets/img/logo.png" alt="Lubricentro">
+          </div>
+          <p class="footer-desc">Tu lubricentro de confianza. Más de 10 años cuidando los vehículos de nuestra comunidad con profesionalismo y transparencia.</p>
+          <div class="footer-social">
+            <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
+            <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
+            <a href="#" aria-label="Twitter/X"><i class="bi bi-twitter-x"></i></a>
+            <a href="#" aria-label="YouTube"><i class="bi bi-youtube"></i></a>
+            <a href="#" aria-label="TikTok"><i class="bi bi-tiktok"></i></a>
+          </div>
+        </div>
+        <!-- Nav links -->
+        <div class="col-sm-6 col-lg-2">
+          <div class="footer-heading">Navegación</div>
+          <ul class="footer-links">
+            <li><a href="#">Inicio</a></li>
+            <li><a href="#nosotros">Nosotros</a></li>
+            <li><a href="#servicios">Servicios</a></li>
+            <li><a href="#contacto">Contacto</a></li>
+          </ul>
+        </div>
+        <!-- Services links -->
+        <div class="col-sm-6 col-lg-2">
+          <div class="footer-heading">Servicios</div>
+          <ul class="footer-links">
+            <li><a href="#">Revisión General</a></li>
+            <li><a href="#">Cambio de Aceite</a></li>
+            <li><a href="#">Alineación y Balanceo</a></li>
+            <li><a href="#">Servicio de Frenos</a></li>
+            <li><a href="#">Diagnóstico</a></li>
+          </ul>
+        </div>
+        <!-- Contact -->
+        <div class="col-lg-4" id="contacto">
+          <div class="footer-heading">Contacto</div>
+          <div class="footer-contact-item"><i class="bi bi-geo-alt-fill"></i><span>Calle Principal 123, San José, Costa Rica</span></div>
+          <div class="footer-contact-item"><i class="bi bi-telephone-fill"></i><span>+(506) 2443-6139</span></div>
+          <div class="footer-contact-item"><i class="bi bi-envelope-fill"></i><span>info@lubricentro.cr</span></div>
+          <div class="footer-contact-item"><i class="bi bi-clock-fill"></i><span>Lun – Sáb: 09:00 – 19:00</span></div>
+        </div>
+      </div>
+    </div>
+    <!-- Bottom bar -->
+    <div class="container">
+      <div class="footer-bottom">
+        <span class="footer-bottom-text">© 2026 Lubricentro. Todos los derechos reservados.</span>
+        <span class="footer-bottom-text">Hecho con ♥ para un mejor servicio automotriz</span>
+      </div>
+    </div>
+  </footer>
+
   <script src="./assets/js/main.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

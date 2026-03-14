@@ -1,6 +1,6 @@
 from django.utils import timezone
 from rest_framework import serializers
-from .models import Category, Product
+from .models import Category, Product, ProductChangeLog
 from urllib.parse import urlparse
 
 class CategorySerializer(serializers.ModelSerializer):
@@ -80,3 +80,18 @@ class ProductSerializer(serializers.ModelSerializer):
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise serializers.ValidationError("image_url debe ser una URL válida (http/https).")
         return v
+
+
+class ProductChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ProductChangeLog
+        fields = [
+            "log_id",
+            "changed_by_id",
+            "changed_at",
+            "change_type",
+            "field_name",
+            "old_value",
+            "new_value",
+        ]
+        read_only_fields = fields

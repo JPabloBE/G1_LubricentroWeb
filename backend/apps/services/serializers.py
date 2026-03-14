@@ -1,7 +1,7 @@
 from django.utils import timezone
 from rest_framework import serializers
 
-from .models import Service
+from .models import Service, ServiceChangeLog
 
 
 class ServiceSerializer(serializers.ModelSerializer):
@@ -55,3 +55,18 @@ class ServiceLiteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Service
         fields = ["service_id", "name", "base_price", "estimated_minutes", "requires_lift"]
+
+
+class ServiceChangeLogSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ServiceChangeLog
+        fields = [
+            "log_id",
+            "changed_by_id",
+            "changed_at",
+            "change_type",
+            "field_name",
+            "old_value",
+            "new_value",
+        ]
+        read_only_fields = fields
