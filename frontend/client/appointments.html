@@ -154,6 +154,114 @@
     /* Alert */
     #msg { border-radius: 8px; margin-bottom: 16px; }
 
+    /* ── Notification bell ── */
+    .notif-wrap { position: relative; }
+    .btn-notif-bell {
+      position: relative; background: rgba(255,255,255,.12);
+      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
+      color: #fff; padding: 5px 10px; font-size: 1rem; cursor: pointer;
+      transition: background .15s; line-height: 1;
+    }
+    .btn-notif-bell:hover { background: rgba(255,255,255,.22); }
+    .notif-count {
+      position: absolute; top: -6px; right: -6px;
+      background: #ef4444; color: #fff; border-radius: 99px;
+      font-size: .62rem; font-weight: 800; line-height: 1;
+      min-width: 17px; height: 17px; display: none;
+      align-items: center; justify-content: center; padding: 0 4px;
+    }
+    .notif-count.show { display: flex; }
+    .notif-dropdown {
+      position: absolute; top: calc(100% + 8px); right: 0;
+      width: 320px; background: #fff; border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,.18); border: 1px solid #e4eaf5;
+      z-index: 200; display: none; overflow: hidden;
+    }
+    .notif-dropdown.open { display: block; }
+    .notif-dd-header {
+      padding: 13px 16px 10px; border-bottom: 1px solid #f1f5f9;
+      font-size: .78rem; font-weight: 800; color: #0f172a; letter-spacing: .04em;
+      text-transform: uppercase;
+    }
+    .notif-empty { padding: 22px 16px; text-align: center; color: #9ca3af; font-size: .85rem; }
+
+    /* ── Notification panel ── */
+    .notif-panel {
+      background: #fff; border-radius: 12px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07); border: 1px solid #e4eaf5;
+      margin-bottom: 20px; overflow: hidden;
+    }
+    .notif-panel-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 18px 11px; border-bottom: 1px solid #f1f5f9;
+    }
+    .notif-panel-title {
+      font-size: .78rem; font-weight: 800; color: #0f172a;
+      letter-spacing: .04em; text-transform: uppercase;
+      display: flex; align-items: center; gap: 7px;
+    }
+    .notif-panel-badge {
+      background: #ef4444; color: #fff; border-radius: 20px;
+      font-size: .65rem; font-weight: 800; padding: 2px 7px;
+    }
+    .notif-panel-item {
+      display: flex; align-items: flex-start; gap: 12px;
+      padding: 13px 18px; border-bottom: 1px solid #f8fafc;
+    }
+    .notif-panel-item:last-child { border-bottom: none; }
+    .np-icon {
+      width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
+    }
+    .np-icon.urgent { background: #fff1f1; color: #dc2626; }
+    .np-icon.normal { background: #eff6ff; color: #1d63ff; }
+    .np-body { flex: 1; min-width: 0; }
+    .np-title { font-size: .87rem; font-weight: 700; color: #0f172a; }
+    .np-meta  { font-size: .78rem; color: #6c7a94; margin-top: 3px; }
+    .btn-np-dismiss {
+      background: #f1f5f9; border: none; border-radius: 6px; color: #475569;
+      font-size: .75rem; font-weight: 600; padding: 4px 10px; cursor: pointer;
+      transition: background .15s; white-space: nowrap; align-self: center;
+    }
+    .btn-np-dismiss:hover { background: #e2e8f0; }
+    .notif-panel-empty { padding: 18px; text-align: center; color: #9ca3af; font-size: .85rem; }
+
+    /* ── Reminder pop-up ── */
+    .notif-modal-overlay {
+      display: none; position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,.45); align-items: center; justify-content: center;
+    }
+    .notif-modal-overlay.open { display: flex; }
+    .notif-modal-box {
+      background: #fff; border-radius: 16px; max-width: 400px; width: 90%;
+      box-shadow: 0 8px 40px rgba(0,0,0,.22); overflow: hidden;
+      animation: notifSlideIn .25s ease;
+    }
+    @keyframes notifSlideIn {
+      from { transform: translateY(20px); opacity: 0; }
+      to   { transform: translateY(0);    opacity: 1; }
+    }
+    .notif-modal-header {
+      background: #fff1f1; border-bottom: 1px solid #fecaca;
+      padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px;
+    }
+    .notif-modal-icon { font-size: 1.5rem; color: #dc2626; }
+    .notif-modal-hl   { font-size: 1rem; font-weight: 800; color: #991b1b; }
+    .notif-modal-body { padding: 18px 20px; }
+    .notif-modal-service { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
+    .notif-modal-plate   { font-size: .85rem; color: #6c7a94; margin-bottom: 12px; }
+    .notif-modal-time {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: #fff1f1; color: #dc2626; border-radius: 8px;
+      padding: 7px 14px; font-size: .9rem; font-weight: 700;
+    }
+    .btn-notif-close {
+      margin-top: 16px; width: 100%; background: #dc2626; color: #fff;
+      border: none; border-radius: 8px; padding: 10px; font-family: inherit;
+      font-size: .95rem; font-weight: 700; cursor: pointer; transition: background .15s;
+    }
+    .btn-notif-close:hover { background: #b91c1c; }
+
     @media (max-width: 767px) {
       .topbar-info { display: none !important; }
       .ap-card-row { flex-direction: column; align-items: flex-start; }
@@ -202,6 +310,17 @@
         <i class="bi bi-list"></i>
       </button>
       <div class="nav-user d-none d-lg-flex">
+        <!-- Campana de notificaciones -->
+        <div class="notif-wrap">
+          <button class="btn-notif-bell" id="btnNotifBell" title="Notificaciones">
+            <i class="bi bi-bell"></i>
+            <span class="notif-count" id="notifCount"></span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-dd-header"><i class="bi bi-bell me-1"></i>Recordatorios</div>
+            <div id="notifListDd"><div class="notif-empty">Sin recordatorios pendientes</div></div>
+          </div>
+        </div>
         <span class="nav-user-name" id="whoami"></span>
         <button class="btn-logout" id="btnLogout">
           <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
@@ -229,6 +348,18 @@
   <!-- ══ MAIN ══ -->
   <main class="container py-4" style="max-width:720px;">
     <div id="msg" class="alert d-none" role="alert"></div>
+
+    <!-- ── Panel de notificaciones ── -->
+    <div class="notif-panel" id="notifPanel" style="display:none;">
+      <div class="notif-panel-header">
+        <div class="notif-panel-title">
+          <i class="bi bi-bell-fill" style="color:#1d63ff;"></i>
+          Recordatorios
+          <span class="notif-panel-badge" id="notifPanelCount"></span>
+        </div>
+      </div>
+      <div id="notifPanelList"></div>
+    </div>
 
     <!-- ── Formulario nueva cita ── -->
     <div class="form-card">
@@ -587,7 +718,142 @@
       showMsg("Sesión inválida o expirada. Iniciá sesión nuevamente.", "warning");
       setTimeout(() => (window.location.href = "../auth_client.html"), 900);
     }
+
+    loadReminders();
   })();
+
+  // ── Recordatorios ────────────────────────────────────────────
+  const REMINDERS_URL = `${API_BASE}/api/customer-appointments/reminders/`;
+
+  function reminderKey(id, type) { return `reminded_${id}_${type}`; }
+  function isDismissed(id, type) { return !!localStorage.getItem(reminderKey(id, type)); }
+  function dismiss(id, type) { localStorage.setItem(reminderKey(id, type), "1"); }
+
+  function fmtReminderTime(iso) {
+    try {
+      return new Date(iso).toLocaleString("es-CR", {
+        weekday: "short", day: "numeric", month: "short",
+        hour: "2-digit", minute: "2-digit"
+      });
+    } catch (_) { return iso; }
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c =>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function renderNotifPanel(reminders) {
+    const pending = reminders.filter(r => !isDismissed(r.appointment_id, r.reminder_type));
+    const panel   = document.getElementById("notifPanel");
+    const listEl  = document.getElementById("notifPanelList");
+    const countEl = document.getElementById("notifPanelCount");
+    const ddList  = document.getElementById("notifListDd");
+    const ddCount = document.getElementById("notifCount");
+
+    // Panel principal
+    if (!pending.length) {
+      panel.style.display = "none";
+    } else {
+      panel.style.display = "block";
+      countEl.textContent = pending.length;
+      listEl.innerHTML = pending.map(r => {
+        const isUrgent = r.reminder_type === "1h";
+        const msg = isUrgent ? "¡Tu cita es en menos de 1 hora!" : "Tu cita es mañana";
+        return `
+          <div class="notif-panel-item">
+            <div class="np-icon ${isUrgent ? "urgent" : "normal"}">
+              <i class="bi bi-${isUrgent ? "alarm" : "clock"}"></i>
+            </div>
+            <div class="np-body">
+              <div class="np-title">${escapeHtml(msg)}</div>
+              <div class="np-meta">${escapeHtml(r.service_name)} — ${escapeHtml(r.vehicle_plate)}<br>${escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
+            </div>
+            <button class="btn-np-dismiss" data-id="${escapeHtml(r.appointment_id)}" data-type="${escapeHtml(r.reminder_type)}">
+              <i class="bi bi-check2"></i> Visto
+            </button>
+          </div>
+        `;
+      }).join("");
+
+      listEl.querySelectorAll(".btn-np-dismiss").forEach(btn => {
+        btn.addEventListener("click", () => {
+          dismiss(btn.dataset.id, btn.dataset.type);
+          renderNotifPanel(reminders);
+        });
+      });
+    }
+
+    // Dropdown en campana
+    const ddPending = pending;
+    if (!ddPending.length) {
+      ddList.innerHTML = `<div class="notif-empty">Sin recordatorios pendientes</div>`;
+      ddCount.classList.remove("show");
+    } else {
+      ddCount.textContent = ddPending.length;
+      ddCount.classList.add("show");
+      ddList.innerHTML = ddPending.map(r => `
+        <div style="padding:10px 14px;border-bottom:1px solid #f8fafc;font-size:.82rem;">
+          <strong>${escapeHtml(r.reminder_type === "1h" ? "¡En 1 hora!" : "Mañana")}</strong>
+          — ${escapeHtml(r.service_name)}<br>
+          <span style="color:#6c7a94;">${escapeHtml(fmtReminderTime(r.scheduled_start))}</span>
+        </div>
+      `).join("");
+    }
+  }
+
+  function showReminderPopup(reminder) {
+    const overlay = document.getElementById("notifModalOverlay");
+    if (!overlay) return;
+    overlay.querySelector(".notif-modal-service").textContent = reminder.service_name || "Servicio";
+    overlay.querySelector(".notif-modal-plate").textContent   = `Vehículo: ${reminder.vehicle_plate || "—"}`;
+    overlay.querySelector(".notif-modal-time").innerHTML      =
+      `<i class="bi bi-alarm-fill"></i> ${fmtReminderTime(reminder.scheduled_start)}`;
+    overlay.classList.add("open");
+    overlay.querySelector(".btn-notif-close").onclick = () => {
+      dismiss(reminder.appointment_id, reminder.reminder_type);
+      overlay.classList.remove("open");
+      if (window._lastReminders) renderNotifPanel(window._lastReminders);
+    };
+  }
+
+  // Toggle campana
+  document.getElementById("btnNotifBell").addEventListener("click", (e) => {
+    e.stopPropagation();
+    document.getElementById("notifDropdown").classList.toggle("open");
+  });
+  document.addEventListener("click", () => {
+    document.getElementById("notifDropdown").classList.remove("open");
+  });
+  document.getElementById("notifDropdown").addEventListener("click", (e) => e.stopPropagation());
+
+  async function loadReminders() {
+    if (!token) return;
+    try {
+      const data = await fetchJSON(REMINDERS_URL, { headers: authHeaders() });
+      const reminders = Array.isArray(data) ? data : [];
+      window._lastReminders = reminders;
+      renderNotifPanel(reminders);
+      const urgent = reminders.find(r => r.reminder_type === "1h" && !isDismissed(r.appointment_id, r.reminder_type));
+      if (urgent) showReminderPopup(urgent);
+    } catch (_) { /* no crítico */ }
+  }
 </script>
+
+<!-- Modal pop-up de recordatorio -->
+<div class="notif-modal-overlay" id="notifModalOverlay">
+  <div class="notif-modal-box">
+    <div class="notif-modal-header">
+      <i class="bi bi-alarm-fill notif-modal-icon"></i>
+      <span class="notif-modal-hl">¡Recordatorio de cita!</span>
+    </div>
+    <div class="notif-modal-body">
+      <div class="notif-modal-service"></div>
+      <div class="notif-modal-plate"></div>
+      <div class="notif-modal-time"><i class="bi bi-alarm-fill"></i> —</div>
+      <button class="btn-notif-close">Entendido</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>

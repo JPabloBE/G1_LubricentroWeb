@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lubricentro | Citas</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <style>
     .btn-action { min-width: 36px; }
     .table td { vertical-align: middle; }
@@ -129,6 +130,9 @@
             </svg>
             Recargar
           </button>
+          <a href="./dashboard_appointment_report.html" class="btn btn-sm btn-outline-primary">
+            <i class="bi bi-bar-chart-line me-1"></i>Reporte
+          </a>
         </div>
       </div>
 
@@ -155,7 +159,7 @@
                   <th>Horario</th>
                   <th>Estado</th>
                   <th>OT</th>
-                  <th style="width: 200px;">Acciones</th>
+                  <th style="width: 160px;">Acciones</th>
                 </tr>
               </thead>
               <tbody id="tbody"></tbody>
@@ -180,12 +184,6 @@
     completed:   { label: "Completada",  badge: "bg-success"   },
     cancelled:   { label: "Cancelada",   badge: "bg-danger"    },
   };
-
-  // ── Iconos SVG ──────────────────────────────────────────────────────────────
-  const ICO_CHECK = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0z"/></svg>`;
-  const ICO_PLAY  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>`;
-  const ICO_X     = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="M4.646 4.646a.5.5 0 0 1 .708 0L8 7.293l2.646-2.647a.5.5 0 0 1 .708.708L8.707 8l2.647 2.646a.5.5 0 0 1-.708.708L8 8.707l-2.646 2.647a.5.5 0 0 1-.708-.708L7.293 8 4.646 5.354a.5.5 0 0 1 0-.708z"/></svg>`;
-  const ICO_INFO  = `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16"><path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/></svg>`;
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   function escapeHtml(s) {
@@ -235,47 +233,48 @@
 
   // ── Renderizar botones según estado ─────────────────────────────────────────
   function renderActions(apt) {
-    const s  = apt.status;
-    const id = apt.appointment_id;
+    const s     = apt.status;
+    const id    = apt.appointment_id;
     const hasWo = !!apt.work_order_id;
 
-    let btns = `
-      <button class="btn btn-sm btn-outline-secondary btn-action" title="Ver detalle"
-              onclick="openDetail('${id}')">${ICO_INFO}</button>`;
-
+    // Botón principal según estado del flujo
+    let primaryBtn = "";
     if (s === "scheduled") {
-      btns += `
-        <button class="btn btn-sm btn-success btn-action" title="Confirmar y crear OT"
-                onclick="confirmApt('${id}')">${ICO_CHECK} Confirmar</button>
-        <button class="btn btn-sm btn-outline-danger btn-action" title="Cancelar cita"
-                onclick="changeStatus('${id}','cancelled')">${ICO_X}</button>`;
+      primaryBtn = `<button class="btn btn-sm btn-success" onclick="confirmApt('${id}')">
+        <i class="bi bi-check-lg"></i> Confirmar</button>`;
     } else if (s === "confirmed") {
-      // Siempre mostrar botón de OT si no existe
-      if (!hasWo) {
-        btns += `
-          <button class="btn btn-sm btn-warning btn-action" title="Crear Orden de Trabajo"
-                  onclick="confirmApt('${id}')">${ICO_CHECK} Crear OT</button>`;
-      }
-      btns += `
-        <button class="btn btn-sm btn-primary btn-action" title="Marcar en progreso"
-                onclick="changeStatus('${id}','in_progress')">${ICO_PLAY} Iniciar</button>
-        <button class="btn btn-sm btn-outline-danger btn-action" title="Cancelar cita"
-                onclick="changeStatus('${id}','cancelled')">${ICO_X}</button>`;
+      primaryBtn = `<button class="btn btn-sm btn-primary" onclick="changeStatus('${id}','in_progress')">
+        <i class="bi bi-play-fill"></i> Iniciar</button>`;
     } else if (s === "in_progress") {
-      // Si no tiene OT, mostrar botón prominente para crear
-      if (!hasWo) {
-        btns += `
-          <button class="btn btn-sm btn-warning btn-action" title="Crear Orden de Trabajo"
-                  onclick="confirmApt('${id}')">${ICO_CHECK} Crear OT</button>`;
-      }
-      btns += `
-        <button class="btn btn-sm btn-success btn-action" title="Marcar completada"
-                onclick="changeStatus('${id}','completed')">${ICO_CHECK} Completar</button>
-        <button class="btn btn-sm btn-outline-danger btn-action" title="Cancelar cita"
-                onclick="changeStatus('${id}','cancelled')">${ICO_X}</button>`;
+      primaryBtn = `<button class="btn btn-sm btn-success" onclick="changeStatus('${id}','completed')">
+        <i class="bi bi-check-lg"></i> Completar</button>`;
     }
 
-    return `<div class="d-flex flex-wrap gap-1">${btns}</div>`;
+    // Ítems del menú ⋮
+    let menuItems = `<li><a class="dropdown-item" href="#" onclick="openDetail('${id}');return false;">
+      <i class="bi bi-eye me-2"></i>Ver detalle</a></li>`;
+
+    if (!hasWo && (s === "confirmed" || s === "in_progress")) {
+      menuItems += `<li><a class="dropdown-item" href="#" onclick="confirmApt('${id}');return false;">
+        <i class="bi bi-file-earmark-plus me-2"></i>Crear OT</a></li>`;
+    }
+
+    if (["scheduled", "confirmed", "in_progress"].includes(s)) {
+      menuItems += `<li><hr class="dropdown-divider"></li>
+        <li><a class="dropdown-item text-danger" href="#" onclick="changeStatus('${id}','cancelled');return false;">
+          <i class="bi bi-x-circle me-2"></i>Cancelar cita</a></li>`;
+    }
+
+    return `
+      <div class="d-flex align-items-center gap-1">
+        ${primaryBtn}
+        <div class="dropdown">
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
+            <i class="bi bi-three-dots-vertical"></i>
+          </button>
+          <ul class="dropdown-menu dropdown-menu-end">${menuItems}</ul>
+        </div>
+      </div>`;
   }
 
   // ── Cargar citas ─────────────────────────────────────────────────────────────
@@ -312,7 +311,7 @@
 
       const needsWo = !a.work_order_id && ['confirmed','in_progress'].includes(a.status);
       const otBadge = a.work_order_id
-        ? `<a href="./dashboard_work_orders.html" class="badge bg-dark text-decoration-none" title="Ver OT">OT ↗</a>`
+        ? `<a href="./dashboard_work_orders.html?highlight=${encodeURIComponent(a.work_order_id)}" class="badge bg-dark text-decoration-none" title="Ver OT">OT ↗</a>`
         : needsWo
           ? `<span class="badge bg-warning text-dark" title="Sin OT">Sin OT</span>`
           : `<span class="text-muted small">—</span>`;
@@ -345,8 +344,10 @@
         headers: authHeaders(),
         body: JSON.stringify({}),
       });
+      const woId = res?.work_order_id ?? "";
       showToast("Cita confirmada. OT creada automáticamente.", "success", () => {
-        window.location.href = "./dashboard_work_orders.html";
+        const qs = woId ? `?highlight=${encodeURIComponent(woId)}` : "";
+        window.location.href = `./dashboard_work_orders.html${qs}`;
       });
       await loadAppointments();
     } catch (err) {
@@ -390,8 +391,10 @@
     document.getElementById("dAdminMsg").value       = a.admin_message || "";
 
     const otRow = document.getElementById("dOtRow");
+    const dOtLink = document.getElementById("dOtLink");
     if (a.work_order_id) {
       otRow.classList.remove("d-none");
+      dOtLink.href = `./dashboard_work_orders.html?highlight=${encodeURIComponent(a.work_order_id)}`;
     } else {
       otRow.classList.add("d-none");
     }

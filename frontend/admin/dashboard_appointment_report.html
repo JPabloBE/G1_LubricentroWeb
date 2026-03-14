@@ -1,0 +1,514 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lubricentro | Reporte de Citas</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    body { background: #f1f5f9; font-family: system-ui, -apple-system, sans-serif; }
+
+    /* ── Filter bar ── */
+    .filter-bar {
+      background: #fff;
+      border-bottom: 1px solid #e2e8f0;
+      padding: 14px 24px;
+      display: flex;
+      align-items: flex-end;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .filter-bar label { font-size: .72rem; font-weight: 700; color: #64748b; text-transform: uppercase; letter-spacing: .05em; display: block; margin-bottom: 4px; }
+    .filter-bar .form-control,
+    .filter-bar .form-select { font-size: .875rem; border-color: #e2e8f0; border-radius: 8px; }
+    .filter-bar .form-control:focus,
+    .filter-bar .form-select:focus { border-color: #1d63ff; box-shadow: 0 0 0 3px rgba(29,99,255,.1); }
+    .btn-search {
+      background: #1d63ff; color: #fff; border: none; border-radius: 8px;
+      padding: 9px 20px; font-size: .875rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; transition: background .15s; white-space: nowrap;
+    }
+    .btn-search:hover { background: #0a3ea6; }
+    .btn-excel {
+      background: #16a34a; color: #fff; border: none; border-radius: 8px;
+      padding: 9px 16px; font-size: .875rem; font-weight: 700; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; transition: background .15s; white-space: nowrap;
+    }
+    .btn-excel:hover { background: #15803d; }
+    .btn-excel:disabled { background: #94a3b8; cursor: not-allowed; }
+
+    /* ── Main content ── */
+    .report-content { padding: 24px; max-width: 1200px; margin: 0 auto; }
+
+    /* ── KPI cards ── */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 24px; }
+    .kpi-card {
+      background: #fff; border-radius: 12px; padding: 16px 18px;
+      border: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 4px;
+    }
+    .kpi-label { font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: #64748b; }
+    .kpi-value { font-size: 2rem; font-weight: 900; color: #0f172a; line-height: 1; }
+    .kpi-sub   { font-size: .72rem; color: #94a3b8; }
+    .kpi-dot   { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 5px; }
+
+    .kpi-card.total  { border-left: 4px solid #1d63ff; }
+    .kpi-card.completed { border-left: 4px solid #16a34a; }
+    .kpi-card.scheduled { border-left: 4px solid #3b82f6; }
+    .kpi-card.confirmed { border-left: 4px solid #8b5cf6; }
+    .kpi-card.in_progress { border-left: 4px solid #f59e0b; }
+    .kpi-card.cancelled { border-left: 4px solid #ef4444; }
+
+    /* ── Day chart ── */
+    .section-card {
+      background: #fff; border-radius: 12px; border: 1px solid #e2e8f0;
+      padding: 20px 22px; margin-bottom: 20px;
+    }
+    .section-card-title {
+      font-size: .72rem; font-weight: 700; color: #64748b;
+      text-transform: uppercase; letter-spacing: .06em; margin-bottom: 16px;
+      display: flex; align-items: center; gap: 7px;
+    }
+
+    .day-bars { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
+    .day-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .day-bar-fill {
+      width: 100%; background: #1d63ff; border-radius: 4px 4px 0 0;
+      min-height: 4px; transition: height .4s ease;
+    }
+    .day-bar-fill.zero { background: #e2e8f0; }
+    .day-bar-label { font-size: .68rem; font-weight: 700; color: #64748b; text-align: center; }
+    .day-bar-count { font-size: .75rem; font-weight: 800; color: #0f172a; }
+    .day-bar-date  { font-size: .62rem; color: #94a3b8; }
+
+    /* ── Table ── */
+    .report-table { width: 100%; border-collapse: collapse; }
+    .report-table th {
+      font-size: .7rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em;
+      color: #64748b; padding: 10px 14px; border-bottom: 2px solid #e2e8f0; text-align: left;
+      white-space: nowrap;
+    }
+    .report-table td { padding: 12px 14px; border-bottom: 1px solid #f1f5f9; font-size: .875rem; color: #374151; }
+    .report-table tr:last-child td { border-bottom: none; }
+    .report-table tr:hover td { background: #f8fafc; }
+    .cell-name   { font-weight: 700; color: #0f172a; }
+    .cell-sub    { font-size: .75rem; color: #94a3b8; margin-top: 1px; }
+    .cell-time   { font-weight: 700; color: #0f172a; }
+    .cell-date   { font-size: .75rem; color: #94a3b8; }
+
+    /* Status pill */
+    .pill { display: inline-flex; align-items: center; gap: 5px; border-radius: 20px; padding: 3px 10px; font-size: .72rem; font-weight: 700; }
+    .pill-completed  { background: #dcfce7; color: #14532d; }
+    .pill-scheduled  { background: #dbeafe; color: #1e40af; }
+    .pill-confirmed  { background: #ede9fe; color: #4c1d95; }
+    .pill-in_progress{ background: #fef9c3; color: #854d0e; }
+    .pill-cancelled  { background: #fee2e2; color: #991b1b; }
+    .pill-default    { background: #f1f5f9; color: #475569; }
+
+    /* ── Empty / Initial ── */
+    .empty-wrap { text-align: center; padding: 64px 20px; }
+    .empty-wrap i { font-size: 2.8rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
+    .empty-wrap p { color: #64748b; margin: 0; }
+    .empty-wrap .hint { font-size: .85rem; color: #94a3b8; margin-top: 6px; }
+
+    /* ── Loading ── */
+    .spinner-wrap { display: flex; align-items: center; justify-content: center; padding: 48px; gap: 12px; color: #64748b; }
+  </style>
+</head>
+
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark">
+  <div class="container-fluid">
+    <span class="navbar-brand">Lubricentro | Dashboard</span>
+    <div class="d-flex gap-2 align-items-center">
+      <span id="whoami" class="text-white-50 small"></span>
+      <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+    </div>
+  </div>
+</nav>
+
+<div class="container-fluid">
+  <div class="row">
+
+    <!-- Sidebar -->
+    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height:calc(100vh - 56px);">
+      <div class="p-3">
+        <div class="fw-semibold">Menú</div><hr>
+        <div class="list-group">
+          <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_catalog.html">Catálogo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_customers.html">Clientes</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_staff_users.html">Usuarios (Staff/Admin)</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_vehicles.html">Autos</a>
+          <a class="list-group-item list-group-item-action active" href="./dashboard_appointments.html">Citas</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="col-12 col-md-9 col-lg-10 p-0">
+
+      <!-- Header -->
+      <div style="background:#fff;border-bottom:1px solid #e2e8f0;padding:16px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+        <div>
+          <div style="font-size:.72rem;font-weight:700;color:#1d63ff;text-transform:uppercase;letter-spacing:.06em;">Panel Admin</div>
+          <h4 style="margin:2px 0 0;font-weight:800;color:#0f172a;">Reporte de Citas</h4>
+        </div>
+        <a href="./dashboard_appointments.html" class="btn btn-sm btn-outline-secondary">
+          <i class="bi bi-arrow-left me-1"></i>Volver
+        </a>
+      </div>
+
+      <!-- Filter bar -->
+      <div class="filter-bar">
+        <div>
+          <label>Desde</label>
+          <input type="date" id="fDateFrom" class="form-control form-control-sm" style="min-width:130px;">
+        </div>
+        <div>
+          <label>Hasta</label>
+          <input type="date" id="fDateTo" class="form-control form-control-sm" style="min-width:130px;">
+        </div>
+        <div>
+          <label>Estado</label>
+          <select id="fStatus" class="form-select form-select-sm" style="min-width:150px;">
+            <option value="">Todos</option>
+            <option value="scheduled">Programada</option>
+            <option value="confirmed">Confirmada</option>
+            <option value="in_progress">En progreso</option>
+            <option value="completed">Completada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+        <div>
+          <label>Servicio</label>
+          <select id="fService" class="form-select form-select-sm" style="min-width:200px;">
+            <option value="">Todos los servicios</option>
+          </select>
+        </div>
+        <button class="btn-search" id="btnSearch">
+          <i class="bi bi-search"></i> Generar reporte
+        </button>
+        <button class="btn-excel" id="btnExcel" disabled>
+          <i class="bi bi-file-earmark-excel"></i> Exportar Excel
+        </button>
+      </div>
+
+      <!-- Report area -->
+      <div class="report-content">
+        <div id="msgAlert" class="alert d-none mb-3" role="alert"></div>
+
+        <!-- Initial state -->
+        <div id="stateInitial" class="section-card">
+          <div class="empty-wrap">
+            <i class="bi bi-bar-chart-line"></i>
+            <p>Seleccioná un rango de fechas y hacé click en <strong>Generar reporte</strong>.</p>
+          </div>
+        </div>
+
+        <!-- Loading -->
+        <div id="stateLoading" style="display:none;">
+          <div class="spinner-wrap">
+            <div class="spinner-border spinner-border-sm text-primary"></div>
+            Generando reporte...
+          </div>
+        </div>
+
+        <!-- Results -->
+        <div id="stateResults" style="display:none;">
+
+          <!-- KPI row -->
+          <div class="kpi-grid" id="kpiGrid"></div>
+
+          <!-- Activity chart -->
+          <div class="section-card" id="chartWrap" style="display:none;">
+            <div class="section-card-title"><i class="bi bi-bar-chart-fill" style="color:#1d63ff;"></i>Actividad por día</div>
+            <div class="day-bars" id="dayBars"></div>
+          </div>
+
+          <!-- Table -->
+          <div class="section-card" id="tableWrap" style="display:none;">
+            <div class="section-card-title d-flex justify-content-between">
+              <span><i class="bi bi-list-ul" style="color:#1d63ff;"></i> Detalle de citas</span>
+              <span id="tableCount" style="font-size:.8rem;color:#94a3b8;font-weight:500;text-transform:none;letter-spacing:0;"></span>
+            </div>
+            <div style="overflow-x:auto;">
+              <table class="report-table">
+                <thead>
+                  <tr>
+                    <th>Fecha y hora</th>
+                    <th>Cliente</th>
+                    <th>Vehículo</th>
+                    <th>Servicio</th>
+                    <th>Estado</th>
+                    <th>Mecánico</th>
+                  </tr>
+                </thead>
+                <tbody id="reportBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <!-- Empty -->
+          <div id="stateEmpty" style="display:none;">
+            <div class="section-card">
+              <div class="empty-wrap">
+                <i class="bi bi-calendar-x"></i>
+                <p>No se encontraron citas para los filtros aplicados.</p>
+                <p class="hint">Probá con otro rango de fechas o cambiá los filtros.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+  const API_BASE = "http://127.0.0.1:8000";
+  const token    = localStorage.getItem("access_token");
+
+  function authHeaders() {
+    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
+  }
+
+  function showMsg(text, type = "danger") {
+    const el = document.getElementById("msgAlert");
+    el.className = `alert alert-${type}`;
+    el.textContent = text;
+    el.classList.remove("d-none");
+  }
+
+  function escapeHtml(s) {
+    return String(s ?? "").replace(/[&<>"']/g, c =>
+      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+  }
+
+  function fmtDate(iso) {
+    if (!iso) return "—";
+    try { return new Date(iso).toLocaleDateString("es-CR", { day: "2-digit", month: "short", year: "numeric" }); }
+    catch (_) { return iso; }
+  }
+
+  function fmtTime(iso) {
+    if (!iso) return "";
+    try { return new Date(iso).toLocaleTimeString("es-CR", { hour: "2-digit", minute: "2-digit" }); }
+    catch (_) { return ""; }
+  }
+
+  const STATUS_LABELS = {
+    scheduled: "Programada", confirmed: "Confirmada",
+    in_progress: "En progreso", completed: "Completada", cancelled: "Cancelada"
+  };
+
+  const KPI_CONFIG = {
+    total:       { label: "Total de citas",    icon: "bi-calendar3",        color: "#1d63ff" },
+    completed:   { label: "Completadas",        icon: "bi-check-circle-fill",color: "#16a34a" },
+    scheduled:   { label: "Programadas",        icon: "bi-clock",            color: "#3b82f6" },
+    confirmed:   { label: "Confirmadas",        icon: "bi-calendar-check",   color: "#8b5cf6" },
+    in_progress: { label: "En progreso",        icon: "bi-gear-fill",        color: "#f59e0b" },
+    cancelled:   { label: "Canceladas",         icon: "bi-x-circle-fill",    color: "#ef4444" },
+  };
+
+  // ── Auth ──────────────────────────────────────────────────────
+  (async () => {
+    if (!token) { window.location.href = "../auth_admin.html"; return; }
+    try {
+      const me = await fetch(`${API_BASE}/api/auth/me/`, { headers: authHeaders() })
+        .then(r => { if (!r.ok) throw new Error(); return r.json(); });
+      document.getElementById("whoami").textContent = me.username || "";
+    } catch (_) { window.location.href = "../auth_admin.html"; return; }
+
+    // Default: semana actual
+    const today = new Date();
+    const dow = today.getDay();
+    const weekStart = new Date(today);
+    weekStart.setDate(today.getDate() - (dow === 0 ? 6 : dow - 1));
+    document.getElementById("fDateFrom").value = weekStart.toISOString().slice(0, 10);
+    document.getElementById("fDateTo").value   = today.toISOString().slice(0, 10);
+
+    // Cargar servicios
+    try {
+      const res = await fetch(`${API_BASE}/api/services/`, { headers: authHeaders() });
+      if (res.ok) {
+        const data = await res.json();
+        const svcs = Array.isArray(data) ? data : (data.results || []);
+        const sel  = document.getElementById("fService");
+        svcs.forEach(s => {
+          const opt = document.createElement("option");
+          opt.value = s.service_id;
+          opt.textContent = s.name;
+          sel.appendChild(opt);
+        });
+      }
+    } catch (_) {}
+  })();
+
+  document.getElementById("btnLogout").addEventListener("click", () => {
+    localStorage.removeItem("access_token");
+    localStorage.removeItem("refresh_token");
+    window.location.href = "../auth_admin.html";
+  });
+
+  // ── Generar reporte ───────────────────────────────────────────
+  document.getElementById("btnSearch").addEventListener("click", loadReport);
+
+  async function loadReport() {
+    const dateFrom  = document.getElementById("fDateFrom").value;
+    const dateTo    = document.getElementById("fDateTo").value;
+    const status    = document.getElementById("fStatus").value;
+    const serviceId = document.getElementById("fService").value;
+
+    if (!dateFrom || !dateTo) { showMsg("Seleccioná un rango de fechas.", "warning"); return; }
+
+    const params = new URLSearchParams({ date_from: dateFrom, date_to: dateTo });
+    if (status)    params.set("status", status);
+    if (serviceId) params.set("service_id", serviceId);
+    window._reportParams    = params.toString();
+    window._reportDateFrom  = dateFrom;
+    window._reportDateTo    = dateTo;
+
+    setState("loading");
+    document.getElementById("btnSearch").disabled = true;
+
+    try {
+      const res  = await fetch(`${API_BASE}/api/appointments/report/?${params}`, { headers: authHeaders() });
+      const data = await res.json();
+      if (!res.ok) { showMsg(data.detail || "Error al generar reporte.", "danger"); setState("initial"); return; }
+      renderReport(data);
+      document.getElementById("btnExcel").disabled = false;
+    } catch (_) {
+      showMsg("Error de conexión.", "danger");
+      setState("initial");
+    } finally {
+      document.getElementById("btnSearch").disabled = false;
+    }
+  }
+
+  function setState(s) {
+    document.getElementById("stateInitial").style.display  = s === "initial"  ? "block" : "none";
+    document.getElementById("stateLoading").style.display  = s === "loading"  ? "block" : "none";
+    document.getElementById("stateResults").style.display  = s === "results"  ? "block" : "none";
+  }
+
+  function renderReport(data) {
+    const { appointments, summary } = data;
+    setState("results");
+    document.getElementById("msgAlert").classList.add("d-none");
+
+    // ── KPI cards ──
+    const kpiGrid = document.getElementById("kpiGrid");
+    const byStatus = summary.by_status || {};
+    const kpiKeys = ["total", "completed", "scheduled", "confirmed", "in_progress", "cancelled"];
+    kpiGrid.innerHTML = kpiKeys.map(k => {
+      const cfg = KPI_CONFIG[k];
+      const val = k === "total" ? summary.total : (byStatus[k] || 0);
+      if (k !== "total" && val === 0) return "";
+      return `
+        <div class="kpi-card ${k}">
+          <div class="kpi-label"><i class="bi ${cfg.icon}" style="color:${cfg.color};margin-right:4px;"></i>${cfg.label}</div>
+          <div class="kpi-value" style="color:${cfg.color};">${val}</div>
+          ${k === "total" ? `<div class="kpi-sub">${document.getElementById("fDateFrom").value} → ${document.getElementById("fDateTo").value}</div>` : ""}
+        </div>
+      `;
+    }).join("");
+
+    // ── Day chart ──
+    const byDay = summary.by_day || [];
+    const chartWrap = document.getElementById("chartWrap");
+    if (byDay.length > 1) {
+      chartWrap.style.display = "block";
+      const maxCount = Math.max(...byDay.map(d => d.count), 1);
+      document.getElementById("dayBars").innerHTML = byDay.map(d => {
+        const pct = Math.round((d.count / maxCount) * 100);
+        return `
+          <div class="day-bar-wrap">
+            <div class="day-bar-count">${d.count > 0 ? d.count : ""}</div>
+            <div class="day-bar-fill ${d.count === 0 ? "zero" : ""}" style="height:${Math.max(pct, 4)}%;"></div>
+            <div class="day-bar-label">${escapeHtml(d.day.slice(0,3))}</div>
+            <div class="day-bar-date">${escapeHtml(d.date.slice(5))}</div>
+          </div>
+        `;
+      }).join("");
+    } else {
+      chartWrap.style.display = "none";
+    }
+
+    // ── Table ──
+    const tableWrap = document.getElementById("tableWrap");
+    const emptyEl   = document.getElementById("stateEmpty");
+
+    if (!appointments.length) {
+      tableWrap.style.display = "none";
+      emptyEl.style.display   = "block";
+      return;
+    }
+
+    emptyEl.style.display   = "none";
+    tableWrap.style.display = "block";
+    document.getElementById("tableCount").textContent = `${appointments.length} registro${appointments.length !== 1 ? "s" : ""}`;
+
+    document.getElementById("reportBody").innerHTML = appointments.map(ap => {
+      const vehicle = [ap.vehicle_plate, ap.vehicle_make, ap.vehicle_model].filter(Boolean).join(" ");
+      const st = ap.status || "";
+      const pillClass = ["completed","scheduled","confirmed","in_progress","cancelled"].includes(st)
+        ? `pill-${st}` : "pill-default";
+      return `
+        <tr>
+          <td>
+            <div class="cell-time">${escapeHtml(fmtTime(ap.scheduled_start))}</div>
+            <div class="cell-date">${escapeHtml(fmtDate(ap.scheduled_start))}</div>
+          </td>
+          <td>
+            <div class="cell-name">${escapeHtml(ap.customer_name || "—")}</div>
+            <div class="cell-sub">${escapeHtml(ap.customer_email || "")}</div>
+          </td>
+          <td>${escapeHtml(vehicle || "—")}</td>
+          <td>${escapeHtml(ap.service_name || "—")}</td>
+          <td><span class="pill ${pillClass}">${escapeHtml(STATUS_LABELS[st] || st)}</span></td>
+          <td>${escapeHtml(ap.mechanic_username || "—")}</td>
+        </tr>
+      `;
+    }).join("");
+  }
+
+  // ── Excel ─────────────────────────────────────────────────────
+  document.getElementById("btnExcel").addEventListener("click", async () => {
+    if (!window._reportParams) return;
+    const btn = document.getElementById("btnExcel");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span> Exportando...';
+
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/appointments/report/?${window._reportParams}&export=excel`,
+        { headers: { "Authorization": `Bearer ${token}` } }
+      );
+      if (!res.ok) { showMsg("Error al exportar.", "danger"); return; }
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = `reporte_citas_${window._reportDateFrom}_al_${window._reportDateTo}.xlsx`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (_) {
+      showMsg("Error de conexión al exportar.", "danger");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-file-earmark-excel"></i> Exportar Excel';
+    }
+  });
+</script>
+</body>
+</html>

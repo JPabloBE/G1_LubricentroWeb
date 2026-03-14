@@ -1,5 +1,9 @@
 # backend/apps/appointments/views.py
+import io
+from datetime import timedelta
+
 from django.db import connection
+from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
@@ -319,6 +323,207 @@ class AppointmentAdminViewSet(viewsets.ModelViewSet):
             status=status.HTTP_200_OK,
         )
 
+    @action(detail=False, methods=["get"], url_path="report")
+    def report(self, request):
+        """Reporte de citas con filtros por fecha, estado y servicio.
+        Soporta format=excel para exportar a .xlsx (openpyxl)."""
+        params = request.query_params
+        now = timezone.now()
+
+        # Defaults: semana actual
+        today = now.date()
+        week_start = today - timedelta(days=today.weekday())
+        date_from = params.get("date_from") or str(week_start)
+        date_to = params.get("date_to") or str(today)
+        status_filter = (params.get("status") or "").strip()
+        service_id_filter = (params.get("service_id") or "").strip()
+        export_format = (params.get("export") or "json").strip().lower()
+
+        filters = ["a.scheduled_start::date >= %s", "a.scheduled_start::date <= %s"]
+        values = [date_from, date_to]
+
+        if status_filter:
+            filters.append("a.status = %s")
+            values.append(status_filter)
+
+        if service_id_filter:
+            filters.append("a.service_id::text = %s")
+            values.append(service_id_filter)
+
+        where_clause = " and ".join(filters)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                select
+                    a.appointment_id,
+                    a.scheduled_start,
+                    a.scheduled_end,
+                    a.status,
+                    a.requested_work,
+                    a.notes,
+                    a.admin_message,
+                    c.full_name as customer_name,
+                    c.email as customer_email,
+                    v.plate as vehicle_plate,
+                    v.make as vehicle_make,
+                    v.model as vehicle_model,
+                    s.name as service_name,
+                    u.username as mechanic_username
+                from public.appointments a
+                left join public.customers c on c.customer_id = a.customer_id
+                left join public.vehicles v on v.vehicle_id = a.vehicle_id
+                left join public.services s on s.service_id = a.service_id
+                left join django_app.auth_users u on u.id = a.assigned_mechanic_id
+                where {where_clause}
+                order by a.scheduled_start
+                """,
+                values,
+            )
+            rows = cursor.fetchall()
+            cols = [d[0] for d in cursor.description]
+
+        appointments = [dict(zip(cols, row)) for row in rows]
+
+        # Serializar campos no-JSON
+        for ap in appointments:
+            for k, v in ap.items():
+                if hasattr(v, "isoformat"):
+                    ap[k] = v.isoformat()
+                elif v is None:
+                    ap[k] = None
+                else:
+                    ap[k] = str(v) if not isinstance(v, (str, int, float, bool)) else v
+
+        # Resumen por estado
+        by_status = {}
+        for ap in appointments:
+            st = ap.get("status") or "unknown"
+            by_status[st] = by_status.get(st, 0) + 1
+
+        # Resumen por día (dentro del rango)
+        day_names = ["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado", "Domingo"]
+        day_counts = {}
+        for ap in appointments:
+            raw = ap.get("scheduled_start") or ""
+            if raw:
+                try:
+                    from datetime import datetime
+                    dt = datetime.fromisoformat(raw)
+                    d = dt.date()
+                    key = str(d)
+                    if key not in day_counts:
+                        day_counts[key] = {"date": key, "day": day_names[d.weekday()], "count": 0}
+                    day_counts[key]["count"] += 1
+                except Exception:
+                    pass
+
+        by_day = sorted(day_counts.values(), key=lambda x: x["date"])
+
+        summary = {
+            "total": len(appointments),
+            "by_status": by_status,
+            "by_day": by_day,
+        }
+
+        if export_format == "excel":
+            return _build_excel_response(appointments, by_day, date_from, date_to)
+
+        return Response({"appointments": appointments, "summary": summary}, status=200)
+
+
+def _build_excel_response(appointments, by_day, date_from, date_to):
+    """Genera un archivo .xlsx con dos hojas: Citas y Resumen semanal."""
+    try:
+        import openpyxl
+        from openpyxl.styles import Alignment, Font, PatternFill
+    except ImportError:
+        return Response({"detail": "openpyxl no está instalado."}, status=500)
+
+    wb = openpyxl.Workbook()
+
+    # ── Hoja 1: Citas ──
+    ws1 = wb.active
+    ws1.title = "Citas"
+
+    headers = ["Fecha", "Hora", "Cliente", "Email", "Vehículo", "Servicio", "Estado", "Mecánico", "Trabajo solicitado", "Notas"]
+    header_fill = PatternFill(start_color="1D63FF", end_color="1D63FF", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws1.cell(row=1, column=col_idx, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+
+    status_labels = {
+        "scheduled": "Programada",
+        "confirmed": "Confirmada",
+        "in_progress": "En progreso",
+        "completed": "Completada",
+        "cancelled": "Cancelada",
+    }
+
+    for row_idx, ap in enumerate(appointments, 2):
+        raw_start = ap.get("scheduled_start") or ""
+        try:
+            from datetime import datetime
+            dt = datetime.fromisoformat(raw_start)
+            fecha = dt.strftime("%d/%m/%Y")
+            hora = dt.strftime("%H:%M")
+        except Exception:
+            fecha = raw_start
+            hora = ""
+
+        vehicle_str = f"{ap.get('vehicle_plate', '')} {ap.get('vehicle_make', '')} {ap.get('vehicle_model', '')}".strip()
+        st = ap.get("status") or ""
+
+        ws1.append([
+            fecha,
+            hora,
+            ap.get("customer_name") or "",
+            ap.get("customer_email") or "",
+            vehicle_str,
+            ap.get("service_name") or "",
+            status_labels.get(st, st),
+            ap.get("mechanic_username") or "",
+            ap.get("requested_work") or "",
+            ap.get("notes") or "",
+        ])
+
+    for col in ws1.columns:
+        max_len = max((len(str(cell.value or "")) for cell in col), default=10)
+        ws1.column_dimensions[col[0].column_letter].width = min(max_len + 4, 40)
+
+    # ── Hoja 2: Resumen semanal ──
+    ws2 = wb.create_sheet("Resumen semanal")
+    ws2.append(["Fecha", "Día", "Cantidad de citas"])
+    h2_fill = PatternFill(start_color="0A3EA6", end_color="0A3EA6", fill_type="solid")
+    h2_font = Font(bold=True, color="FFFFFF")
+    for cell in ws2[1]:
+        cell.fill = h2_fill
+        cell.font = h2_font
+
+    for row in by_day:
+        ws2.append([row["date"], row["day"], row["count"]])
+
+    for col in ws2.columns:
+        max_len = max((len(str(cell.value or "")) for cell in col), default=10)
+        ws2.column_dimensions[col[0].column_letter].width = min(max_len + 4, 30)
+
+    # Escribir en buffer y devolver
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"reporte_citas_{date_from}_al_{date_to}.xlsx"
+    response = HttpResponse(
+        buffer.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response
+
 
 class AppointmentCustomerViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSerializer
@@ -468,3 +673,52 @@ class AppointmentCustomerViewSet(viewsets.ModelViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+    @action(detail=False, methods=["get"], url_path="reminders")
+    def reminders(self, request):
+        """Devuelve recordatorios de citas próximas (1h y 24h) para el cliente autenticado.
+        Excluye citas canceladas. El estado 'visto' se maneja en el frontend (localStorage)."""
+        customer = request.user
+        now = timezone.now()
+        window_end = now + timedelta(hours=25)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                select
+                    a.appointment_id,
+                    a.scheduled_start,
+                    a.status,
+                    s.name as service_name,
+                    v.plate as vehicle_plate
+                from public.appointments a
+                left join public.services s on s.service_id = a.service_id
+                left join public.vehicles v on v.vehicle_id = a.vehicle_id
+                where a.customer_id = %s
+                  and a.status != 'cancelled'
+                  and a.scheduled_start >= %s
+                  and a.scheduled_start <= %s
+                order by a.scheduled_start
+                """,
+                [str(customer.customer_id), now, window_end],
+            )
+            rows = cursor.fetchall()
+
+        result = []
+        for row in rows:
+            appt_id, scheduled_start, appt_status, service_name, vehicle_plate = row
+            delta = (scheduled_start - now).total_seconds() / 60  # minutos
+            if delta <= 60:
+                reminder_type = "1h"
+            else:
+                reminder_type = "24h"
+            result.append({
+                "appointment_id": str(appt_id),
+                "scheduled_start": scheduled_start.isoformat(),
+                "status": appt_status,
+                "service_name": service_name or "",
+                "vehicle_plate": vehicle_plate or "",
+                "reminder_type": reminder_type,
+            })
+
+        return Response(result, status=200)
