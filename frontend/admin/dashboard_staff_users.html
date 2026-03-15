@@ -3,29 +3,34 @@
 <head>
   <meta charset="utf-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
-  <title>Usuarios Staff/Admin</title>
+  <title>Admin | Usuarios</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <style>
+    .table-responsive:has(.dropdown-menu.show) { overflow: visible !important; }
+  </style>
 </head>
 <body class="bg-light">
 
 <nav class="navbar navbar-dark bg-dark">
   <div class="container-fluid">
-    <span class="navbar-brand">Lubricentro | Usuarios (Staff/Admin)</span>
+    <span class="navbar-brand">Admin | Usuarios</span>
     <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
   </div>
 </nav>
 
 <div class="container-fluid">
   <div class="row">
-    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height: calc(100vh - 56px);">
+
+    <!-- Sidebar -->
+    <aside class="col-12 col-md-3 col-lg-2 bg-white border-end" style="min-height:calc(100vh - 56px);">
       <div class="p-3">
         <div class="fw-semibold">Menú</div>
         <hr>
         <div class="list-group">
           <a class="list-group-item list-group-item-action" href="./dashboard.html">Dashboard</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_catalog.html">Catálogo</a>
-          <a class="list-group-item list-group-item-action" href="./dashboard_customers.html">Clientes</a>
-          <a class="list-group-item list-group-item-action active" href="./dashboard_staff_users.html">Usuarios (Staff/Admin)</a>
+          <a class="list-group-item list-group-item-action active" href="./dashboard_staff_users.html">Usuarios</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_vehicles.html">Autos</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
@@ -33,313 +38,759 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_inventory_report.html">Reporte Inventario</a>
-
         </div>
       </div>
     </aside>
 
+    <!-- Main -->
     <main class="col-12 col-md-9 col-lg-10 p-4">
-      <div id="msg" class="alert d-none" role="alert"></div>
+      <div id="notAllowed" class="alert alert-danger d-none"></div>
 
-      <div class="d-flex gap-2 align-items-center mb-3">
-        <h4 class="m-0">Usuarios del negocio</h4>
-        <button id="btnNew" class="btn btn-dark btn-sm ms-auto">Nuevo usuario</button>
-      </div>
+      <div id="app" class="d-none">
+        <div id="msgGlobal" class="alert d-none mb-3" role="alert"></div>
 
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <div class="table-responsive">
-            <table class="table table-striped align-middle">
-              <thead>
-                <tr>
-                  <th>Usuario</th>
-                  <th>Email</th>
-                  <th>Nombre</th>
-                  <th>Tipo</th>
-                  <th>Activo</th>
-                  <th style="width:160px;">Acciones</th>
-                </tr>
-              </thead>
-              <tbody id="usersTbody"></tbody>
-            </table>
+        <!-- Tabs -->
+        <ul class="nav nav-tabs mb-4" id="mainTabs">
+          <li class="nav-item">
+            <button class="nav-link active" data-bs-toggle="tab" data-bs-target="#tabStaff">
+              <i class="bi bi-person-badge me-1"></i>Staff / Admin
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabClientes">
+              <i class="bi bi-people me-1"></i>Clientes
+            </button>
+          </li>
+          <li class="nav-item">
+            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#tabReporte" id="tabReporteBtn">
+              <i class="bi bi-file-earmark-bar-graph me-1"></i>Reporte
+            </button>
+          </li>
+        </ul>
+
+        <div class="tab-content">
+
+          <!-- ══════════════════════════════════════════════
+               TAB 1 — STAFF / ADMIN
+          ══════════════════════════════════════════════ -->
+          <div class="tab-pane fade show active" id="tabStaff">
+            <div class="d-flex align-items-center mb-3">
+              <h5 class="mb-0">Usuarios del negocio</h5>
+              <button class="btn btn-dark btn-sm ms-auto" id="btnNewStaff">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo usuario
+              </button>
+            </div>
+            <div class="card shadow-sm">
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Username</th>
+                        <th>Email</th>
+                        <th>Tipo</th>
+                        <th>Activo</th>
+                        <th class="text-end">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="staffTbody">
+                      <tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <p class="text-muted small mt-2">Nota: crear/editar/borrar requiere rol <strong>admin</strong>.</p>
           </div>
-        </div>
-      </div>
 
-      <div class="mt-2 small text-muted">
-        Nota: el backend permite ver a staff/admin, pero <b>crear/editar/borrar solo admin</b>.
-      </div>
+          <!-- ══════════════════════════════════════════════
+               TAB 2 — CLIENTES
+          ══════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tabClientes">
+            <div class="d-flex align-items-center mb-3">
+              <h5 class="mb-0">Clientes</h5>
+              <button class="btn btn-dark btn-sm ms-auto" id="btnNewCustomer">
+                <i class="bi bi-plus-lg me-1"></i>Nuevo cliente
+              </button>
+            </div>
+            <div class="card shadow-sm">
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Activo</th>
+                        <th class="text-end">Acciones</th>
+                      </tr>
+                    </thead>
+                    <tbody id="customersTbody">
+                      <tr><td colspan="5" class="text-center text-muted py-4">Cargando...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
 
+          <!-- ══════════════════════════════════════════════
+               TAB 3 — REPORTE
+          ══════════════════════════════════════════════ -->
+          <div class="tab-pane fade" id="tabReporte">
+            <div class="d-flex align-items-center mb-3">
+              <h5 class="mb-0">Reporte de Usuarios</h5>
+              <button class="btn btn-success btn-sm ms-auto" id="btnExportReport">
+                <i class="bi bi-file-earmark-excel me-1"></i>Exportar Excel
+              </button>
+            </div>
+
+            <!-- Filtros -->
+            <div class="card shadow-sm mb-3">
+              <div class="card-body">
+                <div class="row g-2 align-items-end">
+                  <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Rol</label>
+                    <select class="form-select form-select-sm" id="rFilterRole">
+                      <option value="">Todos</option>
+                      <option value="cliente">Cliente</option>
+                      <option value="staff">Staff</option>
+                      <option value="admin">Admin</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Estado</label>
+                    <select class="form-select form-select-sm" id="rFilterActive">
+                      <option value="">Todos</option>
+                      <option value="true">Activos</option>
+                      <option value="false">Inactivos</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-3">
+                    <label class="form-label small mb-1">Orden</label>
+                    <select class="form-select form-select-sm" id="rFilterSort">
+                      <option value="name_asc">Nombre A-Z</option>
+                      <option value="name_desc">Nombre Z-A</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-auto d-flex gap-2">
+                    <button class="btn btn-primary btn-sm" id="btnApplyReport">
+                      <i class="bi bi-search me-1"></i>Aplicar
+                    </button>
+                    <button class="btn btn-outline-secondary btn-sm" id="btnClearReport">
+                      <i class="bi bi-x-lg"></i> Limpiar
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumen -->
+            <div class="row g-3 mb-3" id="reportSummary"></div>
+
+            <!-- Tabla -->
+            <div class="card shadow-sm">
+              <div class="card-body p-0">
+                <div class="table-responsive">
+                  <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Nombre</th>
+                        <th>Rol</th>
+                        <th>Email</th>
+                        <th>Teléfono</th>
+                        <th>Estado</th>
+                        <th class="text-end">Detalle</th>
+                      </tr>
+                    </thead>
+                    <tbody id="reportTbody">
+                      <tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+            <p class="text-muted small mt-2" id="reportCount"></p>
+          </div>
+
+        </div><!-- /tab-content -->
+      </div><!-- /app -->
     </main>
   </div>
 </div>
 
-<!-- Modal Create/Edit -->
-<div class="modal fade" id="userModal" tabindex="-1">
+<!-- ══════════════════════════════════════════════════════
+     MODAL — Staff User
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="staffModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
       <div class="modal-header">
-        <h5 id="modalTitle" class="modal-title">Usuario</h5>
+        <h5 class="modal-title" id="staffModalTitle">Usuario</h5>
         <button class="btn-close" data-bs-dismiss="modal"></button>
       </div>
-
       <div class="modal-body">
-        <form id="userForm" class="row g-3">
-          <input type="hidden" id="u_id"/>
-
+        <form class="row g-3" id="staffForm">
+          <input type="hidden" id="s_id">
           <div class="col-md-6">
             <label class="form-label">Username</label>
-            <input class="form-control" id="u_username" required>
+            <input class="form-control" id="s_username" required>
           </div>
-
           <div class="col-md-6">
             <label class="form-label">Email</label>
-            <input class="form-control" id="u_email" type="email" required>
+            <input class="form-control" id="s_email" type="email" required>
           </div>
-
           <div class="col-md-6">
             <label class="form-label">Nombre</label>
-            <input class="form-control" id="u_first" required>
+            <input class="form-control" id="s_first" required>
           </div>
-
           <div class="col-md-6">
             <label class="form-label">Apellido</label>
-            <input class="form-control" id="u_last" required>
+            <input class="form-control" id="s_last" required>
           </div>
-
           <div class="col-md-6">
             <label class="form-label">Teléfono</label>
-            <input class="form-control" id="u_phone">
+            <input class="form-control" id="s_phone">
           </div>
-
           <div class="col-md-3">
             <label class="form-label">Tipo</label>
-            <select class="form-select" id="u_type">
-              <option value="staff">staff</option>
-              <option value="admin">admin</option>
+            <select class="form-select" id="s_type">
+              <option value="staff">Staff</option>
+              <option value="admin">Admin</option>
             </select>
           </div>
-
           <div class="col-md-3">
             <label class="form-label">Activo</label>
-            <select class="form-select" id="u_active">
+            <select class="form-select" id="s_active">
               <option value="true">Sí</option>
               <option value="false">No</option>
             </select>
           </div>
-
           <div class="col-12">
-            <label class="form-label">Password (obligatoria al crear / opcional al editar)</label>
-            <input class="form-control" id="u_pass" type="password" minlength="8"
-                   placeholder="Dejar vacío para no cambiar en editar">
+            <label class="form-label">Contraseña <span class="text-muted small">(obligatoria al crear; dejar vacía para no cambiar)</span></label>
+            <input class="form-control" id="s_pass" type="password" minlength="8">
           </div>
         </form>
       </div>
-
       <div class="modal-footer">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-        <button id="btnSave" class="btn btn-dark">Guardar</button>
+        <button class="btn btn-dark" id="btnSaveStaff">Guardar</button>
       </div>
     </div>
   </div>
 </div>
 
+<!-- ══════════════════════════════════════════════════════
+     MODAL — Customer
+══════════════════════════════════════════════════════ -->
+<div class="modal fade" id="customerModal" tabindex="-1">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="customerModalTitle">Cliente</h5>
+        <button class="btn-close" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body">
+        <form class="row g-3" id="customerForm">
+          <input type="hidden" id="c_id">
+          <div class="col-md-6">
+            <label class="form-label">Nombre completo</label>
+            <input class="form-control" id="c_name" required>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input class="form-control" id="c_email" type="email">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Teléfono</label>
+            <input class="form-control" id="c_phone">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Activo</label>
+            <select class="form-select" id="c_active">
+              <option value="true">Sí</option>
+              <option value="false">No</option>
+            </select>
+          </div>
+          <div class="col-12">
+            <label class="form-label">Notas</label>
+            <textarea class="form-control" id="c_notes" rows="3"></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+        <button class="btn btn-dark" id="btnSaveCustomer">Guardar</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     OFFCANVAS — Detalle de usuario (Reporte)
+══════════════════════════════════════════════════════ -->
+<div class="offcanvas offcanvas-end" tabindex="-1" id="detailOffcanvas" style="width:360px;">
+  <div class="offcanvas-header border-bottom">
+    <h6 class="offcanvas-title" id="detailTitle">Detalle</h6>
+    <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+  </div>
+  <div class="offcanvas-body" id="detailBody"></div>
+</div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-
+<script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
 <script>
-  const API_BASE = "http://localhost:8000";
-  const API_USERS = `${API_BASE}/api/auth/staff-users/`;
+// ── Constantes y estado ───────────────────────────────────────────────────────
+const API = "http://127.0.0.1:8000/api";
+let token = null;
+let staffData = [];
+let customersData = [];
+let allReportUsers = [];
+let displayedReportUsers = [];
+let reportLoaded = false;
 
-  const token = localStorage.getItem("access_token");
+// Bootstrap instances (inicializados en setup())
+let staffModal, customerModal, detailOffcanvas;
 
-  const modal = new bootstrap.Modal(document.getElementById("userModal"));
+// ── Helpers ───────────────────────────────────────────────────────────────────
+function authHeaders() {
+  return { "Content-Type": "application/json", "Authorization": "Bearer " + token };
+}
+function normalizeList(r) { return Array.isArray(r) ? r : (r && r.results ? r.results : []); }
 
-  function headersAuth() {
-    return { "Content-Type": "application/json", "Authorization": `Bearer ${token}` };
-  }
+function showNotAllowed(msg) {
+  const el = document.getElementById("notAllowed");
+  el.textContent = msg;
+  el.classList.remove("d-none");
+}
 
-  function showMsg(text, type="success") {
-    const el = document.getElementById("msg");
-    el.className = `alert alert-${type}`;
-    el.textContent = text;
-    el.classList.remove("d-none");
-  }
-  function hideMsg() { document.getElementById("msg").classList.add("d-none"); }
+function showMsg(text, type) {
+  type = type || "success";
+  const el = document.getElementById("msgGlobal");
+  el.className = "alert alert-" + type;
+  el.textContent = text;
+  el.classList.remove("d-none");
+  clearTimeout(window._msgTimer);
+  window._msgTimer = setTimeout(function() { el.classList.add("d-none"); }, 4000);
+}
 
-  async function ensureLogged() {
-    if (!token) return false;
-    const res = await fetch(`${API_BASE}/api/auth/me/`, {
-      headers: { "Authorization": `Bearer ${token}` }
+function displayName(u) {
+  if (u.full_name) return u.full_name;
+  var n = ((u.first_name || "") + " " + (u.last_name || "")).trim();
+  return n || u.username || "—";
+}
+
+function roleLabel(role) {
+  return role === "cliente" ? "Cliente" : role === "staff" ? "Staff" : role === "admin" ? "Admin" : role;
+}
+
+function roleBadge(role) {
+  var cls = role === "cliente" ? "bg-info text-dark" : role === "admin" ? "bg-danger" : "bg-secondary";
+  return '<span class="badge ' + cls + '">' + roleLabel(role) + "</span>";
+}
+
+function fmtDate(d) {
+  if (!d) return "—";
+  return new Date(d).toLocaleDateString("es-CR", { year: "numeric", month: "short", day: "numeric" });
+}
+
+function detailRow(label, value) {
+  return '<dt class="col-5 text-muted small">' + label + "</dt>" +
+         '<dd class="col-7 small mb-2">' + value + "</dd>";
+}
+
+// ── Auth ─────────────────────────────────────────────────────────────────────
+async function checkAuth() {
+  token = localStorage.getItem("access_token");
+  if (!token) { showNotAllowed("No autenticado."); return; }
+  try {
+    var r = await fetch(API + "/auth/me/", { headers: authHeaders() });
+    if (!r.ok) { showNotAllowed("Sesión inválida."); return; }
+    var u = await r.json();
+    if (u.user_type !== "admin" && u.user_type !== "staff" && !u.is_staff && !u.is_superuser) {
+      showNotAllowed("Acceso solo para staff y administradores."); return;
+    }
+    document.getElementById("app").classList.remove("d-none");
+    await Promise.all([loadStaffUsers(), loadCustomers()]);
+    document.getElementById("tabReporteBtn").addEventListener("shown.bs.tab", function() {
+      if (!reportLoaded) loadReport();
     });
-    return res.ok;
+  } catch (e) {
+    showNotAllowed("Error de conexión: " + (e && e.message ? e.message : String(e)));
   }
+}
 
-  document.getElementById("btnLogout").addEventListener("click", async () => {
-    try { await fetch(`${API_BASE}/api/auth/logout/`, { method:"POST", headers: headersAuth() }); } catch (_) {}
+// ── TAB 1: STAFF / ADMIN ──────────────────────────────────────────────────────
+async function loadStaffUsers() {
+  try {
+    var r = await fetch(API + "/auth/staff-users/", { headers: authHeaders() });
+    staffData = r.ok ? normalizeList(await r.json()) : [];
+  } catch (_) { staffData = []; }
+  renderStaff(staffData);
+}
+
+function renderStaff(users) {
+  var tbody = document.getElementById("staffTbody");
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">No hay usuarios.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = users.map(function(u) {
+    var fullName = ((u.first_name || "") + " " + (u.last_name || "")).trim() || u.username;
+    var badge = u.user_type === "admin" ? "danger" : "secondary";
+    return "<tr>" +
+      '<td class="fw-semibold">' + fullName + "</td>" +
+      '<td class="text-muted small">' + u.username + "</td>" +
+      "<td>" + (u.email || "—") + "</td>" +
+      '<td><span class="badge text-bg-' + badge + '">' + u.user_type + "</span></td>" +
+      "<td>" + (u.is_active ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>') + "</td>" +
+      '<td class="text-end" style="white-space:nowrap">' +
+        '<div class="d-inline-flex gap-1">' +
+          '<button class="btn btn-sm btn-outline-primary" onclick="openEditStaff(' + u.id + ')">' +
+            '<i class="bi bi-pencil"></i> Editar</button>' +
+          '<div class="dropdown">' +
+            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">' +
+              '<i class="bi bi-three-dots-vertical"></i></button>' +
+            '<ul class="dropdown-menu dropdown-menu-end">' +
+              '<li><a class="dropdown-item text-danger" href="#" onclick="deleteStaff(' + u.id + ');return false;">' +
+                '<i class="bi bi-trash me-1"></i>Eliminar</a></li>' +
+            "</ul>" +
+          "</div>" +
+        "</div>" +
+      "</td>" +
+    "</tr>";
+  }).join("");
+}
+
+async function openEditStaff(id) {
+  try {
+    var r = await fetch(API + "/auth/staff-users/" + id + "/", { headers: authHeaders() });
+    var u = await r.json();
+    if (!r.ok) { showMsg(u.detail || "Error al cargar usuario.", "danger"); return; }
+    document.getElementById("staffModalTitle").textContent = "Editar usuario";
+    document.getElementById("s_id").value      = u.id;
+    document.getElementById("s_username").value = u.username || "";
+    document.getElementById("s_email").value    = u.email || "";
+    document.getElementById("s_first").value    = u.first_name || "";
+    document.getElementById("s_last").value     = u.last_name || "";
+    document.getElementById("s_phone").value    = u.phone || "";
+    document.getElementById("s_type").value     = u.user_type || "staff";
+    document.getElementById("s_active").value   = u.is_active ? "true" : "false";
+    document.getElementById("s_pass").value     = "";
+    staffModal.show();
+  } catch (e) { showMsg("Error: " + e.message, "danger"); }
+}
+
+async function deleteStaff(id) {
+  if (!confirm("¿Eliminar este usuario?")) return;
+  try {
+    var r = await fetch(API + "/auth/staff-users/" + id + "/", { method: "DELETE", headers: authHeaders() });
+    if (!r.ok) { var d = await r.json().catch(function(){return {};}); showMsg(d.detail || "Error al eliminar.", "danger"); return; }
+    await loadStaffUsers();
+    resetReport();
+    showMsg("Usuario eliminado.");
+  } catch (e) { showMsg("Error: " + e.message, "danger"); }
+}
+
+// ── TAB 2: CLIENTES ───────────────────────────────────────────────────────────
+async function loadCustomers() {
+  try {
+    var r = await fetch(API + "/customers/", { headers: authHeaders() });
+    customersData = r.ok ? normalizeList(await r.json()) : [];
+  } catch (_) { customersData = []; }
+  renderCustomers(customersData);
+}
+
+function renderCustomers(customers) {
+  var tbody = document.getElementById("customersTbody");
+  if (!customers.length) {
+    tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-5">No hay clientes.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = customers.map(function(c) {
+    return "<tr>" +
+      '<td class="fw-semibold">' + (c.full_name || "—") + "</td>" +
+      "<td>" + (c.email || "—") + "</td>" +
+      "<td>" + (c.phone || "—") + "</td>" +
+      "<td>" + (c.is_active ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>') + "</td>" +
+      '<td class="text-end" style="white-space:nowrap">' +
+        '<div class="d-inline-flex gap-1">' +
+          '<button class="btn btn-sm btn-outline-primary" onclick="openEditCustomer(\'' + c.customer_id + '\')">' +
+            '<i class="bi bi-pencil"></i> Editar</button>' +
+          '<div class="dropdown">' +
+            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">' +
+              '<i class="bi bi-three-dots-vertical"></i></button>' +
+            '<ul class="dropdown-menu dropdown-menu-end">' +
+              '<li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(\'' + c.customer_id + '\');return false;">' +
+                '<i class="bi bi-trash me-1"></i>Eliminar</a></li>' +
+            "</ul>" +
+          "</div>" +
+        "</div>" +
+      "</td>" +
+    "</tr>";
+  }).join("");
+}
+
+async function openEditCustomer(id) {
+  try {
+    var r = await fetch(API + "/customers/" + id + "/", { headers: authHeaders() });
+    var c = await r.json();
+    if (!r.ok) { showMsg(c.detail || "Error al cargar cliente.", "danger"); return; }
+    document.getElementById("customerModalTitle").textContent = "Editar cliente";
+    document.getElementById("c_id").value    = c.customer_id;
+    document.getElementById("c_name").value  = c.full_name || "";
+    document.getElementById("c_email").value = c.email || "";
+    document.getElementById("c_phone").value = c.phone || "";
+    document.getElementById("c_notes").value = c.notes || "";
+    document.getElementById("c_active").value = c.is_active ? "true" : "false";
+    customerModal.show();
+  } catch (e) { showMsg("Error: " + e.message, "danger"); }
+}
+
+async function deleteCustomer(id) {
+  if (!confirm("¿Eliminar este cliente?")) return;
+  try {
+    var r = await fetch(API + "/customers/" + id + "/", { method: "DELETE", headers: authHeaders() });
+    if (!r.ok) { var d = await r.json().catch(function(){return {};}); showMsg(d.detail || "Error al eliminar.", "danger"); return; }
+    await loadCustomers();
+    resetReport();
+    showMsg("Cliente eliminado.");
+  } catch (e) { showMsg("Error: " + e.message, "danger"); }
+}
+
+// ── TAB 3: REPORTE ────────────────────────────────────────────────────────────
+async function loadReport() {
+  reportLoaded = true;
+  document.getElementById("reportTbody").innerHTML =
+    '<tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>';
+  try {
+    var results = await Promise.all([
+      fetch(API + "/auth/staff-users/", { headers: authHeaders() }),
+      fetch(API + "/customers/", { headers: authHeaders() }),
+    ]);
+    var staffUsers = normalizeList(await results[0].json()).map(function(u) { return Object.assign({}, u, { _role: u.user_type }); });
+    var customers  = normalizeList(await results[1].json()).map(function(u) { return Object.assign({}, u, { _role: "cliente" }); });
+    allReportUsers = staffUsers.concat(customers);
+    renderReportSummary(allReportUsers);
+    applyReportFilters();
+  } catch (e) {
+    document.getElementById("reportTbody").innerHTML =
+      '<tr><td colspan="6" class="text-center text-danger py-4">Error al cargar reporte.</td></tr>';
+  }
+}
+
+function resetReport() { reportLoaded = false; allReportUsers = []; }
+
+function renderReportSummary(users) {
+  var total    = users.length;
+  var activos  = users.filter(function(u) { return u.is_active; }).length;
+  var clientes = users.filter(function(u) { return u._role === "cliente"; }).length;
+  var staff    = users.filter(function(u) { return u._role !== "cliente"; }).length;
+  document.getElementById("reportSummary").innerHTML =
+    '<div class="col-6 col-md-3"><div class="card text-center shadow-sm border-0"><div class="card-body py-2">' +
+      '<div class="fs-4 fw-bold">' + total + '</div><div class="small text-muted">Total usuarios</div></div></div></div>' +
+    '<div class="col-6 col-md-3"><div class="card text-center shadow-sm border-0"><div class="card-body py-2">' +
+      '<div class="fs-4 fw-bold text-success">' + activos + '</div><div class="small text-muted">Activos</div></div></div></div>' +
+    '<div class="col-6 col-md-3"><div class="card text-center shadow-sm border-0"><div class="card-body py-2">' +
+      '<div class="fs-4 fw-bold text-info">' + clientes + '</div><div class="small text-muted">Clientes</div></div></div></div>' +
+    '<div class="col-6 col-md-3"><div class="card text-center shadow-sm border-0"><div class="card-body py-2">' +
+      '<div class="fs-4 fw-bold text-secondary">' + staff + '</div><div class="small text-muted">Staff / Admin</div></div></div></div>';
+}
+
+function applyReportFilters() {
+  var role   = document.getElementById("rFilterRole").value;
+  var active = document.getElementById("rFilterActive").value;
+  var sort   = document.getElementById("rFilterSort").value;
+  var filtered = allReportUsers.slice();
+  if (role)   filtered = filtered.filter(function(u) { return u._role === role; });
+  if (active) filtered = filtered.filter(function(u) { return String(u.is_active) === active; });
+  filtered.sort(function(a, b) {
+    var na = displayName(a), nb = displayName(b);
+    return sort === "name_asc" ? na.localeCompare(nb, "es") : nb.localeCompare(na, "es");
+  });
+  displayedReportUsers = filtered;
+  renderReportTable(filtered);
+}
+
+function renderReportTable(users) {
+  var tbody = document.getElementById("reportTbody");
+  var count = document.getElementById("reportCount");
+  if (!users.length) {
+    tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted py-5">No hay usuarios con los filtros aplicados.</td></tr>';
+    count.textContent = "";
+    return;
+  }
+  tbody.innerHTML = users.map(function(u, i) {
+    return "<tr>" +
+      '<td class="fw-semibold">' + displayName(u) + "</td>" +
+      "<td>" + roleBadge(u._role) + "</td>" +
+      "<td>" + (u.email || "—") + "</td>" +
+      "<td>" + (u.phone || "—") + "</td>" +
+      "<td>" + (u.is_active ? '<span class="badge bg-success">Activo</span>' : '<span class="badge bg-secondary">Inactivo</span>') + "</td>" +
+      '<td class="text-end"><button class="btn btn-sm btn-outline-secondary" onclick="openDetail(' + i + ')">' +
+        '<i class="bi bi-eye"></i> Ver</button></td>' +
+    "</tr>";
+  }).join("");
+  count.textContent = users.length + " usuario" + (users.length !== 1 ? "s" : "") + " mostrado" + (users.length !== 1 ? "s" : "") + ".";
+}
+
+function openDetail(idx) {
+  var u = displayedReportUsers[idx];
+  if (!u) return;
+  document.getElementById("detailTitle").textContent = displayName(u);
+  var html = "";
+  if (u._role === "cliente") {
+    html = detailRow("Nombre", u.full_name || "—") +
+           detailRow("Email", u.email || "—") +
+           detailRow("Teléfono", u.phone || "—") +
+           detailRow("Estado", u.is_active ? "Activo" : "Inactivo") +
+           detailRow("Notas", u.notes || "—") +
+           detailRow("Último login", fmtDate(u.last_login)) +
+           detailRow("Registrado", fmtDate(u.created_at));
+  } else {
+    var fn = ((u.first_name || "") + " " + (u.last_name || "")).trim() || "—";
+    html = detailRow("Nombre completo", fn) +
+           detailRow("Username", u.username || "—") +
+           detailRow("Email", u.email || "—") +
+           detailRow("Teléfono", u.phone || "—") +
+           detailRow("Tipo", roleLabel(u._role)) +
+           detailRow("Estado", u.is_active ? "Activo" : "Inactivo") +
+           detailRow("Último login", fmtDate(u.last_login)) +
+           detailRow("Fecha alta", fmtDate(u.date_joined));
+  }
+  document.getElementById("detailBody").innerHTML = '<dl class="row mb-0">' + html + "</dl>";
+  detailOffcanvas.show();
+}
+
+// ── Setup (event listeners + Bootstrap init) ──────────────────────────────────
+function setup() {
+  // Bootstrap instances
+  staffModal      = new bootstrap.Modal(document.getElementById("staffModal"));
+  customerModal   = new bootstrap.Modal(document.getElementById("customerModal"));
+  detailOffcanvas = new bootstrap.Offcanvas(document.getElementById("detailOffcanvas"));
+
+  // Logout
+  document.getElementById("btnLogout").addEventListener("click", function() {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-    window.location.href = "./auth.html";
+    location.href = "./auth.html";
   });
 
-  function rowHtml(u) {
-    const fullName = `${u.first_name || ""} ${u.last_name || ""}`.trim();
-    const badge = u.user_type === "admin" ? "danger" : "secondary";
-    return `
-      <tr>
-        <td>${u.username}</td>
-        <td>${u.email || ""}</td>
-        <td>${fullName}</td>
-        <td><span class="badge text-bg-${badge}">${u.user_type}</span></td>
-        <td>${u.is_active ? "Sí" : "No"}</td>
-        <td>
-          <button class="btn btn-outline-dark btn-sm" data-action="edit" data-id="${u.id}">Editar</button>
-          <button class="btn btn-outline-danger btn-sm" data-action="del" data-id="${u.id}">Borrar</button>
-        </td>
-      </tr>
-    `;
-  }
+  // Staff — nuevo
+  document.getElementById("btnNewStaff").addEventListener("click", function() {
+    document.getElementById("staffModalTitle").textContent = "Nuevo usuario";
+    document.getElementById("s_id").value = "";
+    document.getElementById("s_username").value = "";
+    document.getElementById("s_email").value = "";
+    document.getElementById("s_first").value = "";
+    document.getElementById("s_last").value = "";
+    document.getElementById("s_phone").value = "";
+    document.getElementById("s_type").value = "staff";
+    document.getElementById("s_active").value = "true";
+    document.getElementById("s_pass").value = "";
+    staffModal.show();
+  });
 
-  async function loadUsers() {
-    hideMsg();
-    const res = await fetch(API_USERS, { headers: headersAuth() });
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      showMsg(data.detail || "No se pudieron cargar usuarios.", "danger");
-      return;
-    }
-
-    const items = Array.isArray(data) ? data : (data.results || []);
-    document.getElementById("usersTbody").innerHTML = items.map(rowHtml).join("");
-  }
-
-  function openCreate() {
-    document.getElementById("modalTitle").textContent = "Nuevo usuario";
-    document.getElementById("u_id").value = "";
-    document.getElementById("u_username").value = "";
-    document.getElementById("u_email").value = "";
-    document.getElementById("u_first").value = "";
-    document.getElementById("u_last").value = "";
-    document.getElementById("u_phone").value = "";
-    document.getElementById("u_type").value = "staff";
-    document.getElementById("u_active").value = "true";
-    document.getElementById("u_pass").value = "";
-    modal.show();
-  }
-
-  async function openEdit(id) {
-    hideMsg();
-    const res = await fetch(`${API_USERS}${id}/`, { headers: headersAuth() });
-    const u = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      showMsg(u.detail || "No se pudo cargar el usuario.", "danger");
-      return;
-    }
-
-    document.getElementById("modalTitle").textContent = "Editar usuario";
-    document.getElementById("u_id").value = u.id;
-    document.getElementById("u_username").value = u.username || "";
-    document.getElementById("u_email").value = u.email || "";
-    document.getElementById("u_first").value = u.first_name || "";
-    document.getElementById("u_last").value = u.last_name || "";
-    document.getElementById("u_phone").value = u.phone || "";
-    document.getElementById("u_type").value = (u.user_type || "staff");
-    document.getElementById("u_active").value = u.is_active ? "true" : "false";
-    document.getElementById("u_pass").value = "";
-    modal.show();
-  }
-
-  async function saveUser() {
-    hideMsg();
-    const id = document.getElementById("u_id").value;
-
-    const payloadBase = {
-      username: document.getElementById("u_username").value.trim(),
-      email: document.getElementById("u_email").value.trim(),
-      first_name: document.getElementById("u_first").value.trim(),
-      last_name: document.getElementById("u_last").value.trim(),
-      phone: document.getElementById("u_phone").value.trim(),
-      user_type: document.getElementById("u_type").value,
-      is_active: document.getElementById("u_active").value === "true",
+  // Staff — guardar
+  document.getElementById("btnSaveStaff").addEventListener("click", async function() {
+    var id   = document.getElementById("s_id").value;
+    var pass = document.getElementById("s_pass").value;
+    var payload = {
+      username:   document.getElementById("s_username").value.trim(),
+      email:      document.getElementById("s_email").value.trim(),
+      first_name: document.getElementById("s_first").value.trim(),
+      last_name:  document.getElementById("s_last").value.trim(),
+      phone:      document.getElementById("s_phone").value.trim(),
+      user_type:  document.getElementById("s_type").value,
+      is_active:  document.getElementById("s_active").value === "true",
     };
-
-    const pass = document.getElementById("u_pass").value;
-
-    let url = API_USERS;
-    let method = "POST";
-    let payload = payloadBase;
-
     if (id) {
-      url = `${API_USERS}${id}/`;
-      method = "PATCH";
-      payload = { ...payloadBase };
       if (pass) payload.password = pass;
     } else {
-      if (!pass || pass.length < 8) {
-        showMsg("Para crear, la contraseña es obligatoria (mín. 8).", "danger");
-        return;
-      }
+      if (!pass || pass.length < 8) { showMsg("Contraseña obligatoria (mín. 8 caracteres).", "danger"); return; }
       payload.password = pass;
       payload.password2 = pass;
     }
-
-    const res = await fetch(url, {
-      method,
-      headers: headersAuth(),
-      body: JSON.stringify(payload)
-    });
-
-    const data = await res.json().catch(() => ({}));
-
-    if (!res.ok) {
-      const msg = data.detail || Object.values(data).flat().join(", ") || "No se pudo guardar.";
-      showMsg(msg, "danger");
-      return;
-    }
-
-    modal.hide();
-    await loadUsers();
-    showMsg("Guardado correctamente.", "success");
-  }
-
-  async function deleteUser(id) {
-    if (!confirm("¿Seguro que quieres borrar este usuario?")) return;
-
-    hideMsg();
-    const res = await fetch(`${API_USERS}${id}/`, {
-      method:"DELETE",
-      headers: headersAuth()
-    });
-
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      showMsg(data.detail || "No se pudo borrar.", "danger");
-      return;
-    }
-
-    await loadUsers();
-    showMsg("Usuario eliminado.", "success");
-  }
-
-  document.getElementById("btnNew").addEventListener("click", openCreate);
-  document.getElementById("btnSave").addEventListener("click", saveUser);
-
-  document.getElementById("usersTbody").addEventListener("click", (e) => {
-    const btn = e.target.closest("button");
-    if (!btn) return;
-    const id = btn.getAttribute("data-id");
-    const action = btn.getAttribute("data-action");
-    if (action === "edit") openEdit(id);
-    if (action === "del") deleteUser(id);
+    try {
+      var url = id ? API + "/auth/staff-users/" + id + "/" : API + "/auth/staff-users/";
+      var r = await fetch(url, { method: id ? "PATCH" : "POST", headers: authHeaders(), body: JSON.stringify(payload) });
+      var data = await r.json().catch(function(){return {};});
+      if (!r.ok) { showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger"); return; }
+      staffModal.hide();
+      await loadStaffUsers();
+      resetReport();
+      showMsg("Usuario guardado.");
+    } catch (e) { showMsg("Error: " + e.message, "danger"); }
   });
 
-  (async () => {
-    const ok = await ensureLogged();
-    if (!ok) { window.location.href = "./auth.html"; return; }
-    await loadUsers();
-  })();
-</script>
+  // Clientes — nuevo
+  document.getElementById("btnNewCustomer").addEventListener("click", function() {
+    document.getElementById("customerModalTitle").textContent = "Nuevo cliente";
+    document.getElementById("c_id").value = "";
+    document.getElementById("c_name").value = "";
+    document.getElementById("c_email").value = "";
+    document.getElementById("c_phone").value = "";
+    document.getElementById("c_notes").value = "";
+    document.getElementById("c_active").value = "true";
+    customerModal.show();
+  });
 
+  // Clientes — guardar
+  document.getElementById("btnSaveCustomer").addEventListener("click", async function() {
+    var id = document.getElementById("c_id").value;
+    var payload = {
+      full_name: document.getElementById("c_name").value.trim(),
+      email:     document.getElementById("c_email").value.trim() || null,
+      phone:     document.getElementById("c_phone").value.trim() || null,
+      notes:     document.getElementById("c_notes").value.trim() || null,
+      is_active: document.getElementById("c_active").value === "true",
+    };
+    try {
+      var url = id ? API + "/customers/" + id + "/" : API + "/customers/";
+      var r = await fetch(url, { method: id ? "PATCH" : "POST", headers: authHeaders(), body: JSON.stringify(payload) });
+      var data = await r.json().catch(function(){return {};});
+      if (!r.ok) { showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger"); return; }
+      customerModal.hide();
+      await loadCustomers();
+      resetReport();
+      showMsg("Cliente guardado.");
+    } catch (e) { showMsg("Error: " + e.message, "danger"); }
+  });
+
+  // Reporte — filtros y export
+  document.getElementById("btnApplyReport").addEventListener("click", applyReportFilters);
+  document.getElementById("btnClearReport").addEventListener("click", function() {
+    document.getElementById("rFilterRole").value   = "";
+    document.getElementById("rFilterActive").value = "";
+    document.getElementById("rFilterSort").value   = "name_asc";
+    applyReportFilters();
+  });
+  document.getElementById("btnExportReport").addEventListener("click", function() {
+    if (!displayedReportUsers.length) { alert("No hay usuarios para exportar."); return; }
+    var rows = displayedReportUsers.map(function(u) {
+      return {
+        "Nombre":       displayName(u),
+        "Rol":          roleLabel(u._role),
+        "Email":        u.email || "",
+        "Teléfono":     u.phone || "",
+        "Estado":       u.is_active ? "Activo" : "Inactivo",
+        "Último login": u.last_login ? new Date(u.last_login).toLocaleDateString("es-CR") : "",
+      };
+    });
+    var ws = XLSX.utils.json_to_sheet(rows);
+    var wb = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, "Usuarios");
+    XLSX.writeFile(wb, "usuarios_" + new Date().toISOString().slice(0, 10) + ".xlsx");
+  });
+
+  // Arrancar
+  checkAuth();
+}
+
+// ── Entrada ───────────────────────────────────────────────────────────────────
+setup();
+</script>
 </body>
 </html>
