@@ -7,265 +7,34 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/client.css">
 
   <style>
-    body { background: #f8fafc; }
+    #pastList { display: none; }
 
-    /* ── Page banner ── */
-    .page-banner {
-      background: linear-gradient(135deg, #f3f6ff 60%, #e8efff);
-      border-bottom: 1px solid #dde5f5;
-      padding: 28px 0 20px;
+    /* ── 2-column layout ── */
+    .appt-layout {
+      display:     flex;
+      gap:         24px;
+      align-items: flex-start;
     }
-    .page-banner .page-title { font-size: 1.5rem; font-weight: 800; color: #0f172a; }
-    .page-banner .page-sub   { color: #6c7a94; font-size: .9rem; margin-top: 4px; }
-    .page-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #1d63ff; color: #fff; border-radius: 20px;
-      padding: 3px 12px; font-size: .75rem; font-weight: 600; margin-bottom: 8px;
+    .appt-form-col {
+      flex:      0 0 42%;
+      max-width: 42%;
+      position:  sticky;
+      top:       80px;
     }
-
-    /* ── Nav user ── */
-    .nav-user { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-    .nav-user-name { color: rgba(255,255,255,.75); font-size: .875rem; font-weight: 500; }
-    .btn-logout {
-      background: rgba(255,255,255,.12); color: #fff;
-      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-      padding: 5px 14px; font-size: .8rem; font-weight: 600; cursor: pointer;
-      transition: background .15s; white-space: nowrap;
+    .appt-list-col {
+      flex:      1;
+      min-width: 0;
     }
-    .btn-logout:hover { background: rgba(255,255,255,.22); }
-
-    /* ── Form card ── */
-    .form-card {
-      border: none; border-radius: 12px; overflow: hidden;
-      box-shadow: 0 2px 14px rgba(0,0,0,.08); background: #fff; margin-bottom: 24px;
-    }
-    .form-card-header {
-      background: #1d63ff; color: #fff; padding: 15px 20px;
-      display: flex; align-items: center; justify-content: space-between;
-      cursor: pointer; user-select: none;
-    }
-    .form-card-header h6 { font-weight: 800; font-size: .97rem; margin: 0; }
-    .form-card-header .toggle-icon { font-size: 1rem; transition: transform .2s; }
-    .form-card-header.collapsed .toggle-icon { transform: rotate(-90deg); }
-    .form-card-body { padding: 20px; }
-    .form-card label { font-weight: 600; font-size: .85rem; color: #374151; margin-bottom: 5px; }
-    .form-card .form-control, .form-card .form-select {
-      border: 1.5px solid #dde5f5; border-radius: 8px; font-family: inherit;
-      font-size: .875rem; transition: border-color .15s, box-shadow .15s;
-    }
-    .form-card .form-control:focus, .form-card .form-select:focus {
-      border-color: #1d63ff; box-shadow: 0 0 0 3px rgba(29,99,255,.1);
-    }
-    .btn-submit {
-      background: #1d63ff; color: #fff; border: none; border-radius: 8px;
-      padding: 10px 24px; font-family: inherit; font-size: .9rem; font-weight: 700;
-      cursor: pointer; width: 100%; transition: background .15s;
-    }
-    .btn-submit:hover { background: #0a3ea6; }
-    .hint-text { font-size: .78rem; color: #9ca3af; margin-top: 4px; }
-
-    /* ── Section header ── */
-    .section-header {
-      display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;
-    }
-    .section-title {
-      font-size: .72rem; font-weight: 700; color: #6c7a94;
-      text-transform: uppercase; letter-spacing: .08em;
-    }
-    .btn-reload {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #f3f6ff; color: #1d63ff; border: 1px solid #dde5f5;
-      border-radius: 6px; padding: 5px 12px; font-size: .78rem; font-weight: 700;
-      cursor: pointer; transition: background .15s;
-    }
-    .btn-reload:hover { background: #e8efff; }
-
-    /* ── Appointment cards ── */
-    .ap-card {
-      border: none; border-radius: 10px;
-      box-shadow: 0 1px 8px rgba(0,0,0,.07); background: #fff; margin-bottom: 10px;
-    }
-    .ap-card-row {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 14px 18px; gap: 12px;
-    }
-    .ap-card-vehicle { font-weight: 800; font-size: .97rem; color: #0f172a; }
-    .ap-card-date    { font-size: .8rem; color: #6c7a94; margin-top: 3px; display: flex; align-items: center; gap: 5px; }
-    .ap-card-right   { display: flex; align-items: center; gap: 8px; flex-shrink: 0; flex-wrap: wrap; justify-content: flex-end; }
-
-    /* Status badges */
-    .ap-status {
-      display: inline-flex; align-items: center; gap: 5px;
-      border-radius: 20px; padding: 4px 11px; font-size: .75rem; font-weight: 700; white-space: nowrap;
-    }
-    .ap-status-pending    { background: #fff8e1; color: #92400e; border: 1px solid #fde68a; }
-    .ap-status-scheduled  { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-    .ap-status-accepted   { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-    .ap-status-in_progress{ background: #ede9fe; color: #4c1d95; border: 1px solid #c4b5fd; }
-    .ap-status-completed  { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
-    .ap-status-cancelled  { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .ap-status-rejected   { background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-    .ap-status-no_show    { background: #f3f4f6; color: #6b7280; border: 1px solid #d1d5db; }
-    .ap-status-default    { background: #f3f4f6; color: #374151; border: 1px solid #e5e7eb; }
-
-    /* Action buttons */
-    .btn-detail {
-      display: inline-flex; align-items: center; gap: 5px;
-      background: #1d63ff; color: #fff; border: none;
-      border-radius: 6px; padding: 6px 14px; font-size: .78rem; font-weight: 700;
-      text-decoration: none; transition: background .15s; white-space: nowrap;
-    }
-    .btn-detail:hover { background: #0a3ea6; color: #fff; }
-    .btn-cancel-ap {
-      display: inline-flex; align-items: center; gap: 4px;
-      background: transparent; color: #dc2626; border: 1.5px solid #fca5a5;
-      border-radius: 6px; padding: 5px 12px; font-size: .78rem; font-weight: 700;
-      cursor: pointer; transition: background .15s; white-space: nowrap;
-    }
-    .btn-cancel-ap:hover { background: #fee2e2; }
-
-    /* Past appointments toggle */
-    .past-toggle {
-      display: flex; align-items: center; gap: 8px; width: 100%;
-      background: #f8fafc; border: 1.5px dashed #dde5f5; border-radius: 10px;
-      padding: 12px 18px; cursor: pointer; font-size: .87rem; font-weight: 700; color: #6c7a94;
-      transition: background .15s, color .15s; margin-top: 8px;
-      text-align: left;
-    }
-    .past-toggle:hover { background: #f3f6ff; color: #1d63ff; border-color: #1d63ff; }
-    .past-toggle .past-toggle-icon { margin-left: auto; transition: transform .2s; }
-    .past-toggle.open .past-toggle-icon { transform: rotate(180deg); }
-    #pastList { margin-top: 8px; display: none; }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center; padding: 36px 24px;
-      background: #fff; border-radius: 10px; box-shadow: 0 1px 8px rgba(0,0,0,.05);
-    }
-    .empty-state i { font-size: 2.5rem; color: #dde5f5; margin-bottom: 10px; display: block; }
-    .empty-state p { color: #6c7a94; font-size: .9rem; margin: 0; }
-
-    /* Alert */
-    #msg { border-radius: 8px; margin-bottom: 16px; }
-
-    /* ── Notification bell ── */
-    .notif-wrap { position: relative; }
-    .btn-notif-bell {
-      position: relative; background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-      color: #fff; padding: 5px 10px; font-size: 1rem; cursor: pointer;
-      transition: background .15s; line-height: 1;
-    }
-    .btn-notif-bell:hover { background: rgba(255,255,255,.22); }
-    .notif-count {
-      position: absolute; top: -6px; right: -6px;
-      background: #ef4444; color: #fff; border-radius: 99px;
-      font-size: .62rem; font-weight: 800; line-height: 1;
-      min-width: 17px; height: 17px; display: none;
-      align-items: center; justify-content: center; padding: 0 4px;
-    }
-    .notif-count.show { display: flex; }
-    .notif-dropdown {
-      position: absolute; top: calc(100% + 8px); right: 0;
-      width: 320px; background: #fff; border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.18); border: 1px solid #e4eaf5;
-      z-index: 200; display: none; overflow: hidden;
-    }
-    .notif-dropdown.open { display: block; }
-    .notif-dd-header {
-      padding: 13px 16px 10px; border-bottom: 1px solid #f1f5f9;
-      font-size: .78rem; font-weight: 800; color: #0f172a; letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-    .notif-empty { padding: 22px 16px; text-align: center; color: #9ca3af; font-size: .85rem; }
-
-    /* ── Notification panel ── */
-    .notif-panel {
-      background: #fff; border-radius: 12px;
-      box-shadow: 0 2px 12px rgba(0,0,0,.07); border: 1px solid #e4eaf5;
-      margin-bottom: 20px; overflow: hidden;
-    }
-    .notif-panel-header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 13px 18px 11px; border-bottom: 1px solid #f1f5f9;
-    }
-    .notif-panel-title {
-      font-size: .78rem; font-weight: 800; color: #0f172a;
-      letter-spacing: .04em; text-transform: uppercase;
-      display: flex; align-items: center; gap: 7px;
-    }
-    .notif-panel-badge {
-      background: #ef4444; color: #fff; border-radius: 20px;
-      font-size: .65rem; font-weight: 800; padding: 2px 7px;
-    }
-    .notif-panel-item {
-      display: flex; align-items: flex-start; gap: 12px;
-      padding: 13px 18px; border-bottom: 1px solid #f8fafc;
-    }
-    .notif-panel-item:last-child { border-bottom: none; }
-    .np-icon {
-      width: 36px; height: 36px; border-radius: 9px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 1.1rem;
-    }
-    .np-icon.urgent { background: #fff1f1; color: #dc2626; }
-    .np-icon.normal { background: #eff6ff; color: #1d63ff; }
-    .np-body { flex: 1; min-width: 0; }
-    .np-title { font-size: .87rem; font-weight: 700; color: #0f172a; }
-    .np-meta  { font-size: .78rem; color: #6c7a94; margin-top: 3px; }
-    .btn-np-dismiss {
-      background: #f1f5f9; border: none; border-radius: 6px; color: #475569;
-      font-size: .75rem; font-weight: 600; padding: 4px 10px; cursor: pointer;
-      transition: background .15s; white-space: nowrap; align-self: center;
-    }
-    .btn-np-dismiss:hover { background: #e2e8f0; }
-    .notif-panel-empty { padding: 18px; text-align: center; color: #9ca3af; font-size: .85rem; }
-
-    /* ── Reminder pop-up ── */
-    .notif-modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 999;
-      background: rgba(0,0,0,.45); align-items: center; justify-content: center;
-    }
-    .notif-modal-overlay.open { display: flex; }
-    .notif-modal-box {
-      background: #fff; border-radius: 16px; max-width: 400px; width: 90%;
-      box-shadow: 0 8px 40px rgba(0,0,0,.22); overflow: hidden;
-      animation: notifSlideIn .25s ease;
-    }
-    @keyframes notifSlideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .notif-modal-header {
-      background: #fff1f1; border-bottom: 1px solid #fecaca;
-      padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px;
-    }
-    .notif-modal-icon { font-size: 1.5rem; color: #dc2626; }
-    .notif-modal-hl   { font-size: 1rem; font-weight: 800; color: #991b1b; }
-    .notif-modal-body { padding: 18px 20px; }
-    .notif-modal-service { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-    .notif-modal-plate   { font-size: .85rem; color: #6c7a94; margin-bottom: 12px; }
-    .notif-modal-time {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #fff1f1; color: #dc2626; border-radius: 8px;
-      padding: 7px 14px; font-size: .9rem; font-weight: 700;
-    }
-    .btn-notif-close {
-      margin-top: 16px; width: 100%; background: #dc2626; color: #fff;
-      border: none; border-radius: 8px; padding: 10px; font-family: inherit;
-      font-size: .95rem; font-weight: 700; cursor: pointer; transition: background .15s;
-    }
-    .btn-notif-close:hover { background: #b91c1c; }
-
-    @media (max-width: 767px) {
-      .topbar-info { display: none !important; }
-      .ap-card-row { flex-direction: column; align-items: flex-start; }
-      .ap-card-right { justify-content: flex-start; }
+    @media (max-width: 991px) {
+      .appt-layout   { flex-direction: column; }
+      .appt-form-col { flex: none; max-width: none; width: 100%; position: static; }
     }
   </style>
 </head>
@@ -304,7 +73,6 @@
         <li><a href="./dashboard.html">Dashboard</a></li>
         <li><a class="active" href="./appointments.html">Mis Citas</a></li>
         <li><a href="./vehicles.html">Mis Autos</a></li>
-        <li><a href="./work_orders.html">Órdenes</a></li>
       </ul>
       <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
         <i class="bi bi-list"></i>
@@ -331,7 +99,6 @@
       <a href="./dashboard.html">Dashboard</a>
       <a class="active" href="./appointments.html">Mis Citas</a>
       <a href="./vehicles.html">Mis Autos</a>
-      <a href="./work_orders.html">Órdenes</a>
       <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
     </div>
   </nav>
@@ -339,82 +106,92 @@
   <!-- ══ PAGE BANNER ══ -->
   <section class="page-banner">
     <div class="container">
-      <div class="page-badge"><i class="bi bi-calendar-check"></i> Mis Citas</div>
+      <div class="page-eyebrow">Mis Citas</div>
       <div class="page-title">Gestión de Citas</div>
       <div class="page-sub">Agendá nuevas citas y revisá el estado de las existentes.</div>
     </div>
   </section>
 
   <!-- ══ MAIN ══ -->
-  <main class="container py-4" style="max-width:720px;">
+  <main class="container py-4">
     <div id="msg" class="alert d-none" role="alert"></div>
 
-    <!-- ── Panel de notificaciones ── -->
-    <div class="notif-panel" id="notifPanel" style="display:none;">
-      <div class="notif-panel-header">
-        <div class="notif-panel-title">
-          <i class="bi bi-bell-fill" style="color:#1d63ff;"></i>
-          Recordatorios
-          <span class="notif-panel-badge" id="notifPanelCount"></span>
-        </div>
-      </div>
-      <div id="notifPanelList"></div>
-    </div>
+    <div class="appt-layout">
 
-    <!-- ── Formulario nueva cita ── -->
-    <div class="form-card">
-      <div class="form-card-header" id="formToggle">
-        <h6><i class="bi bi-plus-circle me-2"></i>Agendar nueva cita</h6>
-        <i class="bi bi-chevron-down toggle-icon" id="formToggleIcon"></i>
-      </div>
-      <div class="form-card-body" id="formBody">
-        <div class="row g-3">
-          <div class="col-12 col-sm-6">
-            <label class="form-label">Vehículo</label>
-            <select id="vehicleSelect" class="form-select"></select>
+      <!-- ── Columna izquierda: formulario ── -->
+      <div class="appt-form-col">
+        <div class="form-card">
+          <div class="form-card-header">
+            <h6><i class="bi bi-plus-circle me-2"></i>Nueva cita</h6>
           </div>
-          <div class="col-12 col-sm-6">
-            <label class="form-label">Servicio</label>
-            <select id="serviceSelect" class="form-select"></select>
-          </div>
-          <div class="col-12">
-            <label class="form-label">Horario disponible</label>
-            <select id="slotSelect" class="form-select"></select>
-            <div class="hint-text">Solo aparecen horarios con cupo disponible.</div>
-          </div>
-          <div class="col-12 col-sm-6">
-            <label class="form-label">Trabajo solicitado <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
-            <textarea id="requestedWork" class="form-control" rows="2" placeholder="Ej: cambio de aceite, revisión de frenos..."></textarea>
-          </div>
-          <div class="col-12 col-sm-6">
-            <label class="form-label">Notas adicionales <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
-            <textarea id="notes" class="form-control" rows="2" placeholder="Cualquier detalle extra."></textarea>
-          </div>
-          <div class="col-12">
-            <button id="btnCreate" class="btn-submit">
-              <i class="bi bi-calendar-plus me-2"></i>Confirmar cita
-            </button>
+          <div class="form-card-body" id="formBody">
+            <div class="row g-3">
+              <div class="col-12">
+                <label class="form-label">Vehículo</label>
+                <select id="vehicleSelect" class="form-select"></select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Servicio</label>
+                <select id="serviceSelect" class="form-select"></select>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Horario disponible</label>
+                <select id="slotSelect" class="form-select"></select>
+                <div class="hint-text">Solo aparecen horarios con cupo disponible.</div>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Trabajo solicitado <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
+                <textarea id="requestedWork" class="form-control" rows="2" placeholder="Ej: cambio de aceite, revisión de frenos..."></textarea>
+              </div>
+              <div class="col-12">
+                <label class="form-label">Notas adicionales <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
+                <textarea id="notes" class="form-control" rows="2" placeholder="Cualquier detalle extra."></textarea>
+              </div>
+              <div class="col-12">
+                <button id="btnCreate" class="btn-submit">
+                  <i class="bi bi-calendar-plus me-2"></i>Confirmar cita
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       </div>
-    </div>
 
-    <!-- ── Citas activas ── -->
-    <div class="section-header">
-      <span class="section-title" id="activeTitle">Mis citas activas</span>
-      <button class="btn-reload" id="btnReload">
-        <i class="bi bi-arrow-clockwise"></i> Actualizar
-      </button>
-    </div>
-    <div id="activeList"></div>
+      <!-- ── Columna derecha: lista de citas ── -->
+      <div class="appt-list-col">
 
-    <!-- ── Citas anteriores ── -->
-    <button class="past-toggle d-none" id="pastToggle" type="button">
-      <i class="bi bi-clock-history"></i>
-      <span id="pastToggleLabel">Ver citas anteriores</span>
-      <i class="bi bi-chevron-down past-toggle-icon"></i>
-    </button>
-    <div id="pastList"></div>
+        <!-- Panel de notificaciones -->
+        <div class="notif-panel" id="notifPanel" style="display:none;">
+          <div class="notif-panel-header">
+            <div class="notif-panel-title">
+              <i class="bi bi-bell-fill" style="color:#1d63ff;"></i>
+              Recordatorios
+              <span class="notif-panel-badge" id="notifPanelCount"></span>
+            </div>
+          </div>
+          <div id="notifPanelList"></div>
+        </div>
+
+        <!-- Citas activas -->
+        <div class="section-header">
+          <span class="section-label" id="activeTitle">Mis citas activas</span>
+          <button class="btn-reload" id="btnReload">
+            <i class="bi bi-arrow-clockwise"></i> Actualizar
+          </button>
+        </div>
+        <div id="activeList"></div>
+
+        <!-- Citas anteriores -->
+        <button class="past-toggle d-none" id="pastToggle" type="button">
+          <i class="bi bi-clock-history"></i>
+          <span id="pastToggleLabel">Ver citas anteriores</span>
+          <i class="bi bi-chevron-down past-toggle-icon"></i>
+        </button>
+        <div id="pastList"></div>
+
+      </div><!-- /.appt-list-col -->
+
+    </div><!-- /.appt-layout -->
   </main>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
@@ -622,17 +399,6 @@
     });
   }
 
-  // ── Form toggle ──────────────────────────────────────────────────────────────
-  document.getElementById("formToggle").addEventListener("click", () => {
-    const body   = document.getElementById("formBody");
-    const icon   = document.getElementById("formToggleIcon");
-    const header = document.getElementById("formToggle");
-    const hidden = body.style.display === "none";
-    body.style.display = hidden ? "block" : "none";
-    icon.style.transform = hidden ? "rotate(0deg)" : "rotate(-90deg)";
-    header.classList.toggle("collapsed", !hidden);
-  });
-
   // ── Past toggle ──────────────────────────────────────────────────────────────
   document.getElementById("pastToggle").addEventListener("click", () => {
     const list = document.getElementById("pastList");
@@ -738,11 +504,6 @@
     } catch (_) { return iso; }
   }
 
-  function escapeHtml(s) {
-    return String(s ?? "").replace(/[&<>"']/g, c =>
-      ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  }
-
   function renderNotifPanel(reminders) {
     const pending = reminders.filter(r => !isDismissed(r.appointment_id, r.reminder_type));
     const panel   = document.getElementById("notifPanel");
@@ -760,12 +521,16 @@
       listEl.innerHTML = pending.map(r => {
         const isUrgent = r.reminder_type === "1h";
         const msg = isUrgent ? "¡Tu cita es en menos de 1 hora!" : "Tu cita es mañana";
+        const urgencyChip = isUrgent
+          ? `<div class="np-urgency-chip urgent"><i class="bi bi-alarm-fill"></i> En 1 hora</div>`
+          : `<div class="np-urgency-chip"><i class="bi bi-calendar3"></i> Mañana</div>`;
         return `
-          <div class="notif-panel-item">
+          <div class="notif-panel-item ${isUrgent ? "urgent-item" : ""}">
             <div class="np-icon ${isUrgent ? "urgent" : "normal"}">
               <i class="bi bi-${isUrgent ? "alarm" : "clock"}"></i>
             </div>
             <div class="np-body">
+              ${urgencyChip}
               <div class="np-title">${escapeHtml(msg)}</div>
               <div class="np-meta">${escapeHtml(r.service_name)} — ${escapeHtml(r.vehicle_plate)}<br>${escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
             </div>
@@ -843,15 +608,24 @@
 <!-- Modal pop-up de recordatorio -->
 <div class="notif-modal-overlay" id="notifModalOverlay">
   <div class="notif-modal-box">
+    <div class="notif-modal-stripes"></div>
     <div class="notif-modal-header">
-      <i class="bi bi-alarm-fill notif-modal-icon"></i>
-      <span class="notif-modal-hl">¡Recordatorio de cita!</span>
+      <div class="notif-modal-glow-ring">
+        <i class="bi bi-alarm-fill notif-modal-icon"></i>
+      </div>
+      <div class="notif-modal-hl">¡Cita en menos de 1 hora!</div>
+      <div class="notif-modal-sub">No olvides presentarte a tiempo</div>
     </div>
     <div class="notif-modal-body">
       <div class="notif-modal-service"></div>
-      <div class="notif-modal-plate"></div>
+      <div class="notif-modal-plate-row">
+        <i class="bi bi-car-front-fill"></i>
+        <span class="notif-modal-plate"></span>
+      </div>
       <div class="notif-modal-time"><i class="bi bi-alarm-fill"></i> —</div>
-      <button class="btn-notif-close">Entendido</button>
+      <button class="btn-notif-close">
+        <i class="bi bi-check2-circle"></i> Entendido
+      </button>
     </div>
   </div>
 </div>

@@ -5,46 +5,59 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Acceso Staff | Lubricentro</title>
 
+  <!-- Barlow Condensed + DM Sans — igual que index.html -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
 
   <style>
+    /* ── Variables idénticas a main.css ── */
     :root {
-      --accent: #1d63ff;
-      --nav-blue-1: #0a3ea6;
-      --nav-blue-2: #062a73;
-      --nav-blue-3: #061a3b;
-      --amber: #f59e0b;
+      --bg-base:        #0C0D11;
+      --bg-surface:     #13141A;
+      --bg-elevated:    #1B1D25;
+      --accent-red:     #FF3B1F;
+      --accent-gold:    #E8A030;
+      --accent-gold-dim: rgba(232,160,48,.12);
+      --text-primary:   #F2F2F4;
+      --text-muted:     #8A8D9A;
+      --border:         rgba(255,255,255,.07);
+      --border-bright:  rgba(255,255,255,.13);
+      --font-display:  "Barlow Condensed", sans-serif;
+      --font-body:     "DM Sans", system-ui, -apple-system, sans-serif;
+      --ease-out-expo: cubic-bezier(0.22,1,0.36,1);
     }
 
-    *, *::before, *::after { box-sizing: border-box; }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    /* Sin scroll — todo en viewport */
+    html, body { height: 100%; overflow: hidden; }
 
     body {
-      margin: 0;
-      font-family: "Inter", system-ui, -apple-system, Arial, sans-serif;
-      font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1;
+      font-family: var(--font-body);
       -webkit-font-smoothing: antialiased;
-      min-height: 100vh;
       display: flex;
       flex-direction: column;
-      /* mismo fondo oscuro que la sección trust del sitio */
-      background: #10141e;
+      /* Fondo más oscuro + grid dorado sutil — diferencia visual respecto al portal cliente */
+      background: #080A0F;
       background-image:
-        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
-      background-size: 44px 44px;
+        linear-gradient(rgba(232,160,48,.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(232,160,48,.025) 1px, transparent 1px);
+      background-size: 48px 48px;
+      color: var(--text-primary);
     }
 
-    /* ── Nav (idéntica al .mainnav del sitio) ── */
+    /* ── Nav — mismo .mainnav, borde dorado para diferenciar ── */
     .auth-nav {
-      background: linear-gradient(90deg, var(--nav-blue-1), var(--nav-blue-2), var(--nav-blue-3));
-      border-bottom: 1px solid rgba(255,255,255,.08);
-      position: sticky;
-      top: 0;
-      z-index: 100;
+      background: rgba(8,10,15,.97);
+      border-bottom: 2px solid var(--accent-gold);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      position: relative;
+      z-index: 10;
+      flex-shrink: 0;
     }
 
     .auth-nav-inner {
@@ -55,140 +68,284 @@
       display: flex;
       align-items: center;
       justify-content: space-between;
+      position: relative;
     }
 
     .auth-nav img {
       height: 36px;
       width: auto;
       object-fit: contain;
-      filter: brightness(0) invert(1);
     }
 
-    .auth-nav-back {
-      color: rgba(255,255,255,.75);
-      font-size: .82rem;
-      font-weight: 600;
-      text-decoration: none;
+    /* Badge central — simétrico con el logo */
+    .auth-nav-badge {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      transition: color .15s;
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .12em;
+      font-family: var(--font-body);
     }
-    .auth-nav-back:hover { color: #fff; }
+    .auth-nav-badge i { color: var(--accent-gold); font-size: 13px; }
 
-    /* ── Main area ── */
+    /* Back link — navlink puro sin borde (igual que auth_client) */
+    .auth-nav-back {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      color: rgba(242,242,244,.7);
+      font-family: var(--font-body);
+      font-size: 13.5px;
+      font-weight: 600;
+      text-decoration: none;
+      padding: 7px 12px;
+      border-radius: 5px;
+      transition: color .2s, background .2s;
+      letter-spacing: .01em;
+    }
+    .auth-nav-back:hover {
+      color: #fff;
+      background: var(--accent-gold-dim);
+    }
+    .auth-nav-back i { font-size: 13px; }
+
+    /* ── Layout centrado, sin scroll ── */
     .auth-main {
       flex: 1;
+      min-height: 0;
       display: flex;
       align-items: center;
       justify-content: center;
-      padding: 48px 16px 64px;
+      padding: 20px 16px;
+      position: relative;
     }
 
-    /* ── Form column ── */
+    /* Línea degradada superior — igual que .section-trust::before */
+    .auth-main::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--accent-gold) 50%, transparent);
+      opacity: .4;
+    }
+
     .auth-wrap {
       width: 100%;
       max-width: 420px;
+      position: relative;
     }
 
+    /* ── Ícono de escudo central ── */
+    .auth-shield-wrap {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 16px;
+    }
+
+    .auth-shield {
+      width: 68px;
+      height: 68px;
+      border-radius: 14px;
+      background: var(--accent-gold-dim);
+      border: 1px solid rgba(232,160,48,.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      color: var(--accent-gold);
+      position: relative;
+    }
+
+    /* Pulso sutil alrededor del escudo */
+    .auth-shield::after {
+      content: "";
+      position: absolute;
+      inset: -5px;
+      border-radius: 19px;
+      border: 1px solid rgba(232,160,48,.15);
+      pointer-events: none;
+    }
+
+    /* Eyebrow — igual que index.html pero en dorado */
     .auth-eyebrow {
       display: inline-flex;
       align-items: center;
-      gap: 7px;
-      color: var(--amber);
-      background: rgba(245,158,11,.1);
-      border: 1px solid rgba(245,158,11,.3);
-      border-radius: 20px;
-      padding: 5px 14px;
-      font-size: .74rem;
+      gap: 8px;
+      color: var(--accent-gold);
+      font-family: var(--font-body);
+      font-size: 11px;
       font-weight: 700;
-      letter-spacing: .07em;
       text-transform: uppercase;
-      margin-bottom: 16px;
+      letter-spacing: .14em;
+      margin-bottom: 12px;
+      justify-content: center;
+      width: 100%;
+    }
+    .auth-eyebrow::before {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 2px;
+      background: var(--accent-gold);
+      flex-shrink: 0;
+    }
+    .auth-eyebrow::after {
+      content: "";
+      display: inline-block;
+      width: 20px;
+      height: 2px;
+      background: var(--accent-gold);
+      flex-shrink: 0;
     }
 
     .auth-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #f1f5f9;
-      letter-spacing: -.025em;
+      font-family: var(--font-display);
+      font-size: clamp(28px, 3.5vw, 40px);
+      font-weight: 900;
+      color: var(--text-primary);
+      text-transform: uppercase;
+      line-height: 1.0;
+      letter-spacing: -.5px;
       margin: 0 0 6px;
+      text-align: center;
     }
 
     .auth-sub {
-      color: #64748b;
-      font-size: .9rem;
-      margin: 0 0 28px;
+      color: var(--text-muted);
+      font-size: 13px;
+      margin: 0 0 18px;
+      line-height: 1.5;
+      text-align: center;
     }
 
-    /* ── Card ── */
+    /* Badge de advertencia */
+    .auth-warning {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      background: rgba(232,160,48,.07);
+      border: 1px solid rgba(232,160,48,.2);
+      border-radius: 7px;
+      padding: 10px 14px;
+      margin-bottom: 20px;
+      font-size: 12.5px;
+      color: rgba(232,160,48,.85);
+      font-weight: 500;
+    }
+    .auth-warning i { font-size: 15px; flex-shrink: 0; color: var(--accent-gold); }
+
+    /* Card — borde dorado en lugar de rojo */
     .auth-card {
-      background: #fff;
-      border-radius: 14px;
-      box-shadow: 0 4px 24px rgba(0,0,0,.4), 0 1px 4px rgba(0,0,0,.3);
-      padding: 32px;
-      border-left: 4px solid var(--amber);
+      background: var(--bg-elevated);
+      border-radius: 10px;
+      border: 1px solid var(--border-bright);
+      border-top: 3px solid var(--accent-gold);
+      padding: 22px 24px;
+      box-shadow: 0 8px 40px rgba(0,0,0,.6), 0 0 0 1px rgba(232,160,48,.05);
     }
 
-    /* Alert */
+    /* Mensaje */
     .message {
-      padding: 11px 14px;
-      border-radius: 8px;
+      padding: 10px 14px;
+      border-radius: 7px;
       margin-bottom: 16px;
-      font-size: .875rem;
+      font-size: 13px;
       font-weight: 500;
       display: none;
+      font-family: var(--font-body);
     }
-    .message.error   { background: #fff1f1; border: 1.5px solid #fecaca; color: #991b1b; }
-    .message.success { background: #eaffea; border: 1.5px solid #bde5bd; color: #166534; }
+    .message.error   {
+      background: rgba(255,59,31,.08);
+      border: 1px solid rgba(255,59,31,.3);
+      color: #ff6b52;
+    }
+    .message.success {
+      background: rgba(22,163,74,.1);
+      border: 1px solid rgba(22,163,74,.3);
+      color: #4ade80;
+    }
 
-    /* Form */
+    /* Formulario */
     .form-group { margin-bottom: 16px; }
 
     .form-group label {
       display: block;
       font-weight: 600;
-      font-size: .83rem;
-      color: #374151;
+      font-size: 11px;
+      color: var(--text-muted);
       margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
     }
 
     .form-group input {
       width: 100%;
       padding: 10px 14px;
-      border: 1.5px solid #dde5f5;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: .9rem;
-      color: #0f172a;
+      border: 1.5px solid var(--border-bright);
+      border-radius: 6px;
+      font-family: var(--font-body);
+      font-size: 14px;
+      color: var(--text-primary);
       outline: none;
-      background: #fff;
+      background: var(--bg-surface);
       transition: border-color .15s, box-shadow .15s;
     }
 
+    .form-group input::placeholder { color: rgba(138,141,154,.45); }
+
     .form-group input:focus {
-      border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(29,99,255,.1);
+      border-color: var(--accent-gold);
+      box-shadow: 0 0 0 3px rgba(232,160,48,.12);
     }
 
+    /* Botón — dorado en lugar de rojo */
     .btn-auth {
+      position: relative;
       width: 100%;
-      padding: 11px;
-      background: var(--accent);
-      color: #fff;
-      border: none;
-      border-radius: 8px;
-      font-family: inherit;
-      font-size: .95rem;
-      font-weight: 700;
+      padding: 12px;
+      background: var(--accent-gold);
+      color: #0C0D11;
+      border: 2px solid transparent;
+      border-radius: 6px;
+      font-family: var(--font-display);
+      font-size: 17px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: .06em;
       cursor: pointer;
-      transition: background .15s;
       margin-top: 4px;
+      overflow: hidden;
+      transition: background .22s var(--ease-out-expo), transform .22s, box-shadow .22s;
     }
-    .btn-auth:hover { background: var(--nav-blue-1); }
 
+    .btn-auth::before {
+      content: "";
+      position: absolute;
+      top: 0; left: -100%;
+      width: 60%;
+      height: 100%;
+      background: linear-gradient(105deg, transparent, rgba(255,255,255,.2), transparent);
+      transition: left .45s var(--ease-out-expo);
+      pointer-events: none;
+    }
+
+    .btn-auth:hover {
+      background: #d4911e;
+      transform: translateY(-1px);
+      box-shadow: 0 8px 22px rgba(232,160,48,.35);
+    }
+    .btn-auth:hover::before { left: 140%; }
+
+    /* Footer links */
     .auth-footer-links {
-      margin-top: 18px;
+      margin-top: 14px;
       display: flex;
       flex-direction: column;
       gap: 6px;
@@ -197,21 +354,31 @@
     }
 
     .auth-footer-links .hint {
-      font-size: .78rem;
-      color: #9ca3af;
+      font-size: 12px;
+      color: rgba(138,141,154,.7);
+      line-height: 1.5;
+      max-width: 300px;
     }
 
-    .auth-footer-links span {
-      font-size: .82rem;
-      color: #64748b;
+    .auth-footer-links .nav-link-row {
+      font-size: 12.5px;
+      color: var(--text-muted);
     }
 
     .auth-footer-links a {
-      color: var(--accent);
+      color: var(--accent-gold);
       font-weight: 700;
       text-decoration: none;
     }
     .auth-footer-links a:hover { text-decoration: underline; }
+
+    /* Separador */
+    .auth-footer-links .sep {
+      width: 40px;
+      height: 1px;
+      background: var(--border-bright);
+      margin: 4px auto;
+    }
   </style>
 </head>
 
@@ -221,8 +388,11 @@
   <nav class="auth-nav">
     <div class="auth-nav-inner">
       <a href="./index.html">
-        <img src="./assets/img/logo.png" alt="Lubricentro">
+        <img src="./assets/img/logo_white.png" alt="Lubricentro">
       </a>
+      <div class="auth-nav-badge">
+        <i class="bi bi-shield-lock-fill"></i> Zona Restringida
+      </div>
       <a href="./index.html" class="auth-nav-back">
         <i class="bi bi-arrow-left"></i> Volver al inicio
       </a>
@@ -233,13 +403,26 @@
   <main class="auth-main">
     <div class="auth-wrap">
 
-      <div class="auth-eyebrow">
-        <i class="bi bi-shield-lock"></i> Zona Restringida
+      <!-- Ícono de escudo -->
+      <div class="auth-shield-wrap">
+        <div class="auth-shield">
+          <i class="bi bi-shield-lock-fill"></i>
+        </div>
       </div>
-      <h1 class="auth-title">Acceso Staff / Admin</h1>
-      <p class="auth-sub">Ingresá con tus credenciales de personal.</p>
+
+      <!-- Eyebrow centrado con líneas a ambos lados -->
+      <div class="auth-eyebrow">Zona Restringida</div>
+
+      <h1 class="auth-title">Acceso Staff</h1>
+      <p class="auth-sub">Ingresá con tus credenciales de personal autorizado.</p>
 
       <div class="auth-card">
+
+        <!-- Badge de advertencia -->
+        <div class="auth-warning">
+          <i class="bi bi-exclamation-triangle-fill"></i>
+          Acceso exclusivo para personal autorizado del lubricentro.
+        </div>
 
         <div id="message" class="message"></div>
 
@@ -252,12 +435,14 @@
             <label for="login-password">Contraseña</label>
             <input type="password" id="login-password" placeholder="••••••••" required />
           </div>
-          <button type="submit" class="btn-auth">Iniciar sesión <i class="bi bi-arrow-right ms-1"></i></button>
+          <button type="submit" class="btn-auth">Ingresar <i class="bi bi-arrow-right ms-1"></i></button>
         </form>
 
         <div class="auth-footer-links">
+          <div class="sep"></div>
           <span class="hint">Si necesitás un usuario, pedile a un admin que lo cree desde el dashboard.</span>
-          <span>¿Sos cliente? <a href="./auth_client.html">Ir al portal cliente</a></span>
+          <div class="sep"></div>
+          <span class="nav-link-row">¿Sos cliente? <a href="./auth_client.html">Ir al portal cliente</a></span>
         </div>
 
       </div>

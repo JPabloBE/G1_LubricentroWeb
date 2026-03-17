@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Django Backend",
+      "runtimeExecutable": "venv/bin/python",
+      "runtimeArgs": ["backend/manage.py", "runserver"],
+      "port": 8000
+    },
+    {
+      "name": "Frontend Static Server",
+      "runtimeExecutable": "python3",
+      "runtimeArgs": ["-m", "http.server", "5500", "--directory", "frontend"],
+      "port": 5500
+    }
+  ]
+}

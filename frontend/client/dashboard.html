@@ -7,315 +7,15 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/client.css">
 
   <style>
-    body { background: #f8fafc; }
-
-    /* ── Hero ── */
-    .hero-section {
-      background: linear-gradient(135deg, #f3f6ff 60%, #e8efff);
-      border-bottom: 1px solid #dde5f5;
-      padding: 36px 0 28px;
-    }
-    .hero-greeting {
-      font-size: .82rem;
-      font-weight: 700;
-      color: #1d63ff;
-      text-transform: uppercase;
-      letter-spacing: .07em;
-      margin-bottom: 6px;
-    }
-    .hero-title {
-      font-size: 1.75rem;
-      font-weight: 800;
-      color: #0f172a;
-      line-height: 1.2;
-      margin-bottom: 20px;
-    }
-    .btn-hero {
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-      background: #1d63ff;
-      color: #fff;
-      border: none;
-      border-radius: 10px;
-      padding: 13px 30px;
-      font-size: 1rem;
-      font-weight: 700;
-      text-decoration: none;
-      transition: background .18s;
-    }
-    .btn-hero:hover { background: #0a3ea6; color: #fff; }
-    .btn-hero-ghost {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      color: #1d63ff;
-      font-size: .9rem;
-      font-weight: 700;
-      text-decoration: none;
-      vertical-align: middle;
-    }
-    .btn-hero-ghost:hover { text-decoration: underline; color: #0a3ea6; }
-
-    /* ── Section label ── */
-    .section-label {
-      font-size: .72rem;
-      font-weight: 700;
-      color: #6c7a94;
-      text-transform: uppercase;
-      letter-spacing: .08em;
-      margin-bottom: 14px;
-    }
-
-    /* ── Appointment cards ── */
-    .appt-card {
-      border: none;
-      border-radius: 14px;
-      box-shadow: 0 2px 14px rgba(0,0,0,.08);
-      background: #fff;
-      overflow: hidden;
-    }
-    .appt-card-accent {
-      height: 5px;
-      background: #1d63ff;
-    }
-    .appt-card-accent.ready { background: #16a34a; }
-    .appt-card-body { padding: 20px 22px 22px; }
-
-    .appt-card-plate {
-      font-size: .72rem;
-      font-weight: 700;
-      color: #6c7a94;
-      letter-spacing: .08em;
-      text-transform: uppercase;
-    }
-    .appt-card-vehicle {
-      font-size: 1.08rem;
-      font-weight: 800;
-      color: #0f172a;
-      margin-bottom: 2px;
-    }
-    .appt-card-date {
-      font-size: .83rem;
-      color: #6c7a94;
-    }
-    .appt-card-date i { color: #1d63ff; }
-
-    /* Progress */
-    .wo-progress-wrap { margin: 16px 0 4px; }
-    .wo-progress-bar {
-      height: 8px;
-      border-radius: 99px;
-      background: #e2e8f0;
-      overflow: hidden;
-    }
-    .wo-progress-fill {
-      height: 100%;
-      border-radius: 99px;
-      background: #1d63ff;
-      transition: width .5s ease;
-    }
-    .wo-progress-fill.ready { background: #16a34a; }
-    .wo-progress-meta {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: 6px;
-    }
-    .wo-progress-label {
-      font-size: .8rem;
-      font-weight: 700;
-      color: #0f172a;
-    }
-    .wo-progress-pct {
-      font-size: .75rem;
-      font-weight: 700;
-      color: #6c7a94;
-    }
-    .wo-progress-pct.ready { color: #16a34a; }
-    .wo-mechanic-note {
-      display: flex; align-items: flex-start; gap: 6px;
-      margin-top: 8px; padding: 7px 10px;
-      background: #f8fafc; border-left: 3px solid #1d63ff;
-      border-radius: 0 6px 6px 0;
-      font-size: .78rem; color: #374151; line-height: 1.4;
-    }
-    .wo-mechanic-note i { color: #1d63ff; margin-top: 1px; flex-shrink: 0; }
-
-    /* No-OT message */
-    .appt-confirmed-msg {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      background: #f0f7ff;
-      color: #1d63ff;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: .82rem;
-      font-weight: 600;
-      margin: 14px 0 4px;
-    }
-
-    /* Action row */
-    .appt-card-actions {
-      margin-top: 16px;
-      padding-top: 14px;
-      border-top: 1px solid #f1f5f9;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .appt-status-badge {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      border-radius: 20px;
-      padding: 4px 12px;
-      font-size: .75rem;
-      font-weight: 700;
-    }
-    .badge-pending  { background: #fef9c3; color: #854d0e; }
-    .badge-active   { background: #dbeafe; color: #1e40af; }
-    .badge-ready    { background: #dcfce7; color: #14532d; }
-
-    .btn-card-link {
-      display: inline-flex;
-      align-items: center;
-      gap: 5px;
-      font-size: .82rem;
-      font-weight: 700;
-      color: #1d63ff;
-      text-decoration: none;
-    }
-    .btn-card-link:hover { text-decoration: underline; color: #0a3ea6; }
-
-    /* Empty state */
-    .empty-state {
-      text-align: center;
-      padding: 60px 20px;
-      color: #6c7a94;
-    }
-    .empty-state i { font-size: 3rem; color: #cbd5e1; display: block; margin-bottom: 14px; }
-    .empty-state p { font-size: .95rem; margin-bottom: 20px; }
-
-    /* Nav user */
-    .nav-user {
-      display: flex; align-items: center; gap: 12px; margin-left: auto;
-    }
-    .nav-user-name { color: rgba(255,255,255,.75); font-size: .875rem; font-weight: 500; }
-    .btn-logout {
-      background: rgba(255,255,255,.12); color: #fff;
-      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-      padding: 5px 14px; font-size: .8rem; font-weight: 600;
-      cursor: pointer; transition: background .15s; white-space: nowrap;
-    }
-    .btn-logout:hover { background: rgba(255,255,255,.22); }
-
-    /* Alert */
-    #msg { border-radius: 8px; }
-
-    /* ── Notification bell ── */
-    .notif-wrap { position: relative; }
-    .btn-notif-bell {
-      position: relative; background: rgba(255,255,255,.12);
-      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-      color: #fff; padding: 5px 10px; font-size: 1rem; cursor: pointer;
-      transition: background .15s; line-height: 1;
-    }
-    .btn-notif-bell:hover { background: rgba(255,255,255,.22); }
-    .notif-count {
-      position: absolute; top: -6px; right: -6px;
-      background: #ef4444; color: #fff; border-radius: 99px;
-      font-size: .62rem; font-weight: 800; line-height: 1;
-      min-width: 17px; height: 17px; display: none;
-      align-items: center; justify-content: center; padding: 0 4px;
-    }
-    .notif-count.show { display: flex; }
-
-    .notif-dropdown {
-      position: absolute; top: calc(100% + 8px); right: 0;
-      width: 320px; background: #fff; border-radius: 12px;
-      box-shadow: 0 8px 32px rgba(0,0,0,.18); border: 1px solid #e4eaf5;
-      z-index: 200; display: none; overflow: hidden;
-    }
-    .notif-dropdown.open { display: block; }
-    .notif-dd-header {
-      padding: 13px 16px 10px; border-bottom: 1px solid #f1f5f9;
-      font-size: .78rem; font-weight: 800; color: #0f172a; letter-spacing: .04em;
-      text-transform: uppercase;
-    }
-    .notif-item {
-      display: flex; align-items: flex-start; gap: 10px;
-      padding: 12px 16px; border-bottom: 1px solid #f8fafc;
-      transition: background .12s;
-    }
-    .notif-item:last-child { border-bottom: none; }
-    .notif-item:hover { background: #f8fafc; }
-    .notif-icon {
-      width: 34px; height: 34px; border-radius: 8px; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center; font-size: 1rem;
-    }
-    .notif-icon.urgent { background: #fff1f1; color: #dc2626; }
-    .notif-icon.normal { background: #eff6ff; color: #1d63ff; }
-    .notif-body { flex: 1; min-width: 0; }
-    .notif-title { font-size: .82rem; font-weight: 700; color: #0f172a; line-height: 1.3; }
-    .notif-meta  { font-size: .75rem; color: #6c7a94; margin-top: 2px; }
-    .btn-notif-dismiss {
-      background: none; border: none; color: #94a3b8; font-size: .7rem;
-      cursor: pointer; padding: 2px 6px; border-radius: 4px; white-space: nowrap; align-self: center;
-    }
-    .btn-notif-dismiss:hover { background: #f1f5f9; color: #475569; }
-    .notif-empty { padding: 22px 16px; text-align: center; color: #9ca3af; font-size: .85rem; }
-
-    /* ── Reminder pop-up modal ── */
-    .notif-modal-overlay {
-      display: none; position: fixed; inset: 0; z-index: 999;
-      background: rgba(0,0,0,.45); align-items: center; justify-content: center;
-    }
-    .notif-modal-overlay.open { display: flex; }
-    .notif-modal-box {
-      background: #fff; border-radius: 16px; max-width: 400px; width: 90%;
-      box-shadow: 0 8px 40px rgba(0,0,0,.22); overflow: hidden;
-      animation: notifSlideIn .25s ease;
-    }
-    @keyframes notifSlideIn {
-      from { transform: translateY(20px); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
-    }
-    .notif-modal-header {
-      background: #fff1f1; border-bottom: 1px solid #fecaca;
-      padding: 18px 20px 14px; display: flex; align-items: center; gap: 10px;
-    }
-    .notif-modal-icon { font-size: 1.5rem; color: #dc2626; }
-    .notif-modal-hl { font-size: 1rem; font-weight: 800; color: #991b1b; }
-    .notif-modal-body { padding: 18px 20px; }
-    .notif-modal-service { font-size: 1.05rem; font-weight: 800; color: #0f172a; margin-bottom: 4px; }
-    .notif-modal-plate   { font-size: .85rem; color: #6c7a94; margin-bottom: 12px; }
-    .notif-modal-time    {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: #fff1f1; color: #dc2626; border-radius: 8px;
-      padding: 7px 14px; font-size: .9rem; font-weight: 700;
-    }
-    .btn-notif-close {
-      margin-top: 16px; width: 100%; background: #dc2626; color: #fff;
-      border: none; border-radius: 8px; padding: 10px; font-family: inherit;
-      font-size: .95rem; font-weight: 700; cursor: pointer; transition: background .15s;
-    }
-    .btn-notif-close:hover { background: #b91c1c; }
-
-    @media (max-width: 767px) {
-      .topbar-info { display: none !important; }
-      .hero-section { padding: 24px 0 20px; }
-      .hero-title { font-size: 1.35rem; }
-      .btn-hero-ghost { display: none; }
-      .notif-dropdown { width: 290px; }
-    }
+    /* Estilos extendidos — ver client.css */
+    .section-label { margin-bottom: 14px; }
   </style>
 </head>
 
@@ -353,7 +53,6 @@
         <li><a class="active" href="./dashboard.html">Dashboard</a></li>
         <li><a href="./appointments.html">Mis Citas</a></li>
         <li><a href="./vehicles.html">Mis Autos</a></li>
-        <li><a href="./work_orders.html">Órdenes</a></li>
       </ul>
 
       <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
@@ -383,21 +82,20 @@
       <a class="active" href="./dashboard.html">Dashboard</a>
       <a href="./appointments.html">Mis Citas</a>
       <a href="./vehicles.html">Mis Autos</a>
-      <a href="./work_orders.html">Órdenes</a>
       <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
     </div>
   </nav>
 
   <!-- ══ HERO ══ -->
-  <section class="hero-section">
+  <section class="hero-banner">
     <div class="container">
       <div class="hero-greeting">Portal Cliente</div>
       <div class="hero-title">Bienvenido/a, <span id="whoamiHero">—</span></div>
       <div class="d-flex align-items-center flex-wrap gap-3">
-        <a class="btn-hero" href="./appointments.html">
+        <a class="btn-primary-red" href="./appointments.html">
           <i class="bi bi-plus-circle-fill"></i>Agendar nueva cita
         </a>
-        <a class="btn-hero-ghost" href="./vehicles.html">
+        <a class="btn-ghost-red" href="./vehicles.html">
           Mis autos <i class="bi bi-arrow-right"></i>
         </a>
       </div>
@@ -521,8 +219,15 @@
         <div class="appt-card">
           <div class="appt-card-accent ${accentClass}"></div>
           <div class="appt-card-body">
-            <div class="appt-card-plate">${escapeHtml(plate)}</div>
-            <div class="appt-card-vehicle">${escapeHtml(vehicle)}</div>
+            <div class="appt-card-header">
+              <div class="appt-card-header-info">
+                <div class="appt-card-plate">${escapeHtml(plate)}</div>
+                <div class="appt-card-vehicle">${escapeHtml(vehicle)}</div>
+              </div>
+              <div class="appt-card-icon">
+                <i class="bi bi-car-front-fill"></i>
+              </div>
+            </div>
             <div class="appt-card-date">
               <i class="bi bi-calendar3"></i>
               ${escapeHtml(fmtDate(appt.scheduled_start))}
@@ -530,7 +235,7 @@
             ${renderProgressBlock(wo)}
             <div class="appt-card-actions">
               ${apptStatusBadge(appt.status)}
-              <a class="btn-card-link" href="./appointment_detail.html?id=${escapeHtml(appt.appointment_id)}">
+              <a class="btn-card-link stretched-link" href="./appointment_detail.html?id=${escapeHtml(appt.appointment_id)}">
                 Ver detalle <i class="bi bi-arrow-right"></i>
               </a>
             </div>
@@ -649,15 +354,16 @@
 
     list.innerHTML = pending.map(r => {
       const isUrgent = r.reminder_type === "1h";
-      const msg = isUrgent ? "¡Tu cita es en menos de 1 hora!" : "Tu cita es mañana";
+      const msg = isUrgent ? "¡Cita en menos de 1 hora!" : "Tu cita es mañana";
       return `
-        <div class="notif-item">
+        <div class="notif-item ${isUrgent ? "urgent" : "normal"}">
           <div class="notif-icon ${isUrgent ? "urgent" : "normal"}">
-            <i class="bi bi-${isUrgent ? "alarm" : "clock"}"></i>
+            <i class="bi bi-${isUrgent ? "alarm-fill" : "calendar3"}"></i>
           </div>
           <div class="notif-body">
+            <div class="notif-service">${escapeHtml(r.service_name)}</div>
             <div class="notif-title">${escapeHtml(msg)}</div>
-            <div class="notif-meta">${escapeHtml(r.service_name)} — ${escapeHtml(r.vehicle_plate)}<br>${escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
+            <div class="notif-meta"><i class="bi bi-car-front-fill"></i> ${escapeHtml(r.vehicle_plate)} · ${escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
           </div>
           <button class="btn-notif-dismiss" data-id="${escapeHtml(r.appointment_id)}" data-type="${escapeHtml(r.reminder_type)}">Visto</button>
         </div>
@@ -719,15 +425,24 @@
 <!-- Modal pop-up de recordatorio -->
 <div class="notif-modal-overlay" id="notifModalOverlay">
   <div class="notif-modal-box">
+    <div class="notif-modal-stripes"></div>
     <div class="notif-modal-header">
-      <i class="bi bi-alarm-fill notif-modal-icon"></i>
-      <span class="notif-modal-hl">¡Recordatorio de cita!</span>
+      <div class="notif-modal-glow-ring">
+        <i class="bi bi-alarm-fill notif-modal-icon"></i>
+      </div>
+      <div class="notif-modal-hl">¡Cita en menos de 1 hora!</div>
+      <div class="notif-modal-sub">No olvides presentarte a tiempo</div>
     </div>
     <div class="notif-modal-body">
       <div class="notif-modal-service"></div>
-      <div class="notif-modal-plate"></div>
+      <div class="notif-modal-plate-row">
+        <i class="bi bi-car-front-fill"></i>
+        <span class="notif-modal-plate"></span>
+      </div>
       <div class="notif-modal-time"><i class="bi bi-alarm-fill"></i> —</div>
-      <button class="btn-notif-close">Entendido</button>
+      <button class="btn-notif-close">
+        <i class="bi bi-check2-circle"></i> Entendido
+      </button>
     </div>
   </div>
 </div>

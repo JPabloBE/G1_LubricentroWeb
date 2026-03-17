@@ -7,159 +7,280 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:ital,opsz,wght@0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,400&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/main.css">
+  <link rel="stylesheet" href="../assets/css/client.css">
 
   <style>
-    body { background: #f8fafc; }
-
-    /* Nav user */
-    .nav-user { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-    .nav-user-name { color: rgba(255,255,255,.75); font-size: .875rem; font-weight: 500; }
-    .btn-logout {
-      background: rgba(255,255,255,.12); color: #fff;
-      border: 1px solid rgba(255,255,255,.25); border-radius: 6px;
-      padding: 5px 14px; font-size: .8rem; font-weight: 600;
-      cursor: pointer; transition: background .15s; white-space: nowrap;
+    /* ── Hero card: layout de dos zonas ── */
+    @media (min-width: 768px) {
+      .hero-card {
+        display: flex !important;
+        align-items: stretch;
+      }
+      .hero-card-body {
+        flex: 1;
+      }
+      .hero-card-visual {
+        display: flex !important;
+      }
     }
-    .btn-logout:hover { background: rgba(255,255,255,.22); }
 
-    /* Back link */
+    .hero-card-visual {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      min-width: 200px;
+      padding: 20px 24px;
+      background: rgba(0,0,0,.3);
+      border-left: 1px solid rgba(255,255,255,.07);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero-card-visual::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 60% 50%, rgba(232,160,48,.06) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    /* Con foto real del vehículo */
+    .hero-vehicle-img {
+      width: 100%;
+      max-width: 200px;
+      height: 110px;
+      object-fit: cover;
+      border-radius: 7px;
+      opacity: .88;
+      box-shadow: 0 4px 20px rgba(0,0,0,.5);
+      transition: opacity .2s;
+    }
+    .hero-card:hover .hero-vehicle-img { opacity: 1; }
+
+    /* Sin foto: ícono fallback */
+    .hero-car-icon {
+      font-size: 4rem;
+      line-height: 1;
+      background: linear-gradient(135deg, var(--accent-gold) 0%, rgba(232,160,48,.5) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      filter: drop-shadow(0 4px 16px rgba(232,160,48,.25));
+      transition: filter .25s;
+    }
+    .hero-card:hover .hero-car-icon {
+      filter: drop-shadow(0 4px 22px rgba(232,160,48,.45));
+    }
+
+    .hero-car-make {
+      font-family: var(--font-display);
+      font-size: .75rem;
+      font-weight: 700;
+      letter-spacing: .15em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      text-align: center;
+      line-height: 1.2;
+    }
+
+    /* ── Layout de 2 zonas ──
+       Desktop:
+         1. Hero                    → 100%
+         2. Columnas                → Estado+OT (izq ~58%) | Sidebar sticky (der ~42%)
+       Móvil: hero → sidebar → Estado → OT
+    ── */
+
+    /* Zona de columnas */
+    .detail-columns {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .detail-main-col {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .detail-sidebar-col {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    @media (min-width: 992px) {
+      .detail-columns {
+        flex-direction: row;
+        align-items: stretch;
+        gap: 16px;
+      }
+
+      /* Sidebar a la derecha (order 2), columnas más parejas */
+      .detail-sidebar-col {
+        flex: 0 0 38%;
+        max-width: 38%;
+        order: 2;
+      }
+
+      /* El card de detalles ocupa el espacio restante de la sidebar */
+      .detail-sidebar-col .sidebar-info-card {
+        flex: 1;
+      }
+
+      .detail-main-col {
+        flex: 1 1 0;
+        min-width: 0;
+        order: 1;
+      }
+    }
+
+    /* ── Mensaje del taller ── */
+    .msg-card {
+      background: rgba(232,160,48,.05);
+      border: 1px solid rgba(232,160,48,.18);
+      border-left: 4px solid var(--accent-gold);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(232,160,48,.06);
+    }
+
+    .msg-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 16px 10px;
+      border-bottom: 1px solid rgba(232,160,48,.12);
+      color: var(--accent-gold);
+      font-family: var(--font-body);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .msg-card-body {
+      padding: 14px 16px 16px;
+      font-family: var(--font-body);
+      font-size: .88rem;
+      color: var(--text-primary);
+      line-height: 1.65;
+    }
+
+    /* ── Sidebar info card (detalles de la cita) ── */
+    .sidebar-info-card {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-bright);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+
+    .sidebar-info-card-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 11px 16px 9px;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-muted);
+      font-family: var(--font-body);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+
+    .sidebar-info-card-header i {
+      color: var(--accent-red);
+      font-size: .9rem;
+    }
+
+    .sidebar-info-card-body {
+      padding: 10px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    /* ── Quick-info pills para el sidebar ── */
+    .appt-meta-pill {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 12px;
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-bright);
+      border-radius: 7px;
+      font-family: var(--font-body);
+      font-size: .8rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+    }
+
+    .appt-meta-pill i {
+      color: var(--accent-gold);
+      font-size: 1rem;
+      flex-shrink: 0;
+    }
+
+    .appt-meta-pill .pill-label {
+      font-size: .65rem;
+      color: var(--text-muted);
+      font-weight: 600;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      display: block;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .appt-meta-pill .pill-val {
+      font-size: .82rem;
+      color: var(--text-primary);
+      font-weight: 500;
+      line-height: 1.2;
+    }
+
+    /* ── Sidebar section label ── */
+    .sidebar-section-label {
+      font-family: var(--font-body);
+      font-size: .65rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin: 16px 0 8px;
+    }
+
+    .sidebar-section-label:first-child {
+      margin-top: 0;
+    }
+
+    /* ── Espaciado entre tarjetas del main ── */
+    .detail-card + .detail-card {
+      margin-top: 12px;
+    }
+
+    /* ── Back link ── */
     .back-link {
-      display: inline-flex; align-items: center; gap: 6px;
-      color: #1d63ff; font-size: .85rem; font-weight: 700;
-      text-decoration: none; margin-bottom: 20px;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-family: var(--font-body);
+      font-size: .82rem;
+      color: var(--text-muted);
+      text-decoration: none;
+      margin-bottom: 18px;
+      transition: color .15s;
     }
-    .back-link:hover { text-decoration: underline; color: #0a3ea6; }
 
-    /* Hero card */
-    .hero-card {
-      border: none; border-radius: 14px;
-      box-shadow: 0 2px 14px rgba(0,0,0,.08);
-      overflow: hidden; background: #fff; margin-bottom: 20px;
-    }
-    .hero-card-accent { height: 6px; background: #1d63ff; }
-    .hero-card-accent.ready { background: #16a34a; }
-    .hero-card-body { padding: 24px 26px 22px; }
-    .hero-plate { font-size: .75rem; font-weight: 700; color: #6c7a94; letter-spacing: .08em; text-transform: uppercase; }
-    .hero-vehicle { font-size: 1.45rem; font-weight: 800; color: #0f172a; line-height: 1.2; margin: 4px 0 10px; }
-    .hero-meta { display: flex; flex-wrap: wrap; gap: 14px; margin-bottom: 14px; }
-    .hero-meta-item { display: flex; align-items: center; gap: 6px; font-size: .87rem; color: #4b5563; }
-    .hero-meta-item i { color: #1d63ff; }
-
-    /* Status badge */
-    .ap-badge {
-      display: inline-flex; align-items: center; gap: 6px;
-      border-radius: 20px; padding: 5px 14px; font-size: .8rem; font-weight: 700;
-    }
-    .badge-pending  { background: #fff8e1; color: #854d0e; border: 1px solid #fde68a; }
-    .badge-active   { background: #dbeafe; color: #1e40af; border: 1px solid #93c5fd; }
-    .badge-done     { background: #dcfce7; color: #14532d; border: 1px solid #86efac; }
-    .badge-cancelled{ background: #fee2e2; color: #991b1b; border: 1px solid #fca5a5; }
-
-    /* Section cards */
-    .detail-card {
-      border: none; border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,.06);
-      background: #fff; margin-bottom: 16px; overflow: hidden;
-    }
-    .detail-card-header {
-      padding: 14px 20px; border-bottom: 1px solid #f1f5f9;
-      display: flex; align-items: center; gap: 10px;
-    }
-    .detail-card-header i { font-size: 1rem; color: #1d63ff; }
-    .detail-card-header h6 { font-size: .92rem; font-weight: 800; color: #0f172a; margin: 0; }
-    .detail-card-body { padding: 18px 20px; }
-
-    /* Progress */
-    .progress-track {
-      display: flex; gap: 0; margin-bottom: 18px;
-    }
-    .progress-step {
-      flex: 1; position: relative; text-align: center; padding-top: 10px;
-    }
-    .progress-step::before {
-      content: ""; position: absolute; top: 18px; left: 0; right: 0; height: 3px;
-      background: #e2e8f0; z-index: 0;
-    }
-    .progress-step:first-child::before { left: 50%; }
-    .progress-step:last-child::before  { right: 50%; }
-    .progress-dot {
-      width: 18px; height: 18px; border-radius: 50%;
-      background: #e2e8f0; border: 3px solid #fff;
-      display: inline-block; position: relative; z-index: 1;
-      margin-bottom: 6px; box-shadow: 0 0 0 2px #e2e8f0;
-    }
-    .progress-step.done .progress-step::before { background: #1d63ff; }
-    .progress-step.active .progress-dot { background: #1d63ff; box-shadow: 0 0 0 3px rgba(29,99,255,.25); }
-    .progress-step.done   .progress-dot { background: #1d63ff; box-shadow: 0 0 0 2px #1d63ff; }
-    .progress-step.ready-step .progress-dot { background: #16a34a; box-shadow: 0 0 0 3px rgba(22,163,74,.25); }
-    .progress-step-label { font-size: .7rem; font-weight: 600; color: #94a3b8; line-height: 1.3; }
-    .progress-step.active .progress-step-label,
-    .progress-step.done   .progress-step-label  { color: #1d63ff; }
-    .progress-step.ready-step .progress-step-label { color: #16a34a; }
-
-    .wo-progress-bar-wrap { margin-bottom: 8px; }
-    .wo-bar { height: 10px; border-radius: 99px; background: #e2e8f0; overflow: hidden; }
-    .wo-bar-fill { height: 100%; border-radius: 99px; background: #1d63ff; transition: width .5s; }
-    .wo-bar-fill.ready { background: #16a34a; }
-    .wo-bar-meta { display: flex; justify-content: space-between; margin-top: 6px; font-size: .82rem; }
-    .wo-bar-label { font-weight: 700; color: #0f172a; }
-    .wo-bar-pct   { font-weight: 700; color: #6c7a94; }
-    .wo-bar-pct.ready { color: #16a34a; }
-
-    /* Fields */
-    .field-row { margin-bottom: 14px; }
-    .field-label { font-size: .72rem; font-weight: 700; color: #6c7a94; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 3px; }
-    .field-val   { font-size: .9rem; color: #0f172a; }
-
-    /* Line items table */
-    .line-table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-    .line-table th {
-      text-align: left; font-size: .7rem; font-weight: 700; color: #6c7a94;
-      text-transform: uppercase; letter-spacing: .05em;
-      padding: 6px 8px; border-bottom: 1.5px solid #f1f5f9;
-    }
-    .line-table td { padding: 8px; border-bottom: 1px solid #f8fafc; vertical-align: top; }
-    .line-table tr:last-child td { border-bottom: none; }
-    .line-name   { font-weight: 600; color: #0f172a; }
-    .line-sub    { font-size: .75rem; color: #6c7a94; margin-top: 2px; }
-    .line-amount { font-weight: 700; color: #0f172a; text-align: right; white-space: nowrap; }
-
-    /* Total row */
-    .total-row {
-      display: flex; justify-content: space-between; align-items: center;
-      padding: 12px 0 0; border-top: 2px solid #f1f5f9; margin-top: 8px;
-    }
-    .total-label { font-size: .85rem; font-weight: 700; color: #374151; }
-    .total-val   { font-size: 1.1rem; font-weight: 800; color: #1d63ff; }
-
-    /* Cancel btn */
-    .btn-cancel {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: transparent; color: #dc2626; border: 1.5px solid #fca5a5;
-      border-radius: 8px; padding: 8px 20px; font-family: inherit;
-      font-size: .875rem; font-weight: 700; cursor: pointer; transition: background .15s;
-    }
-    .btn-cancel:hover { background: #fee2e2; }
-
-    /* Alert */
-    #msg { border-radius: 8px; margin-bottom: 16px; }
-
-    /* Empty/error */
-    .state-msg {
-      text-align: center; padding: 60px 20px;
-      background: #fff; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,.05);
-    }
-    .state-msg i { font-size: 2.5rem; color: #cbd5e1; display: block; margin-bottom: 12px; }
-    .state-msg p { color: #6c7a94; }
-
-    @media (max-width: 767px) {
-      .topbar-info { display: none !important; }
-      .hero-vehicle { font-size: 1.2rem; }
-      .progress-step-label { font-size: .62rem; }
+    .back-link:hover {
+      color: var(--text-primary);
     }
   </style>
 </head>
@@ -198,7 +319,6 @@
         <li><a href="./dashboard.html">Dashboard</a></li>
         <li><a class="active" href="./appointments.html">Mis Citas</a></li>
         <li><a href="./vehicles.html">Mis Autos</a></li>
-        <li><a href="./work_orders.html">Órdenes</a></li>
       </ul>
       <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
         <i class="bi bi-list"></i>
@@ -214,15 +334,14 @@
       <a href="./dashboard.html">Dashboard</a>
       <a class="active" href="./appointments.html">Mis Citas</a>
       <a href="./vehicles.html">Mis Autos</a>
-      <a href="./work_orders.html">Órdenes</a>
       <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
     </div>
   </nav>
 
   <!-- ══ MAIN ══ -->
-  <main class="container py-4" style="max-width:800px;">
-    <a class="back-link" href="./dashboard.html">
-      <i class="bi bi-arrow-left"></i>Volver al inicio
+  <main class="container py-4">
+    <a class="back-link" href="./appointments.html">
+      <i class="bi bi-arrow-left"></i>Volver a mis citas
     </a>
 
     <div id="msg" class="alert d-none" role="alert"></div>
@@ -373,20 +492,51 @@
       </table>`;
   }
 
-  function renderPage(appt, wo) {
-    const status  = (appt.status || "").toLowerCase();
-    const label   = AP_STATUS_LABELS[status] || appt.status;
+  function renderPage(appt, wo, vehicleImgUrl) {
+    const status     = (appt.status || "").toLowerCase();
+    const label      = AP_STATUS_LABELS[status] || appt.status;
     const badgeClass = apBadgeClass(status);
     const isReady    = wo?.status === "ready" || wo?.status === "closed";
     const cancellable = status === "scheduled";
+    const accentClass = isReady ? "ready" : "";
 
-    const vehicle = [appt.vehicle_make, appt.vehicle_model].filter(Boolean).join(" ") || "Vehículo";
-    const plate   = appt.vehicle_plate || "";
+    const vehicle  = [appt.vehicle_make, appt.vehicle_model].filter(Boolean).join(" ") || "Vehículo";
+    const plate    = appt.vehicle_plate || "";
     const slotTime = appt.slot_start || appt.scheduled_start;
 
-    // WO sections
+    // ── Hero: zona visual — foto real o ícono fallback
+    const makeLabel = [appt.vehicle_make, appt.vehicle_year].filter(Boolean).join(" · ");
+    const vehicleVisual = vehicleImgUrl ? `
+      <div class="hero-card-visual">
+        <img class="hero-vehicle-img"
+             src="${escapeHtml(vehicleImgUrl)}"
+             alt="${escapeHtml(plate)}"
+             onerror="this.parentNode.innerHTML='<i class=&quot;bi bi-car-front-fill hero-car-icon&quot;></i>${makeLabel ? `<div class=&quot;hero-car-make&quot;>${escapeHtml(makeLabel)}</div>` : ""}'">
+      </div>` : `
+      <div class="hero-card-visual">
+        <i class="bi bi-car-front-fill hero-car-icon"></i>
+        ${makeLabel ? `<div class="hero-car-make">${escapeHtml(makeLabel)}</div>` : ""}
+      </div>`;
+
+    // ── Hero card completo
+    const heroCardHtml = `
+      <div class="hero-card">
+        <div class="hero-card-accent ${accentClass}"></div>
+        <div class="hero-card-body">
+          <div class="hero-plate">${escapeHtml(plate)}</div>
+          <div class="hero-vehicle">${escapeHtml(vehicle)}</div>
+          <div class="hero-meta">
+            ${appt.service_name ? `<div class="hero-meta-item"><i class="bi bi-wrench"></i>${escapeHtml(appt.service_name)}</div>` : ""}
+            ${slotTime ? `<div class="hero-meta-item"><i class="bi bi-calendar3"></i>${escapeHtml(fmt(slotTime))}</div>` : ""}
+          </div>
+          <span class="ap-badge ${badgeClass}">${escapeHtml(label)}</span>
+        </div>
+        ${vehicleVisual}
+      </div>`;
+
+    // ── Main: WO status
     let woStatusSection = "";
-    let woDetailSection  = "";
+    let woDetailSection = "";
     if (wo) {
       woStatusSection = `
         <div class="detail-card">
@@ -415,7 +565,7 @@
               ${wo.customer_symptoms ? `<div class="field-row"><div class="field-label">Síntomas reportados</div><div class="field-val">${escapeHtml(wo.customer_symptoms)}</div></div>` : ""}
               ${wo.diagnosis         ? `<div class="field-row"><div class="field-label">Diagnóstico del taller</div><div class="field-val">${escapeHtml(wo.diagnosis)}</div></div>` : ""}
               ${wo.notes             ? `<div class="field-row"><div class="field-label">Notas</div><div class="field-val">${escapeHtml(wo.notes)}</div></div>` : ""}
-              ${hasLines ? `<hr style="border-color:#f1f5f9;margin:14px 0;">` : ""}
+              ${hasLines ? `<hr style="border-color:rgba(255,255,255,.07);margin:14px 0;">` : ""}
             ` : ""}
             ${services.length ? `
               <div class="field-label mb-2"><i class="bi bi-wrench me-1"></i>Servicios</div>
@@ -436,48 +586,107 @@
         </div>`;
     }
 
-    // Appointment info section
-    const apptInfo = [
-      appt.requested_work ? `<div class="field-row"><div class="field-label">Trabajo solicitado</div><div class="field-val">${escapeHtml(appt.requested_work)}</div></div>` : "",
-      appt.notes          ? `<div class="field-row"><div class="field-label">Notas</div><div class="field-val">${escapeHtml(appt.notes)}</div></div>` : "",
-      appt.admin_message  ? `<div class="field-row"><div class="field-label" style="color:#1d63ff;"><i class="bi bi-chat-left-text me-1"></i>Mensaje del taller</div><div class="field-val">${escapeHtml(appt.admin_message)}</div></div>` : "",
+    // ── Sidebar: mensaje del taller (prominente, con acento dorado)
+    const adminMsgCard = appt.admin_message ? `
+      <div class="msg-card">
+        <div class="msg-card-header">
+          <i class="bi bi-chat-left-text"></i>Mensaje del taller
+        </div>
+        <div class="msg-card-body">${escapeHtml(appt.admin_message)}</div>
+      </div>` : "";
+
+    // ── Sidebar: detalles rápidos en pills
+    const quickPills = [
+      slotTime ? `
+        <div class="appt-meta-pill">
+          <i class="bi bi-calendar3"></i>
+          <div>
+            <span class="pill-label">Fecha de la cita</span>
+            <span class="pill-val">${escapeHtml(fmt(slotTime))}</span>
+          </div>
+        </div>` : "",
+      appt.service_name ? `
+        <div class="appt-meta-pill">
+          <i class="bi bi-wrench"></i>
+          <div>
+            <span class="pill-label">Servicio</span>
+            <span class="pill-val">${escapeHtml(appt.service_name)}</span>
+          </div>
+        </div>` : "",
+      appt.requested_work ? `
+        <div class="appt-meta-pill">
+          <i class="bi bi-card-text"></i>
+          <div>
+            <span class="pill-label">Trabajo solicitado</span>
+            <span class="pill-val">${escapeHtml(appt.requested_work)}</span>
+          </div>
+        </div>` : "",
+      appt.notes ? `
+        <div class="appt-meta-pill">
+          <i class="bi bi-sticky"></i>
+          <div>
+            <span class="pill-label">Notas</span>
+            <span class="pill-val">${escapeHtml(appt.notes)}</span>
+          </div>
+        </div>` : "",
     ].filter(Boolean).join("");
 
-    const accentClass = isReady ? "ready" : "";
+    // ── Sidebar: botón cancelar
+    const cancelBtn = cancellable ? `
+      <button class="btn-cancel mt-2" id="btnCancel" data-id="${escapeHtml(appt.appointment_id)}">
+        <i class="bi bi-x-circle"></i>Cancelar esta cita
+      </button>` : "";
+
+    // Detalles de la cita en card contenedora (simetría con las del main)
+    const sidebarInfoCard = quickPills ? `
+      <div class="sidebar-info-card">
+        <div class="sidebar-info-card-header">
+          <i class="bi bi-info-circle-fill"></i>Detalles de la cita
+        </div>
+        <div class="sidebar-info-card-body">
+          ${quickPills}
+        </div>
+      </div>` : "";
+
+    // Sin OT
+    const noWoCard = !wo ? `
+      <div class="detail-card">
+        <div class="detail-card-header">
+          <i class="bi bi-hourglass-split"></i>
+          <h6>Estado</h6>
+        </div>
+        <div class="detail-card-body">
+          <div class="appt-confirmed-msg">
+            <i class="bi bi-calendar-check-fill"></i>
+            Tu cita está confirmada
+          </div>
+          <p class="small mt-3 mb-0" style="color:var(--text-muted);">El taller abrirá la orden de trabajo al recibir tu vehículo.</p>
+        </div>
+      </div>` : "";
 
     return `
-      <div class="hero-card">
-        <div class="hero-card-accent ${accentClass}"></div>
-        <div class="hero-card-body">
-          <div class="hero-plate">${escapeHtml(plate)}</div>
-          <div class="hero-vehicle">${escapeHtml(vehicle)}</div>
-          <div class="hero-meta">
-            ${appt.service_name ? `<div class="hero-meta-item"><i class="bi bi-wrench"></i>${escapeHtml(appt.service_name)}</div>` : ""}
-            ${slotTime ? `<div class="hero-meta-item"><i class="bi bi-calendar3"></i>${escapeHtml(fmt(slotTime))}</div>` : ""}
-          </div>
-          <span class="ap-badge ${badgeClass}">${escapeHtml(label)}</span>
+      <!-- Hero: ancho completo -->
+      <div class="mb-3">${heroCardHtml}</div>
+
+      <!-- Columnas: Estado+OT (izq) | Sidebar sticky (der).
+           Main primero en DOM → en mobile: WO status antes que detalles. -->
+      <div class="detail-columns">
+
+        <!-- Main izq: Estado + OT (primero en DOM = primero en mobile) -->
+        <div class="detail-main-col">
+          ${woStatusSection}
+          ${woDetailSection}
+          ${noWoCard}
         </div>
-      </div>
 
-      ${woStatusSection}
-      ${woDetailSection}
+        <!-- Sidebar derecha -->
+        <div class="detail-sidebar-col">
+          ${adminMsgCard}
+          ${sidebarInfoCard}
+          ${cancelBtn ? `<hr style="border-color:rgba(255,255,255,.07);margin:14px 0 0;">` + cancelBtn : ""}
+        </div>
 
-      ${apptInfo ? `
-        <div class="detail-card">
-          <div class="detail-card-header">
-            <i class="bi bi-info-circle"></i>
-            <h6>Información de la cita</h6>
-          </div>
-          <div class="detail-card-body">${apptInfo}</div>
-        </div>` : ""}
-
-      ${cancellable ? `
-        <div class="mt-2 mb-4">
-          <button class="btn-cancel" id="btnCancel" data-id="${escapeHtml(appt.appointment_id)}">
-            <i class="bi bi-x-circle"></i>Cancelar esta cita
-          </button>
-        </div>` : ""}
-    `;
+      </div>`;
   }
 
   // ── Cancel ───────────────────────────────────────────────────────────────────
@@ -551,7 +760,18 @@
       }
     }
 
-    document.getElementById("content").innerHTML = renderPage(appt, wo);
+    // Buscar imagen del vehículo por placa (misma lógica que vehicles.html)
+    let vehicleImgUrl = null;
+    try {
+      const vData = await fetchJSON(`${API_BASE}/api/customer-vehicles/`, { headers: authHeaders() });
+      const vRows = Array.isArray(vData) ? vData : (vData.results || []);
+      const matched = vRows.find(v => v.plate === appt.vehicle_plate);
+      if (matched?.image_url) vehicleImgUrl = matched.image_url;
+    } catch (_) {
+      // Sin imagen — fallback al ícono
+    }
+
+    document.getElementById("content").innerHTML = renderPage(appt, wo, vehicleImgUrl);
   })();
 </script>
 </body>

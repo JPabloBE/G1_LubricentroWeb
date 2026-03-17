@@ -4,71 +4,207 @@
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Lubricentro | Horarios de Citas</title>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <style>
+    /* ── Slot grid cells ── */
     .slot-cell {
-      min-height: 52px;
+      min-height: 54px;
       border-radius: 8px;
       display: flex;
       align-items: center;
       justify-content: center;
-      transition: background .12s, border-color .12s;
+      gap: 4px;
+      transition: background .15s, border-color .15s, box-shadow .15s;
     }
-    /* Inactive */
+
+    /* Inactive: slot no habilitado */
     .slot-cell.inactive {
-      background: #f8f9fa;
-      border: 2px dashed #ced4da;
+      background: rgba(255,255,255,.03);
+      border: 2px dashed rgba(255,255,255,.13);
       cursor: pointer;
-      color: #adb5bd;
-      font-size: .85rem;
+      color: rgba(255,255,255,.2);
+      font-size: 1.2rem;
+      font-weight: 300;
+      letter-spacing: 0;
     }
-    .slot-cell.inactive:hover { background: #e9f1fb; border-color: #74b9e8; color: #0d6efd; }
-    /* Active */
+    .slot-cell.inactive:hover {
+      background: rgba(255,59,31,.08);
+      border-color: rgba(255,59,31,.4);
+      color: #FF3B1F;
+      box-shadow: 0 0 0 3px rgba(255,59,31,.07);
+    }
+
+    /* Active: slot habilitado */
     .slot-cell.active {
-      background: #d1e7dd;
-      border: 2px solid #198754;
+      background: rgba(52,217,136,.1);
+      border: 2px solid rgba(52,217,136,.35);
+      box-shadow: inset 0 0 0 1px rgba(52,217,136,.08);
+    }
+    .slot-cell.active:hover {
+      background: rgba(52,217,136,.15);
+      border-color: rgba(52,217,136,.5);
     }
     .slot-cell.active .cap-input {
-      width: 52px;
+      width: 48px;
       border: none;
       background: transparent;
       text-align: center;
-      font-weight: 700;
-      font-size: 1rem;
-      color: #0f5132;
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 800;
+      font-size: 1.15rem;
+      letter-spacing: .02em;
+      color: #34d988;
       outline: none;
+      padding: 2px 0;
+      border-radius: 4px;
+      transition: background .12s, color .12s;
+      /* hide number spinners */
+      -moz-appearance: textfield;
     }
-    .slot-cell.active .cap-input:focus { background: #fff; border-radius: 4px; }
+    .slot-cell.active .cap-input::-webkit-outer-spin-button,
+    .slot-cell.active .cap-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+    .slot-cell.active .cap-input:focus {
+      background: rgba(52,217,136,.12);
+      color: #a0f0c8;
+    }
     .slot-cell.active .del-btn {
       background: none;
       border: none;
-      color: #842029;
-      opacity: .5;
-      font-size: .85rem;
-      padding: 0 4px;
+      color: rgba(240,128,144,.5);
+      font-size: .75rem;
+      padding: 2px 3px;
       cursor: pointer;
       line-height: 1;
+      border-radius: 4px;
+      transition: color .12s, background .12s;
+      display: flex;
+      align-items: center;
     }
-    .slot-cell.active .del-btn:hover { opacity: 1; }
-    /* Past */
-    .slot-cell.past { opacity: .3; pointer-events: none; }
-    /* Today column */
-    .today-col { background: #fffbe6 !important; }
-    .section-label { font-size: .78rem; font-weight: 700; color: #495057; }
-    .section-sub   { font-size: .68rem; color: #adb5bd; }
-    .day-head { font-size: .75rem; text-align: center; padding: 6px 4px; }
-    .day-name { font-weight: 700; }
-    .day-date { color: #6c757d; }
-    .today-pip { display: inline-block; width: 6px; height: 6px; background: #0d6efd; border-radius: 50%; margin-left: 3px; vertical-align: middle; }
+    .slot-cell.active .del-btn:hover {
+      color: #f08090;
+      background: rgba(220,53,69,.15);
+    }
+
+    /* Past: franja ya pasada */
+    .slot-cell.past { opacity: .25; pointer-events: none; }
+
+    /* Today column: acento dorado solo en header + bordes de celdas */
+    th.today-col {
+      border-top: 3px solid #E8A030 !important;
+      background: rgba(232,160,48,.08) !important;
+    }
+    th.today-col .day-name { color: #E8A030; }
+    th.today-col .day-date { color: rgba(232,160,48,.65); }
+
+    /* td sin background — el acento va en los bordes de la slot-cell */
+    td.today-col { background: transparent !important; }
+
+    td.today-col .slot-cell.active {
+      border-color: rgba(232,160,48,.55) !important;
+      background: rgba(232,160,48,.07) !important;
+    }
+    td.today-col .slot-cell.active:hover {
+      border-color: rgba(232,160,48,.8) !important;
+      background: rgba(232,160,48,.12) !important;
+    }
+    td.today-col .slot-cell.active .cap-input {
+      color: #E8A030 !important;
+    }
+    td.today-col .slot-cell.active .cap-input:focus {
+      color: #f5c06a !important;
+      background: rgba(232,160,48,.1) !important;
+    }
+    td.today-col .slot-cell.inactive {
+      border-color: rgba(232,160,48,.22) !important;
+      color: rgba(232,160,48,.28) !important;
+    }
+    td.today-col .slot-cell.inactive:hover {
+      border-color: rgba(232,160,48,.6) !important;
+      background: rgba(232,160,48,.07) !important;
+      color: #E8A030 !important;
+      box-shadow: 0 0 0 3px rgba(232,160,48,.06) !important;
+    }
+
+    /* Section row labels */
+    .section-label {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: .9rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      text-transform: uppercase;
+      color: #F2F2F4;
+    }
+    .section-sub {
+      font-size: .65rem;
+      color: #8A8D9A;
+      letter-spacing: .04em;
+      margin-top: 1px;
+    }
+
+    /* Day header */
+    .day-head {
+      font-size: .72rem;
+      text-align: center;
+      padding: 8px 4px 6px;
+    }
+    .day-name {
+      font-family: "Barlow Condensed", sans-serif;
+      font-weight: 800;
+      font-size: .95rem;
+      letter-spacing: .08em;
+      text-transform: uppercase;
+      color: #F2F2F4;
+    }
+    .day-date { color: #8A8D9A; margin-top: 1px; }
+    .today-pip {
+      display: inline-block;
+      width: 6px; height: 6px;
+      background: #E8A030;
+      border-radius: 50%;
+      margin-left: 4px;
+      vertical-align: middle;
+      box-shadow: 0 0 6px rgba(232,160,48,.8), 0 0 12px rgba(232,160,48,.3);
+    }
+
+    /* Legend items */
+    .legend-chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: .75rem;
+      color: #8A8D9A;
+    }
+    .legend-swatch {
+      display: inline-block;
+      width: 26px; height: 12px;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+    .legend-swatch.active  { background: rgba(52,217,136,.12); border: 2px solid rgba(52,217,136,.4); }
+    .legend-swatch.inactive{ background: rgba(255,255,255,.03); border: 2px dashed rgba(255,255,255,.13); }
+
+    /* Week nav buttons override to match dark */
+    #weekLabel {
+      font-family: "Barlow Condensed", sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      letter-spacing: .06em;
+      color: #F2F2F4;
+    }
   </style>
+  <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
-<body class="bg-light">
+<body>
 <nav class="navbar navbar-dark bg-dark">
   <div class="container-fluid">
-    <span class="navbar-brand">Lubricentro | Dashboard</span>
-    <div class="d-flex gap-2 align-items-center">
-      <span id="whoami" class="text-white-50 small"></span>
-      <button id="btnLogout" class="btn btn-warning btn-sm">Logout</button>
+    <a class="navbar-brand" href="./dashboard.html">
+      <img src="../assets/img/logo_white.png" alt="Lubricentro" class="brand-logo">
+    </a>
+    <div class="admin-user-area">
+      <span class="admin-whoami" id="whoami"></span>
+      <button class="btn-admin-logout" id="btnLogout"><i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión</button>
     </div>
   </div>
 </nav>
@@ -106,32 +242,32 @@
           </p>
         </div>
         <div class="d-flex gap-2">
-          <button class="btn btn-sm btn-success" id="btnEnableWeek">✓ Habilitar semana</button>
-          <button class="btn btn-sm btn-outline-danger" id="btnClearWeek">✕ Limpiar semana</button>
+          <button class="btn btn-sm btn-success" id="btnEnableWeek"><i class="bi bi-check2-all me-1"></i>Habilitar semana</button>
+          <button class="btn btn-sm btn-outline-danger" id="btnClearWeek"><i class="bi bi-trash me-1"></i>Limpiar semana</button>
         </div>
       </div>
 
       <!-- Navegación -->
       <div class="d-flex align-items-center gap-2 mb-4">
-        <button class="btn btn-sm btn-outline-secondary" id="btnPrevWeek">← Anterior</button>
-        <span class="fw-semibold px-2" id="weekLabel" style="min-width:200px; text-align:center;"></span>
-        <button class="btn btn-sm btn-outline-secondary" id="btnNextWeek">Siguiente →</button>
-        <button class="btn btn-sm btn-outline-primary ms-2" id="btnThisWeek">Esta semana</button>
+        <button class="btn btn-sm btn-outline-secondary" id="btnPrevWeek"><i class="bi bi-chevron-left me-1"></i>Anterior</button>
+        <span id="weekLabel" style="min-width:200px; text-align:center;"></span>
+        <button class="btn btn-sm btn-outline-secondary" id="btnNextWeek">Siguiente<i class="bi bi-chevron-right ms-1"></i></button>
+        <button class="btn btn-sm btn-outline-primary ms-2" id="btnThisWeek"><i class="bi bi-calendar-week me-1"></i>Esta semana</button>
       </div>
 
       <!-- Leyenda -->
-      <div class="d-flex gap-4 mb-3 small text-muted">
-        <span>
-          <span style="display:inline-flex;align-items:center;gap:4px;">
-            <span style="display:inline-block;width:28px;height:14px;background:#d1e7dd;border:2px solid #198754;border-radius:4px;"></span>
-            Disponible (el número = cupo)
-          </span>
+      <div class="d-flex gap-4 mb-3">
+        <span class="legend-chip">
+          <span class="legend-swatch active"></span>
+          Disponible — el número es el cupo
         </span>
-        <span>
-          <span style="display:inline-flex;align-items:center;gap:4px;">
-            <span style="display:inline-block;width:28px;height:14px;background:#f8f9fa;border:2px dashed #ced4da;border-radius:4px;"></span>
-            No disponible (clic para activar)
-          </span>
+        <span class="legend-chip">
+          <span class="legend-swatch inactive"></span>
+          No disponible — clic para activar
+        </span>
+        <span class="legend-chip">
+          <span class="today-pip" style="width:8px;height:8px;"></span>
+          Hoy
         </span>
       </div>
 
@@ -304,7 +440,7 @@
             <div class="slot-cell active${past ? " past" : ""}" data-key="${key}">
               <input class="cap-input" type="number" min="1" value="${slot.capacity}"
                      data-key="${key}" title="Cupo disponible (Enter o clic fuera para guardar)">
-              <button class="del-btn" data-del="${key}" title="Desactivar franja">✕</button>
+              <button class="del-btn" data-del="${key}" title="Desactivar franja"><i class="bi bi-x"></i></button>
             </div>`;
         } else {
           inner = `
