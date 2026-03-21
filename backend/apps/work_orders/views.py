@@ -1,6 +1,9 @@
+import io
 from decimal import Decimal, InvalidOperation
 
 from django.db import connection, transaction
+from django.http import HttpResponse
+from django.utils import timezone
 from rest_framework import status, viewsets
 from rest_framework.decorators import action
 from rest_framework.permissions import IsAuthenticated
@@ -140,6 +143,103 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
             qs = qs.filter(status__iexact=status_q.strip())
 
         return qs
+
+    @action(detail=False, methods=["get"], url_path="report")
+    def report(self, request):
+        """Reporte de órdenes de trabajo con filtros por fecha, estado y mecánico.
+        Soporta export=excel para descargar .xlsx (openpyxl)."""
+        params = request.query_params
+        today = timezone.now().date()
+        month_start = today.replace(day=1)
+
+        date_from = (params.get("date_from") or str(month_start)).strip()
+        date_to = (params.get("date_to") or str(today)).strip()
+        status_filter = (params.get("status") or "").strip()
+        mechanic_id_filter = (params.get("mechanic_id") or "").strip()
+        export_format = (params.get("export") or "json").strip().lower()
+
+        filters = ["wo.opened_at::date >= %s", "wo.opened_at::date <= %s"]
+        values = [date_from, date_to]
+
+        if status_filter:
+            filters.append("wo.status = %s")
+            values.append(status_filter)
+
+        if mechanic_id_filter:
+            filters.append("wo.assigned_mechanic_id::text = %s")
+            values.append(mechanic_id_filter)
+
+        where_clause = " and ".join(filters)
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                f"""
+                select
+                    wo.work_order_id,
+                    wo.status,
+                    wo.authorization_status,
+                    wo.estimated_total,
+                    wo.opened_at,
+                    wo.closed_at,
+                    wo.customer_symptoms,
+                    wo.diagnosis,
+                    wo.notes,
+                    c.full_name                         as customer_name,
+                    c.email                             as customer_email,
+                    v.plate                             as vehicle_plate,
+                    v.make                              as vehicle_make,
+                    v.model                             as vehicle_model,
+                    v.year                              as vehicle_year,
+                    u.first_name || ' ' || u.last_name  as mechanic_name,
+                    u.username                          as mechanic_username
+                from public.work_orders wo
+                left join public.customers      c on c.customer_id = wo.customer_id
+                left join public.vehicles       v on v.vehicle_id  = wo.vehicle_id
+                left join django_app.auth_users u on u.id = wo.assigned_mechanic_id
+                where {where_clause}
+                order by wo.opened_at desc
+                """,
+                values,
+            )
+            rows = cursor.fetchall()
+            cols = [d[0] for d in cursor.description]
+
+        work_orders = [dict(zip(cols, row)) for row in rows]
+
+        # Serializar campos no-JSON (datetimes, Decimals, UUIDs)
+        for wo in work_orders:
+            for k, v in wo.items():
+                if hasattr(v, "isoformat"):
+                    wo[k] = v.isoformat()
+                elif v is None:
+                    wo[k] = None
+                elif not isinstance(v, (str, int, float, bool)):
+                    wo[k] = str(v)
+
+        # Resumen por estado
+        status_keys = ["open", "in_progress", "ready", "closed", "cancelled"]
+        by_status = {k: 0 for k in status_keys}
+        for wo in work_orders:
+            st = wo.get("status") or "unknown"
+            if st in by_status:
+                by_status[st] += 1
+
+        total_estimated = sum(
+            Decimal(str(wo["estimated_total"]))
+            for wo in work_orders
+            if wo.get("estimated_total") is not None
+        )
+
+        summary = {
+            "total": len(work_orders),
+            "by_status": by_status,
+            "total_estimated": str(total_estimated),
+        }
+
+        if export_format == "excel":
+            return _build_wo_excel_response(work_orders, summary, date_from, date_to)
+
+        return Response({"work_orders": work_orders, "summary": summary}, status=200)
 
     @action(detail=False, methods=["post"], url_path="create-from-appointment")
     def create_from_appointment(self, request):
@@ -635,3 +735,135 @@ class WorkOrderProductAdminViewSet(viewsets.ModelViewSet):
             )
 
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+def _build_wo_excel_response(work_orders, summary, date_from, date_to):
+    """Genera un archivo .xlsx con detalle y resumen de órdenes de trabajo."""
+    try:
+        import openpyxl
+        from openpyxl.styles import Alignment, Font, PatternFill
+    except ImportError:
+        return HttpResponse("openpyxl no está instalado.", status=500)
+
+    STATUS_LABELS = {
+        "open": "Abierta",
+        "in_progress": "En proceso",
+        "ready": "Lista",
+        "closed": "Cerrada",
+        "cancelled": "Cancelada",
+    }
+    AUTH_LABELS = {
+        "pending": "Pendiente",
+        "approved": "Aprobada",
+        "rejected": "Rechazada",
+    }
+
+    wb = openpyxl.Workbook()
+
+    # ── Hoja 1: Órdenes de Trabajo ──
+    ws1 = wb.active
+    ws1.title = "Órdenes de Trabajo"
+
+    headers = [
+        "Fecha apertura", "Hora apertura", "Fecha cierre",
+        "Cliente", "Email",
+        "Vehículo", "Año",
+        "Estado", "Mecánico",
+        "Total estimado", "Autorización",
+        "Síntomas", "Diagnóstico", "Notas",
+    ]
+    header_fill = PatternFill(start_color="1D63FF", end_color="1D63FF", fill_type="solid")
+    header_font = Font(bold=True, color="FFFFFF")
+
+    for col_idx, header in enumerate(headers, 1):
+        cell = ws1.cell(row=1, column=col_idx, value=header)
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center")
+
+    for wo in work_orders:
+        from datetime import datetime
+
+        raw_opened = wo.get("opened_at") or ""
+        try:
+            dt_open = datetime.fromisoformat(raw_opened)
+            fecha_open = dt_open.strftime("%d/%m/%Y")
+            hora_open = dt_open.strftime("%H:%M")
+        except Exception:
+            fecha_open = raw_opened
+            hora_open = ""
+
+        raw_closed = wo.get("closed_at") or ""
+        try:
+            fecha_close = datetime.fromisoformat(raw_closed).strftime("%d/%m/%Y") if raw_closed else ""
+        except Exception:
+            fecha_close = raw_closed
+
+        vehicle_str = f"{wo.get('vehicle_plate', '')} {wo.get('vehicle_make', '')} {wo.get('vehicle_model', '')}".strip()
+        st = wo.get("status") or ""
+        auth_st = wo.get("authorization_status") or ""
+
+        estimated = wo.get("estimated_total")
+        try:
+            estimated_val = float(estimated) if estimated is not None else ""
+        except Exception:
+            estimated_val = estimated or ""
+
+        ws1.append([
+            fecha_open,
+            hora_open,
+            fecha_close,
+            wo.get("customer_name") or "",
+            wo.get("customer_email") or "",
+            vehicle_str,
+            wo.get("vehicle_year") or "",
+            STATUS_LABELS.get(st, st),
+            wo.get("mechanic_name") or wo.get("mechanic_username") or "",
+            estimated_val,
+            AUTH_LABELS.get(auth_st, auth_st),
+            wo.get("customer_symptoms") or "",
+            wo.get("diagnosis") or "",
+            wo.get("notes") or "",
+        ])
+
+    for col in ws1.columns:
+        max_len = max((len(str(cell.value or "")) for cell in col), default=10)
+        ws1.column_dimensions[col[0].column_letter].width = min(max_len + 4, 40)
+
+    # ── Hoja 2: Resumen ──
+    ws2 = wb.create_sheet("Resumen")
+    ws2.append(["Estado", "Cantidad"])
+    h2_fill = PatternFill(start_color="0A3EA6", end_color="0A3EA6", fill_type="solid")
+    h2_font = Font(bold=True, color="FFFFFF")
+    for cell in ws2[1]:
+        cell.fill = h2_fill
+        cell.font = h2_font
+
+    by_status = summary.get("by_status", {})
+    for st_key, label in [
+        ("open", "Abierta"),
+        ("in_progress", "En proceso"),
+        ("ready", "Lista"),
+        ("closed", "Cerrada"),
+        ("cancelled", "Cancelada"),
+    ]:
+        ws2.append([label, by_status.get(st_key, 0)])
+
+    ws2.append(["Total", summary.get("total", 0)])
+    ws2.append(["Total estimado (CRC)", summary.get("total_estimated", "0")])
+
+    for col in ws2.columns:
+        max_len = max((len(str(cell.value or "")) for cell in col), default=10)
+        ws2.column_dimensions[col[0].column_letter].width = min(max_len + 4, 30)
+
+    buffer = io.BytesIO()
+    wb.save(buffer)
+    buffer.seek(0)
+
+    filename = f"reporte_ordenes_{date_from}_al_{date_to}.xlsx"
+    response = HttpResponse(
+        buffer.read(),
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+    response["Content-Disposition"] = f'attachment; filename="{filename}"'
+    return response

@@ -36,6 +36,7 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_work_orders_report.html">Reporte OTs</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_inventory_report.html">Reporte Inventario</a>
@@ -97,6 +98,7 @@
   </div>
 </div>
 
+<script src="../assets/js/toast.js"></script>
 <script>
   const API_BASE = "http://localhost:8000";
   const token = localStorage.getItem("access_token");
@@ -141,13 +143,7 @@
   });
 
   // UI helper para errores
-  function showUiError(msg) {
-    const el = document.getElementById("notAllowed");
-    el.classList.remove("d-none");
-    el.classList.remove("alert-danger");
-    el.classList.add("alert-danger");
-    el.textContent = msg;
-  }
+  function showUiError(msg) { showToast(msg, 'error'); }
 
   // --- CRUD ---
   let categories = [];
@@ -267,6 +263,7 @@
       });
     }
 
+    showToast('Categoría guardada.', 'success');
     closeForm();
     await loadCategories();
   }
@@ -279,6 +276,7 @@
       headers: authHeaders()
     });
 
+    showToast('Categoría eliminada.', 'success');
     await loadCategories();
   }
 

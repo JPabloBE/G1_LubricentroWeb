@@ -187,6 +187,7 @@ class StockAdjustmentView(APIView):
         return Response({
             "product_id": str(pk),
             "product_name": product.name,
+            "base_unit": product.base_unit,
             "new_stock_qty": str(new_stock),
         }, status=status.HTTP_200_OK)
 

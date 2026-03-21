@@ -65,6 +65,8 @@ def apply_stock_change(
     Atómicamente: bloquea el producto (FOR UPDATE), valida, actualiza stock y loguea.
     Úsala cuando el caller no tiene ya un lock sobre el producto.
 
+    qty_change debe estar en la unidad base del producto.
+
     Retorna qty_after (Decimal).
     Lanza ValueError en caso de producto inactivo o stock insuficiente.
     """

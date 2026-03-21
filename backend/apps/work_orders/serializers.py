@@ -63,6 +63,11 @@ class WorkOrderServiceSerializer(serializers.ModelSerializer):
 class WorkOrderProductSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_sku = serializers.CharField(source="product.sku", read_only=True)
+    product_base_unit = serializers.CharField(source="product.base_unit", read_only=True)
+    product_secondary_unit = serializers.CharField(source="product.secondary_unit", read_only=True)
+    product_secondary_unit_factor = serializers.DecimalField(
+        source="product.secondary_unit_factor", max_digits=12, decimal_places=4, read_only=True
+    )
 
     class Meta:
         model = WorkOrderProduct
@@ -72,13 +77,19 @@ class WorkOrderProductSerializer(serializers.ModelSerializer):
             "product_id",
             "product_name",
             "product_sku",
+            "product_base_unit",
+            "product_secondary_unit",
+            "product_secondary_unit_factor",
             "description",
             "qty",
             "unit_price",
             "created_at",
             "updated_at",
         ]
-        read_only_fields = ["work_order_product_id", "created_at", "updated_at"]
+        read_only_fields = [
+            "work_order_product_id", "created_at", "updated_at",
+            "product_base_unit", "product_secondary_unit", "product_secondary_unit_factor",
+        ]
 
 
 class WorkOrderCustomerServiceLineSerializer(serializers.ModelSerializer):
@@ -110,6 +121,7 @@ class WorkOrderCustomerServiceLineSerializer(serializers.ModelSerializer):
 class WorkOrderCustomerProductLineSerializer(serializers.ModelSerializer):
     product_name = serializers.CharField(source="product.name", read_only=True)
     product_sku = serializers.CharField(source="product.sku", read_only=True)
+    product_base_unit = serializers.CharField(source="product.base_unit", read_only=True)
     line_total = serializers.SerializerMethodField()
 
     class Meta:
@@ -119,6 +131,7 @@ class WorkOrderCustomerProductLineSerializer(serializers.ModelSerializer):
             "product_sku",
             "description",
             "qty",
+            "product_base_unit",
             "unit_price",
             "line_total",
         ]

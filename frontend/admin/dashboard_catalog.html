@@ -58,6 +58,7 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_work_orders_report.html">Reporte OTs</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_inventory_report.html">Reporte Inventario</a>
@@ -219,7 +220,30 @@
                   </div>
                   <div class="col-6 col-md-4">
                     <label class="form-label">Stock</label>
-                    <input class="form-control" id="productStock" type="number" min="0" step="0.01" value="0">
+                    <div class="input-group">
+                      <input class="form-control" id="productStock" type="number" min="0" step="1" value="0">
+                      <span class="input-group-text" id="productStockUnit">unidad</span>
+                    </div>
+                  </div>
+                  <div class="col-12"><hr class="my-1"><p class="text-muted small mb-1">Unidades de medida</p></div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Unidad <span class="text-danger">*</span></label>
+                    <select class="form-select" id="productBaseUnit">
+                      <option value="unidad">Unitario</option>
+                      <option value="Galón">Galón</option>
+                      <option value="Botella">Botella</option>
+                      <option value="L">L (Litro)</option>
+                      <option value="mL">mL (Mililitro)</option>
+                    </select>
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label class="form-label">Equivalencia <span class="text-muted small">(solo informativo)</span></label>
+                    <input class="form-control" id="productSecondaryUnit" placeholder="ej. Galón, Caja, Pack">
+                  </div>
+                  <div class="col-12 col-md-4" id="productSecondaryFactorWrap" style="display:none">
+                    <label class="form-label">Tamaño de equivalencia</label>
+                    <input class="form-control" id="productSecondaryFactor" type="number" min="0.0001" step="any" placeholder="ej. 3.785">
+                    <div class="form-text" id="productFactorHelp"></div>
                   </div>
                   <div class="col-12 d-flex gap-2 mt-1">
                     <button type="submit" class="btn btn-success btn-sm" id="btnSaveProduct">Guardar</button>
@@ -488,7 +512,10 @@
         </div>
         <div class="mb-3">
           <label class="form-label">Cantidad <span class="text-danger">*</span></label>
-          <input class="form-control" id="adjQty" type="number" min="0.01" step="0.01" placeholder="Ej: 10">
+          <div class="input-group">
+            <input class="form-control" id="adjQty" type="number" min="1" step="1" placeholder="Ej: 10">
+            <span class="input-group-text" id="adjUnitLabel">unidad</span>
+          </div>
           <div class="form-text" id="adjQtyHelp"></div>
         </div>
         <div class="mb-3">
@@ -508,6 +535,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/toast.js"></script>
 <script>
 const API = "http://127.0.0.1:8000/api";
 let token = null;
@@ -581,8 +609,7 @@ async function loadProducts() {
   const r = await fetch(`${API}/catalog/products/`, { headers: authHeaders() });
   allProducts = normalizeList(await r.json());
   filteredProducts = [...allProducts];
-  renderProducts();
-  updateStockAlert();
+  applyFilters();
 }
 
 function fmt(n) { return Number(n).toLocaleString("es-CR", { style: "currency", currency: "CRC", minimumFractionDigits: 0 }); }
@@ -617,7 +644,14 @@ function renderProducts() {
       <td class="text-muted small">${p.sku || '—'}</td>
       <td class="small">${p.category_name || '—'}</td>
       <td>${fmt(p.unit_price)}</td>
-      <td>${stock}</td>
+      <td>
+        ${p.secondary_unit && p.secondary_unit_factor
+          ? `<div>${stock} unidades</div>
+             <div class="text-muted small">${parseFloat(p.secondary_unit_factor).toFixed(1)} ${p.base_unit || 'unidad'} c/u</div>`
+          : `<span class="fw-semibold">${stock}</span>
+             <span class="small ms-1">${p.base_unit || 'unidad'}</span>`
+        }
+      </td>
       <td>
         ${p.is_active
           ? '<span class="badge bg-success">Activo</span>'
@@ -633,9 +667,9 @@ function renderProducts() {
               <i class="bi bi-three-dots-vertical"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','${p.name.replace(/'/g,"\\'")}',${p.stock_qty},'purchase');return false;">
+              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','purchase');return false;">
                 <i class="bi bi-arrow-up-circle text-success me-1"></i>Ingresar stock</a></li>
-              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','${p.name.replace(/'/g,"\\'")}',${p.stock_qty},'deduct');return false;">
+              <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','deduct');return false;">
                 <i class="bi bi-arrow-down-circle text-danger me-1"></i>Descontar stock</a></li>
               <li><hr class="dropdown-divider"></li>
               <li><a class="dropdown-item" href="#" onclick="openChangelog('product','${p.product_id}','${p.name.replace(/'/g,"\\'")}');return false;">
@@ -700,7 +734,7 @@ function applyFilters() {
     if (pMin !== null && price < pMin) return false;
     if (pMax !== null && price > pMax) return false;
     const s = parseFloat(p.stock_qty);
-    if (stock === "instock" && s <= LOW_STOCK) return false;
+    if (stock === "instock" && s <= 0)          return false;
     if (stock === "low"     && !(s > 0 && s <= LOW_STOCK)) return false;
     if (stock === "out"     && s > 0)    return false;
     if (active === "true"  && !p.is_active)  return false;
@@ -716,6 +750,44 @@ document.getElementById("btnNewProduct").addEventListener("click", () => openPro
 document.getElementById("btnCloseProductForm").addEventListener("click", closeProductForm);
 document.getElementById("btnCancelProduct").addEventListener("click", closeProductForm);
 
+const UNIT_PRESETS = {
+  "Galón":   { secondary: "L",   factor: "3.785" },
+  "Botella": { secondary: "mL",  factor: "355" },
+};
+
+document.getElementById("productBaseUnit").addEventListener("change", function() {
+  const base = this.value;
+  const preset = UNIT_PRESETS[base];
+  const secEl    = document.getElementById("productSecondaryUnit");
+  const factorEl = document.getElementById("productSecondaryFactor");
+  const factorWrap = document.getElementById("productSecondaryFactorWrap");
+  const help = document.getElementById("productFactorHelp");
+  if (preset) {
+    secEl.value    = preset.secondary;
+    factorEl.value = preset.factor;
+    factorWrap.style.display = "";
+    help.textContent = `1 ${preset.secondary} = ${preset.factor} ${base}`;
+    document.getElementById("productStockUnit").textContent = preset.secondary;
+  } else {
+    secEl.value    = "";
+    factorEl.value = "";
+    factorWrap.style.display = "none";
+    help.textContent = "";
+    document.getElementById("productStockUnit").textContent = base || "unidad";
+  }
+});
+
+// Mostrar/ocultar campo de factor al escribir unidad secundaria
+document.getElementById("productSecondaryUnit").addEventListener("input", function() {
+  const su = this.value.trim();
+  const factorWrap = document.getElementById("productSecondaryFactorWrap");
+  const help = document.getElementById("productFactorHelp");
+  const base = document.getElementById("productBaseUnit").value || "unidades";
+  factorWrap.style.display = su ? "" : "none";
+  help.textContent = su ? `1 ${su} = ? ${base}` : "";
+  if (!su) document.getElementById("productSecondaryFactor").value = "";
+});
+
 function openProductForm(p = null) {
   document.getElementById("productFormTitle").textContent = p ? "Editar producto" : "Nuevo producto";
   document.getElementById("productId").value         = p?.product_id || "";
@@ -725,9 +797,26 @@ function openProductForm(p = null) {
   document.getElementById("productImageUrl").value   = p?.image_url || "";
   document.getElementById("productUnitPrice").value  = p?.unit_price || 0;
   document.getElementById("productCost").value       = p?.cost || 0;
-  document.getElementById("productStock").value      = p?.stock_qty || 0;
+  document.getElementById("productStock").value           = p?.stock_qty || 0;
+  document.getElementById("productStockUnit").textContent = p?.base_unit || "unidad";
   document.getElementById("productIsActive").value   = p?.is_active !== false ? "true" : "false";
   document.getElementById("productCategoryId").value = p?.category_id || "";
+  // Unidades de medida
+  const baseUnit = p?.base_unit || "unidad";
+  const secondaryUnit = p?.secondary_unit || "";
+  const factor = p?.secondary_unit_factor || "";
+  const baseUnitSel = document.getElementById("productBaseUnit");
+  if (![...baseUnitSel.options].some(o => o.value === baseUnit)) {
+    const opt = new Option(baseUnit, baseUnit);
+    baseUnitSel.appendChild(opt);
+  }
+  baseUnitSel.value = baseUnit;
+  document.getElementById("productSecondaryUnit").value   = secondaryUnit;
+  document.getElementById("productSecondaryFactor").value = factor;
+  const factorWrap = document.getElementById("productSecondaryFactorWrap");
+  factorWrap.style.display = secondaryUnit ? "" : "none";
+  document.getElementById("productFactorHelp").textContent =
+    secondaryUnit ? `1 ${secondaryUnit} = ? ${baseUnit}` : "";
   document.getElementById("productFormCard").classList.remove("d-none");
   document.getElementById("productFormCard").scrollIntoView({ behavior: "smooth", block: "nearest" });
 }
@@ -756,11 +845,19 @@ document.getElementById("productForm").addEventListener("submit", async e => {
     stock_qty:   parseFloat(document.getElementById("productStock").value) || 0,
     is_active:   document.getElementById("productIsActive").value === "true",
     category_id: catVal || null,
+    base_unit:   document.getElementById("productBaseUnit").value.trim() || "unidad",
+    secondary_unit: document.getElementById("productSecondaryUnit").value.trim() || null,
+    secondary_unit_factor: (() => {
+      const v = document.getElementById("productSecondaryFactor").value;
+      const su = document.getElementById("productSecondaryUnit").value.trim();
+      return (su && v) ? parseFloat(v) : null;
+    })(),
   };
   const url    = id ? `${API}/catalog/products/${id}/` : `${API}/catalog/products/`;
   const method = id ? "PUT" : "POST";
   const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); alert("Error: " + JSON.stringify(e)); return; }
+  if (!r.ok) { const e = await r.json(); showToast("Error al guardar: " + (e.detail || JSON.stringify(e)), 'error'); return; }
+  showToast('Producto guardado.', 'success');
   closeProductForm();
   await loadProducts();
 });
@@ -774,11 +871,12 @@ async function deleteProduct(id) {
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      alert("No se pudo eliminar: " + (err.detail || r.statusText));
+      showToast("No se pudo eliminar: " + (err.detail || r.statusText), 'error');
       return;
     }
+    showToast('Producto eliminado.', 'success');
     await loadProducts();
-  } catch { alert("Error de conexión al eliminar."); }
+  } catch { showToast("Error de conexión al eliminar.", 'error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -874,7 +972,8 @@ document.getElementById("serviceForm").addEventListener("submit", async e => {
   const url    = id ? `${API}/services/${id}/` : `${API}/services/`;
   const method = id ? "PUT" : "POST";
   const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); alert("Error: " + JSON.stringify(e)); return; }
+  if (!r.ok) { const e = await r.json(); showToast("Error al guardar: " + (e.detail || JSON.stringify(e)), 'error'); return; }
+  showToast('Servicio guardado.', 'success');
   closeServiceForm();
   await loadServices();
 });
@@ -888,11 +987,12 @@ async function deleteService(id) {
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      alert("No se pudo eliminar: " + (err.detail || r.statusText));
+      showToast("No se pudo eliminar: " + (err.detail || r.statusText), 'error');
       return;
     }
+    showToast('Servicio eliminado.', 'success');
     await loadServices();
-  } catch { alert("Error de conexión al eliminar."); }
+  } catch { showToast("Error de conexión al eliminar.", 'error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -977,7 +1077,8 @@ document.getElementById("categoryForm").addEventListener("submit", async e => {
   const url    = id ? `${API}/catalog/categories/${id}/` : `${API}/catalog/categories/`;
   const method = id ? "PUT" : "POST";
   const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); alert("Error: " + JSON.stringify(e)); return; }
+  if (!r.ok) { const e = await r.json(); showToast("Error al guardar: " + (e.detail || JSON.stringify(e)), 'error'); return; }
+  showToast('Categoría guardada.', 'success');
   closeCategoryForm();
   await loadCategories();
 });
@@ -991,12 +1092,13 @@ async function deleteCategory(id) {
     });
     if (!r.ok) {
       const err = await r.json().catch(() => ({}));
-      alert("No se pudo eliminar: " + (err.detail || r.statusText));
+      showToast("No se pudo eliminar: " + (err.detail || r.statusText), 'error');
       return;
     }
+    showToast('Categoría eliminada.', 'success');
     await loadCategories();
     await loadProducts();
-  } catch { alert("Error de conexión al eliminar."); }
+  } catch { showToast("Error de conexión al eliminar.", 'error'); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -1141,25 +1243,30 @@ async function openChangelog(type, id, name) {
 // ═══════════════════════════════════════════════════════════════════════════════
 const adjustStockModal = new bootstrap.Modal(document.getElementById("adjustStockModal"));
 
-function openAdjustStock(productId, productName, currentStock, mode) {
+function openAdjustStock(productId, mode) {
+  const p = allProducts.find(x => x.product_id === productId);
+  if (!p) return;
   const isPurchase = mode === "purchase";
+  const displayUnit = p.secondary_unit ? "unidades" : (p.base_unit || "unidad");
+
   document.getElementById("adjModalTitle").textContent = isPurchase ? "Ingresar stock" : "Descontar stock";
-  document.getElementById("adjProductId").value    = productId;
-  document.getElementById("adjProductName").value  = productName;
-  document.getElementById("adjCurrentStock").value = currentStock;
-  document.getElementById("adjMode").value         = mode;
-  document.getElementById("adjQty").value          = "";
-  document.getElementById("adjReason").value       = "";
-  document.getElementById("adjQtyHelp").textContent = isPurchase
+  document.getElementById("adjProductId").value        = productId;
+  document.getElementById("adjProductName").value      = p.name;
+  document.getElementById("adjCurrentStock").value     = `${p.stock_qty} ${displayUnit}`;
+  document.getElementById("adjMode").value             = mode;
+  document.getElementById("adjQty").value              = "";
+  document.getElementById("adjReason").value           = "";
+  document.getElementById("adjQtyHelp").textContent    = isPurchase
     ? "Cantidad a sumar al stock actual."
     : "Cantidad a restar del stock actual.";
   document.getElementById("adjError").classList.add("d-none");
+  document.getElementById("adjUnitLabel").textContent  = displayUnit;
   adjustStockModal.show();
 }
 
 document.getElementById("btnConfirmAdj").addEventListener("click", async () => {
   const productId = document.getElementById("adjProductId").value;
-  const qty       = parseFloat(document.getElementById("adjQty").value);
+  const qty       = parseInt(document.getElementById("adjQty").value, 10);
   const reason    = document.getElementById("adjReason").value.trim();
   const mode      = document.getElementById("adjMode").value;
   const errEl     = document.getElementById("adjError");
@@ -1168,13 +1275,15 @@ document.getElementById("btnConfirmAdj").addEventListener("click", async () => {
   if (!reason)          { errEl.textContent = "El motivo es obligatorio."; errEl.classList.remove("d-none"); return; }
   errEl.classList.add("d-none");
 
-  const qtyChange     = mode === "purchase" ? qty : -qty;
-  const movementType  = mode === "purchase" ? "purchase" : "manual_adjustment";
+  const p            = allProducts.find(x => x.product_id === productId);
+  const qtyChange    = mode === "purchase" ? qty : -qty;
+  const movementType = mode === "purchase" ? "purchase" : "manual_adjustment";
+  const payload = { qty_change: qtyChange, reason, movement_type: movementType };
 
   const r = await fetch(`${API}/catalog/products/${productId}/adjust-stock/`, {
     method: "POST",
     headers: authHeaders(),
-    body: JSON.stringify({ qty_change: qtyChange, reason, movement_type: movementType }),
+    body: JSON.stringify(payload),
   });
   if (!r.ok) {
     const e = await r.json().catch(() => ({}));
@@ -1185,14 +1294,7 @@ document.getElementById("btnConfirmAdj").addEventListener("click", async () => {
   const data = await r.json();
   adjustStockModal.hide();
   await loadProducts();
-  const toastEl = document.createElement("div");
-  toastEl.className = "toast align-items-center text-bg-success border-0 position-fixed bottom-0 end-0 m-3";
-  toastEl.setAttribute("role", "alert");
-  toastEl.style.zIndex = "1100";
-  toastEl.innerHTML = `<div class="d-flex"><div class="toast-body">Stock actualizado: <strong>${data.new_stock_qty}</strong> unidades</div><button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button></div>`;
-  document.body.appendChild(toastEl);
-  new bootstrap.Toast(toastEl, { delay: 3000 }).show();
-  toastEl.addEventListener("hidden.bs.toast", () => toastEl.remove());
+  showToast(`Stock actualizado: ${data.new_stock_qty} ${p?.secondary_unit ? "unidades" : (data.base_unit || "unidades")}`, 'success');
 });
 
 // ── Start ────────────────────────────────────────────────────────────────────

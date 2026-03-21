@@ -126,3 +126,30 @@ class CustomerVehicleViewSet(viewsets.ReadOnlyModelViewSet):
     def get_queryset(self):
         customer = self.request.user
         return Vehicle.objects.filter(customer_id=customer.customer_id).order_by("plate")
+
+    def create(self, request, *args, **kwargs):
+        customer = request.user
+        plate = str(request.data.get("plate") or "").strip().upper()
+        if not plate:
+            return Response({"detail": "La placa es requerida."}, status=status.HTTP_400_BAD_REQUEST)
+
+        make  = str(request.data.get("make")  or "").strip() or None
+        model = str(request.data.get("model") or "").strip() or None
+        year  = request.data.get("year") or None
+        color = str(request.data.get("color") or "").strip() or None
+
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                insert into public.vehicles
+                  (customer_id, plate, make, model, year, color, created_at, updated_at)
+                values
+                  (%s, %s, %s, %s, %s, %s, now(), now())
+                returning vehicle_id
+                """,
+                [str(customer.customer_id), plate, make, model, year, color],
+            )
+            vehicle_id = cursor.fetchone()[0]
+
+        v = Vehicle.objects.get(vehicle_id=vehicle_id)
+        return Response(VehicleLiteSerializer(v).data, status=status.HTTP_201_CREATED)

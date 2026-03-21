@@ -46,6 +46,7 @@
           <a class="list-group-item list-group-item-action" href="./dashboard_appointments.html">Citas</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_appointment_slots.html">Horarios de Citas</a>
           <a class="list-group-item list-group-item-action active" href="./dashboard_work_orders.html">Órdenes de Trabajo</a>
+          <a class="list-group-item list-group-item-action" href="./dashboard_work_orders_report.html">Reporte OTs</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_cash_register.html">Caja</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_period_closures.html">Cierres de Periodo</a>
           <a class="list-group-item list-group-item-action" href="./dashboard_inventory_report.html">Reporte Inventario</a>
@@ -219,13 +220,13 @@
                     <!-- Tab Productos -->
                     <div class="tab-pane fade" id="tabProducts">
                       <div class="row g-2 mb-2">
-                        <div class="col-7">
+                        <div class="col-12 col-md-5">
                           <select id="prdProductSelect" class="form-select form-select-sm"></select>
                         </div>
-                        <div class="col-2">
-                          <input id="prdQty" class="form-control form-control-sm" placeholder="Cant." value="1">
+                        <div class="col-6 col-md-2">
+                          <input id="prdQty" class="form-control form-control-sm" type="number" min="1" step="1" placeholder="Cant." value="1">
                         </div>
-                        <div class="col-3">
+                        <div class="col-12 col-md-2">
                           <button id="btnAddProduct" class="btn btn-sm btn-primary w-100">+ Agregar</button>
                         </div>
                       </div>
@@ -264,6 +265,7 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="../assets/js/toast.js"></script>
 <script>
   const API_BASE = "http://127.0.0.1:8000";
   const token = localStorage.getItem("access_token");
@@ -307,13 +309,7 @@
   const modal = new bootstrap.Modal(document.getElementById("detailModal"));
 
   // ── Utilidades ────────────────────────────────────────────────────────────
-  function showMsg(text, type = "danger", autoHideMs = 3500) {
-    const el = document.getElementById("msg");
-    el.className = `alert alert-${type}`;
-    el.textContent = text;
-    el.classList.remove("d-none");
-    if (autoHideMs) setTimeout(() => el.classList.add("d-none"), autoHideMs);
-  }
+  function showMsg(text, type = "danger") { showToast(text, type); }
 
   async function fetchJSON(url, options = {}) {
     const res = await fetch(url, options);
@@ -400,6 +396,7 @@
         body: JSON.stringify({ status: newStatus }),
       });
       await loadWorkOrders();
+      showMsg('Estado actualizado.', 'success');
       // Si el modal está abierto y es la misma OT, refrescar
       if (currentWo && currentWo.work_order_id === work_order_id) {
         await refreshModal(work_order_id);
@@ -496,12 +493,16 @@
     const prdSel = document.getElementById("prdProductSelect");
     prdSel.innerHTML = '<option value="">Seleccionar producto...</option>';
     for (const p of productsCache) {
-      const id    = p.product_id || p.id;
-      const stock = p.stock_qty ?? 0;
-      const price = p.unit_price ?? 0;
-      const sku   = p.sku ? ` (${p.sku})` : "";
-      const opt   = new Option(`${p.name || "Producto"}${sku} — Stock: ${stock} — ₡${price}`, id);
-      opt.dataset.price = price;
+      const id       = p.product_id || p.id;
+      const stock    = p.stock_qty ?? 0;
+      const price    = p.unit_price ?? 0;
+      const sku      = p.sku ? ` (${p.sku})` : "";
+      const baseUnit = p.base_unit || "unidad";
+      const opt      = new Option(`${p.name || "Producto"}${sku} — Stock: ${stock} ${baseUnit} — ₡${price}`, id);
+      opt.dataset.price             = price;
+      opt.dataset.baseUnit          = baseUnit;
+      opt.dataset.secondaryUnit     = p.secondary_unit || "";
+      opt.dataset.secondaryFactor   = p.secondary_unit_factor || "";
       prdSel.appendChild(opt);
     }
   }
@@ -596,6 +597,7 @@
         body: JSON.stringify({ status: newStatus }),
       });
       await loadServices(work_order_id);
+      showMsg('Estado del servicio actualizado.', 'success');
     } catch (e) { showMsg(e.message || "No se pudo actualizar.", "danger", 5500); }
   }
 
@@ -670,6 +672,7 @@
     }
 
     for (const r of prdLines) {
+      const baseUnit = r.product_base_unit || "unidad";
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>
@@ -678,7 +681,11 @@
         </td>
         <td class="small text-muted">${escapeHtml(r.product_sku || "—")}</td>
         <td class="small">
-          <input class="form-control form-control-sm" style="width:80px" value="${escapeHtml(String(r.qty))}" data-qty>
+          <div>${r.qty} <span class="text-muted small">${escapeHtml(baseUnit)}</span></div>
+          <div class="d-flex align-items-center gap-1 mt-1">
+            <input class="form-control form-control-sm" type="number" min="1" step="1" style="width:70px" value="${escapeHtml(String(r.qty))}" data-qty title="Cantidad en ${baseUnit}">
+            <span class="text-muted small">${escapeHtml(baseUnit)}</span>
+          </div>
         </td>
         <td class="small">₡${money(r.unit_price)}</td>
         <td class="text-end">
@@ -792,10 +799,11 @@
     if (!product_id) { showMsg("Seleccioná un producto.", "warning"); return; }
     const qty        = document.getElementById("prdQty").value;
     const unit_price = sel.selectedOptions[0]?.dataset?.price ?? "0";
+    const payload = { work_order_id: currentWo.work_order_id, product_id, qty, unit_price };
     try {
       await fetchJSON(WOP_URL, {
         method: "POST", headers: authH(),
-        body: JSON.stringify({ work_order_id: currentWo.work_order_id, product_id, qty, unit_price }),
+        body: JSON.stringify(payload),
       });
       document.getElementById("prdQty").value = "1";
       sel.value = "";

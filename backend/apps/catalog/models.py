@@ -105,6 +105,10 @@ class Product(models.Model):
     cost = models.DecimalField(max_digits=12, decimal_places=2, default=0)
     stock_qty = models.DecimalField(max_digits=12, decimal_places=2, default=0)
 
+    base_unit = models.CharField(max_length=50, default='unidad', db_column='base_unit')
+    secondary_unit = models.CharField(max_length=50, null=True, blank=True, db_column='secondary_unit')
+    secondary_unit_factor = models.DecimalField(max_digits=12, decimal_places=4, null=True, blank=True, db_column='secondary_unit_factor')
+
     is_active = models.BooleanField(default=True)
 
     created_at = models.DateTimeField(db_column="created_at")

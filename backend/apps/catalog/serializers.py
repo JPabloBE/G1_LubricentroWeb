@@ -29,10 +29,13 @@ class ProductSerializer(serializers.ModelSerializer):
             "sku",
             "name",
             "description",
-            "image_url",    
+            "image_url",
             "unit_price",
             "cost",
             "stock_qty",
+            "base_unit",
+            "secondary_unit",
+            "secondary_unit_factor",
             "is_active",
             "created_at",
             "updated_at",
@@ -80,6 +83,22 @@ class ProductSerializer(serializers.ModelSerializer):
         if parsed.scheme not in ("http", "https") or not parsed.netloc:
             raise serializers.ValidationError("image_url debe ser una URL válida (http/https).")
         return v
+
+    def validate(self, data):
+        secondary_unit = data.get("secondary_unit", getattr(self.instance, "secondary_unit", None))
+        secondary_unit_factor = data.get("secondary_unit_factor", getattr(self.instance, "secondary_unit_factor", None))
+        # Normalize empty strings to None
+        if isinstance(secondary_unit, str) and not secondary_unit.strip():
+            secondary_unit = None
+            data["secondary_unit"] = None
+        if secondary_unit and not secondary_unit_factor:
+            raise serializers.ValidationError({"secondary_unit_factor": "El factor de conversión es requerido cuando se define una unidad secundaria."})
+        if secondary_unit_factor and secondary_unit_factor <= 0:
+            raise serializers.ValidationError({"secondary_unit_factor": "El factor de conversión debe ser mayor a 0."})
+        if not secondary_unit:
+            data["secondary_unit"] = None
+            data["secondary_unit_factor"] = None
+        return data
 
 
 class ProductMovementSerializer(serializers.ModelSerializer):
