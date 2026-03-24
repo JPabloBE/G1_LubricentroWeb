@@ -45,6 +45,14 @@
             <div class="info-value">Lun-Sáb : 09:00-19:00</div>
           </div>
         </div>
+
+        <a class="info-chip info-chip-link" href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer">
+          <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
+          <div>
+            <div class="info-label">Encuéntranos</div>
+            <div class="info-value info-value-loc">Montecillos, Alajuela <i class="bi bi-box-arrow-up-right"></i></div>
+          </div>
+        </a>
       </div>
     </div>
   </header>
@@ -205,19 +213,19 @@
       <div class="container">
         <div class="stats-grid reveal-stagger">
           <div class="stat-item">
-            <div class="stat-number">500+</div>
+            <div class="stat-number" data-count="500" data-suffix="+" data-format="plain">500+</div>
             <div class="stat-label">Clientes satisfechos</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">3,200+</div>
+            <div class="stat-number" data-count="3200" data-suffix="+" data-format="comma">3,200+</div>
             <div class="stat-label">Vehículos atendidos</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">98%</div>
+            <div class="stat-number" data-count="98" data-suffix="%" data-format="plain">98%</div>
             <div class="stat-label">Satisfacción</div>
           </div>
           <div class="stat-item">
-            <div class="stat-number">10+</div>
+            <div class="stat-number" data-count="10" data-suffix="+" data-format="plain">10+</div>
             <div class="stat-label">Años de experiencia</div>
           </div>
         </div>
@@ -239,67 +247,62 @@
           <p class="section-desc mb-0 mt-3 mt-lg-0">Ofrecemos soluciones integrales para el mantenimiento y la reparación de tu vehículo. Desde servicios preventivos hasta correcciones complejas.</p>
         </div>
       </div>
-      <div class="row g-4 reveal-stagger">
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Revisión General</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-clipboard2-check service-card-icon"></i>
-              <p class="service-card-desc">Evaluación completa del motor, niveles de líquidos, sistema de frenos, suspensión, dirección, luces y neumáticos.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+      <div class="svc-grid reveal-stagger">
+
+        <div class="svc-card" data-svc="0">
+          <span class="svc-card-num">01</span>
+          <div class="svc-card-ico"><i class="bi bi-clipboard2-check"></i></div>
+          <h3 class="svc-card-title">Revisión General</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Evaluación completa del motor, niveles de líquidos, sistema de frenos, suspensión, dirección, luces y neumáticos.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Cambio de Aceite y Filtro</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-droplet-fill service-card-icon"></i>
-              <p class="service-card-desc">Sustitución del aceite del motor y filtro de aceite. Incluye revisión de nivel de líquidos y presión de neumáticos.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+
+        <div class="svc-card" data-svc="1">
+          <span class="svc-card-num">02</span>
+          <div class="svc-card-ico"><i class="bi bi-droplet-fill"></i></div>
+          <h3 class="svc-card-title">Cambio de Aceite y Filtro</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Sustitución del aceite del motor y filtro de aceite. Incluye revisión de nivel de líquidos y presión de neumáticos.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Alineación y Balanceo</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-record-circle service-card-icon"></i>
-              <p class="service-card-desc">Ajuste de geometría de ruedas y balanceo de neumáticos para una conducción segura y mayor vida útil de las llantas.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+
+        <div class="svc-card" data-svc="2">
+          <span class="svc-card-num">03</span>
+          <div class="svc-card-ico"><i class="bi bi-record-circle"></i></div>
+          <h3 class="svc-card-title">Alineación y Balanceo</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Ajuste de geometría de ruedas y balanceo de neumáticos para una conducción segura y mayor vida útil de las llantas.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Servicio de Frenos</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-exclamation-circle service-card-icon"></i>
-              <p class="service-card-desc">Inspección y reemplazo de pastillas, discos y líquido de frenos. Incluye prueba de funcionamiento en pista de seguridad.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+
+        <div class="svc-card" data-svc="3">
+          <span class="svc-card-num">04</span>
+          <div class="svc-card-ico"><i class="bi bi-exclamation-circle"></i></div>
+          <h3 class="svc-card-title">Servicio de Frenos</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Inspección y reemplazo de pastillas, discos y líquido de frenos. Incluye prueba de funcionamiento en pista de seguridad.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Diagnóstico Computarizado</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-cpu service-card-icon"></i>
-              <p class="service-card-desc">Análisis electrónico del sistema OBD para detectar fallas en motor, transmisión, ABS y airbags con equipos de última generación.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+
+        <div class="svc-card" data-svc="4">
+          <span class="svc-card-num">05</span>
+          <div class="svc-card-ico"><i class="bi bi-cpu"></i></div>
+          <h3 class="svc-card-title">Diagnóstico Computarizado</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Análisis electrónico del sistema OBD para detectar fallas en motor, transmisión, ABS y airbags con equipos de última generación.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
-        <div class="col-md-6 col-lg-4">
-          <div class="service-card">
-            <div class="service-card-head"><p class="service-card-title">Mano de Obra Especializada</p></div>
-            <div class="service-card-body">
-              <i class="bi bi-tools service-card-icon"></i>
-              <p class="service-card-desc">Intervenciones técnicas especializadas por mecánicos certificados. Presupuesto personalizado según la necesidad de tu vehículo.</p>
-              <a href="#" class="service-link">Saber más <i class="bi bi-arrow-right"></i></a>
-            </div>
-          </div>
+
+        <div class="svc-card" data-svc="5">
+          <span class="svc-card-num">06</span>
+          <div class="svc-card-ico"><i class="bi bi-tools"></i></div>
+          <h3 class="svc-card-title">Mano de Obra Especializada</h3>
+          <div class="svc-card-rule"></div>
+          <p class="svc-card-desc">Intervenciones técnicas especializadas por mecánicos certificados. Presupuesto personalizado según la necesidad de tu vehículo.</p>
+          <button type="button" class="svc-card-cta">Saber más <i class="bi bi-arrow-right"></i></button>
         </div>
+
       </div>
     </div>
   </section>
@@ -342,9 +345,14 @@
         <!-- Right: photo collage -->
         <div class="col-lg-6 reveal-right">
           <div class="why-collage">
-            <img class="why-img-1" src="https://images.pexels.com/photos/15476331/pexels-photo-15476331.jpeg" alt="Taller profesional">
-            <img class="why-img-2" src="https://images.pexels.com/photos/16679644/pexels-photo-16679644.jpeg" alt="Mecánico certificado">
-            <div class="why-accent-sq"></div>
+            <img class="why-img-1" src="https://images.pexels.com/photos/6870307/pexels-photo-6870307.jpeg?auto=compress&cs=tinysrgb&w=1260&h=750&dpr=2" alt="Mecánico trabajando en frenos">
+            <div class="why-badge">
+              <div class="why-badge-icon"><i class="bi bi-trophy-fill"></i></div>
+              <div>
+                <div class="why-badge-num">1.200+</div>
+                <div class="why-badge-label">Vehículos atendidos</div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
@@ -377,7 +385,7 @@
       </div>
       <div class="row g-4 reveal-stagger">
         <div class="col-md-4">
-          <div class="news-card">
+          <div class="news-card" data-art="0">
             <img class="news-img" src="https://images.pexels.com/photos/638479/pexels-photo-638479.jpeg" alt="Cambio de aceite">
             <div class="news-body">
               <span class="news-cat">Mantenimiento</span>
@@ -387,7 +395,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="news-card">
+          <div class="news-card" data-art="1">
             <img class="news-img" src="https://images.pexels.com/photos/16634684/pexels-photo-16634684.jpeg" alt="Frenos">
             <div class="news-body">
               <span class="news-cat">Seguridad</span>
@@ -397,7 +405,7 @@
           </div>
         </div>
         <div class="col-md-4">
-          <div class="news-card">
+          <div class="news-card" data-art="2">
             <img class="news-img" src="https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg" alt="Consejos de ahorro">
             <div class="news-body">
               <span class="news-cat">Consejos</span>
@@ -419,9 +427,8 @@
         <!-- Brand -->
         <div class="col-lg-4">
           <div class="footer-brand">
-            <img src="./assets/img/logo.png" alt="Lubricentro">
+            <img src="./assets/img/logo_white.png" alt="Lubricentro">
           </div>
-          <p class="footer-desc">Tu lubricentro de confianza. Más de 10 años cuidando los vehículos de nuestra comunidad con profesionalismo y transparencia.</p>
           <div class="footer-social">
             <a href="#" aria-label="Facebook"><i class="bi bi-facebook"></i></a>
             <a href="#" aria-label="Instagram"><i class="bi bi-instagram"></i></a>
@@ -431,7 +438,7 @@
           </div>
         </div>
         <!-- Nav links -->
-        <div class="col-sm-6 col-lg-2">
+        <div class="col-sm-6 col-lg-4">
           <div class="footer-heading">Navegación</div>
           <ul class="footer-links">
             <li><a href="#">Inicio</a></li>
@@ -440,21 +447,12 @@
             <li><a href="#contacto">Contacto</a></li>
           </ul>
         </div>
-        <!-- Services links -->
-        <div class="col-sm-6 col-lg-2">
-          <div class="footer-heading">Servicios</div>
-          <ul class="footer-links">
-            <li><a href="#">Revisión General</a></li>
-            <li><a href="#">Cambio de Aceite</a></li>
-            <li><a href="#">Alineación y Balanceo</a></li>
-            <li><a href="#">Servicio de Frenos</a></li>
-            <li><a href="#">Diagnóstico</a></li>
-          </ul>
-        </div>
         <!-- Contact -->
         <div class="col-lg-4" id="contacto">
           <div class="footer-heading">Contacto</div>
-          <div class="footer-contact-item"><i class="bi bi-geo-alt-fill"></i><span>Calle Principal 123, San José, Costa Rica</span></div>
+          <a class="footer-contact-item footer-contact-link" href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer">
+            <i class="bi bi-geo-alt-fill"></i><span>Montecillos, Alajuela</span>
+          </a>
           <div class="footer-contact-item"><i class="bi bi-telephone-fill"></i><span>+(506) 2443-6139</span></div>
           <div class="footer-contact-item"><i class="bi bi-envelope-fill"></i><span>info@lubricentro.cr</span></div>
           <div class="footer-contact-item"><i class="bi bi-clock-fill"></i><span>Lun – Sáb: 09:00 – 19:00</span></div>
@@ -463,14 +461,305 @@
     </div>
     <!-- Bottom bar -->
     <div class="container">
-      <div class="footer-bottom">
-        <span class="footer-bottom-text">© 2026 Lubricentro. Todos los derechos reservados.</span>
-        <span class="footer-bottom-text">Hecho con ♥ para un mejor servicio automotriz</span>
+      <div class="footer-bottom footer-bottom-centered">
+        <span class="footer-bottom-text">© 2026 Lubricentro Montecillos. Todos los derechos reservados.</span>
       </div>
     </div>
   </footer>
 
+  <!-- ===================================================
+       SERVICE MODAL
+  =================================================== -->
+  <div class="lm-backdrop" id="svcModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="svcModalTitle">
+    <div class="lm-modal svc-modal">
+      <button class="lm-close-x" id="svcCloseX" aria-label="Cerrar"><i class="bi bi-x"></i></button>
+      <div class="svc-modal-hd" id="svcModalHd"></div>
+      <div class="svc-modal-bd" id="svcModalBd"></div>
+    </div>
+  </div>
+
+  <!-- ===================================================
+       ARTICLE MODAL
+  =================================================== -->
+  <div class="lm-backdrop" id="artModalBackdrop" role="dialog" aria-modal="true" aria-labelledby="artModalTitle">
+    <div class="lm-modal art-modal">
+      <button class="lm-close-x" id="artCloseX" aria-label="Cerrar"><i class="bi bi-x"></i></button>
+      <div id="artModalContent"></div>
+    </div>
+  </div>
+
   <script src="./assets/js/main.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <script>
+  (function () {
+    /* ── Datos de servicios ──────────────────────────────────── */
+    var SERVICES = [
+      {
+        icon: 'bi-clipboard2-check',
+        title: 'Revisión General',
+        desc: 'Evaluación técnica completa de los principales sistemas de tu vehículo. Nuestros técnicos realizan una inspección exhaustiva para detectar cualquier problema antes de que se convierta en una falla costosa.',
+        includes: ['Motor y aceite del motor','Sistema de frenos','Suspensión y dirección','Sistema eléctrico y luces','Presión de neumáticos','Líquido refrigerante'],
+        duration: '45–60 min',
+        price: 'Desde ₡8.000'
+      },
+      {
+        icon: 'bi-droplet-fill',
+        title: 'Cambio de Aceite y Filtro',
+        desc: 'Sustitución del aceite del motor y filtro de aceite usando productos de primera línea. Disponible en aceite mineral, semisintético y sintético 100% según las especificaciones del fabricante de tu vehículo.',
+        includes: ['Aceite del motor nuevo','Filtro de aceite original','Revisión de todos los líquidos','Presión de neumáticos','Informe de condición','Sticker de próximo cambio'],
+        duration: '30 min',
+        price: 'Desde ₡15.000'
+      },
+      {
+        icon: 'bi-record-circle',
+        title: 'Alineación y Balanceo',
+        desc: 'Ajuste preciso de la geometría de las ruedas y balanceo electrónico de neumáticos. Mejora la estabilidad en carretera, el rendimiento del combustible y prolonga significativamente la vida útil de tus llantas.',
+        includes: ['Medición de convergencia','Ajuste de camber y caster','Balanceo electrónico','Revisión de rótulas','Informe de geometría','Prueba de manejo post-servicio'],
+        duration: '45–60 min',
+        price: 'Desde ₡12.000'
+      },
+      {
+        icon: 'bi-exclamation-circle',
+        title: 'Servicio de Frenos',
+        desc: 'Inspección completa y mantenimiento del sistema de frenado. La seguridad de tu vehículo y tu familia depende directamente del correcto funcionamiento de los frenos. No dejes esto para después.',
+        includes: ['Inspección de pastillas y discos','Medición de espesor de discos','Cambio de líquido de frenos','Revisión de mangueras','Prueba de funcionamiento','Garantía escrita por servicio'],
+        duration: '1–2 horas',
+        price: 'Desde ₡20.000'
+      },
+      {
+        icon: 'bi-cpu',
+        title: 'Diagnóstico Computarizado',
+        desc: 'Análisis electrónico completo mediante escáner OBD de última generación. Detectamos fallas en motor, transmisión, ABS, airbags y sistema eléctrico con precisión milimétrica y te entregamos un reporte detallado.',
+        includes: ['Lectura de códigos OBD','Análisis completo del motor','Sistema ABS y airbags','Transmisión automática','Reporte digital de fallas','Recomendaciones técnicas'],
+        duration: '30–45 min',
+        price: 'Desde ₡10.000'
+      },
+      {
+        icon: 'bi-tools',
+        title: 'Mano de Obra Especializada',
+        desc: 'Intervenciones técnicas realizadas por mecánicos certificados con años de experiencia en todo tipo de vehículos, desde autos compactos hasta camionetas y SUVs. Presupuesto personalizado sin costo.',
+        includes: ['Mecánicos certificados','Repuestos originales','Garantía escrita por trabajo','Presupuesto sin costo previo','Compatible con todos los modelos','Seguimiento post-servicio'],
+        duration: 'Según servicio',
+        price: 'Presupuesto personalizado'
+      }
+    ];
+
+    /* ── Datos de artículos ──────────────────────────────────── */
+    var ARTICLES = [
+      {
+        img: 'https://images.pexels.com/photos/638479/pexels-photo-638479.jpeg',
+        cat: 'Mantenimiento',
+        title: '5 señales de que tu auto necesita un cambio de aceite urgente',
+        author: 'Equipo Lubricentro',
+        date: '10 Mar 2026',
+        html: '<p>El aceite del motor es el fluido vital que mantiene todas las piezas móviles lubricadas y protegidas del desgaste. Con el tiempo, el aceite se degrada y pierde su capacidad de proteger el motor de manera efectiva. Ignorar el cambio de aceite puede derivar en daños costosos e irreversibles. Aquí te explicamos las 5 señales clave que indican que ya es tiempo de actuar.</p>' +
+          '<h3>1. El aceite se ve oscuro y espeso</h3>' +
+          '<p>El aceite nuevo tiene un color ámbar claro y una consistencia fluida. Con el uso, acumula partículas de suciedad y residuos del motor, volviéndose negro y viscoso. Revisá el nivel con la varilla de medición: si el aceite es oscuro y pegajoso, es tiempo de cambiarlo sin esperar más.</p>' +
+          '<h3>2. Ruidos inusuales en el motor</h3>' +
+          '<p>Un motor bien lubricado trabaja de forma suave y silenciosa. Si empezás a escuchar golpeteos, chasquidos o un sonido metálico inusual al encender el vehículo, puede ser señal de que el aceite ya no está cumpliendo su función protectora. Las piezas metálicas se rozan entre sí generando esos ruidos característicos.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-lightbulb" style="color:var(--accent-gold);margin-right:6px;"></i><strong>Tip Lubricentro:</strong> Si el motor hace un golpeteo al arrancar que desaparece en pocos segundos, es un síntoma clásico de aceite degradado. No lo ignorés.</p></div>' +
+          '<h3>3. El indicador de aceite se enciende</h3>' +
+          '<p>La luz de aceite en el tablero es la señal más directa de que algo no está bien. Puede indicar bajo nivel de aceite o baja presión en el sistema. Cuando esta luz se enciende, detené el vehículo de manera segura lo antes posible y revisá el nivel. Continuar manejando con baja presión de aceite puede destruir el motor en minutos.</p>' +
+          '<h3>4. Humo del escape con olor a quemado</h3>' +
+          '<p>Si notás un olor a quemado dentro o fuera del vehículo, o si el escape emite humo azulado, es posible que el aceite esté filtrando hacia las partes calientes del motor o que esté tan degradado que ya no resiste las altas temperaturas del motor.</p>' +
+          '<h3>5. El rendimiento del motor baja</h3>' +
+          '<p>Un aceite desgastado aumenta la fricción interna del motor, lo que se traduce en pérdida de potencia, mayor consumo de combustible y respuesta lenta al acelerar. Si tu auto ya no "arranca" como antes, el aceite podría ser parte del problema.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-wrench" style="color:var(--accent-gold);margin-right:6px;"></i>En Lubricentro Montecillos recomendamos cambiar el aceite cada 5.000 km en aceites minerales o cada 10.000 km en aceites sintéticos, según el uso del vehículo.</p></div>'
+      },
+      {
+        img: 'https://images.pexels.com/photos/16634684/pexels-photo-16634684.jpeg',
+        cat: 'Seguridad',
+        title: '¿Cuándo es el momento correcto para revisar tus frenos?',
+        author: 'Equipo Lubricentro',
+        date: '3 Mar 2026',
+        html: '<p>El sistema de frenos es el componente de seguridad más crítico de tu vehículo. Un sistema de frenado deficiente puede ser la diferencia entre un susto y un accidente grave. Conocer cuándo revisarlos y qué señales atender puede salvarte la vida y la de otros.</p>' +
+          '<h3>Señales que no podés ignorar</h3>' +
+          '<p>El sistema te avisa cuando algo no está bien. El chirrido agudo al frenar es la señal más común: las pastillas tienen indicadores metálicos de desgaste que producen ese sonido precisamente para alertarte. Si escuchás ese ruido de forma consistente, es momento de ir al taller inmediatamente.</p>' +
+          '<p>Un pedal de freno que se hunde más de lo usual o que requiere más presión para detener el auto también es señal de alerta. Puede indicar desgaste en las pastillas, problema en el líquido de frenos o una fuga en el sistema hidráulico.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-exclamation-triangle" style="color:var(--accent-gold);margin-right:6px;"></i><strong>Alerta:</strong> Si tu vehículo jala hacia un lado al frenar, podría haber desgaste desigual en las pastillas o un disco deformado. No lo dejes pasar.</p></div>' +
+          '<h3>Vibración al frenar</h3>' +
+          '<p>Si el volante o el pedal vibran al aplicar los frenos, especialmente a velocidades altas, los discos pueden estar deformados por el calor excesivo. Esto reduce drásticamente la eficiencia del sistema y es una situación de riesgo real.</p>' +
+          '<h3>¿Cada cuánto revisarlos?</h3>' +
+          '<p>Como guía general, se recomienda revisar el sistema de frenos cada 15.000–20.000 km o al menos una vez al año. Sin embargo, si conducís frecuentemente en zonas montañosas, con mucho tráfico o con carga pesada, la revisión debe ser más frecuente ya que el desgaste es mayor.</p>' +
+          '<h3>El líquido de frenos</h3>' +
+          '<p>El líquido de frenos es higroscópico, es decir, absorbe humedad del ambiente. Con el tiempo, esta humedad baja su punto de ebullición y puede provocar que el sistema falle bajo frenadas intensas. Se recomienda cambiarlo cada 2 años o cada 40.000 km, lo que ocurra primero.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-check2-circle" style="color:var(--accent-gold);margin-right:6px;"></i>En Lubricentro hacemos una inspección visual del sistema de frenos sin costo adicional en cada cambio de aceite. Tu seguridad siempre está primero.</p></div>'
+      },
+      {
+        img: 'https://images.pexels.com/photos/2244746/pexels-photo-2244746.jpeg',
+        cat: 'Consejos',
+        title: 'Cómo ahorrar dinero en el mantenimiento de tu vehículo',
+        author: 'Equipo Lubricentro',
+        date: '24 Feb 2026',
+        html: '<p>Mantener un vehículo en buen estado no tiene que ser sinónimo de gastar una fortuna. Con los hábitos correctos y siguiendo un plan de mantenimiento preventivo, podés reducir significativamente los costos a largo plazo y evitar las reparaciones inesperadas que realmente duelen en el bolsillo.</p>' +
+          '<h3>Seguí el plan del fabricante</h3>' +
+          '<p>El manual del propietario de tu vehículo contiene el plan de mantenimiento recomendado por los ingenieros que diseñaron el auto. Seguirlo al pie de la letra es la forma más eficiente de mantener el vehículo en óptimas condiciones. Saltarse cambios de aceite o revisiones puede parecer un ahorro hoy, pero se convierte en una reparación costosa mañana.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-lightbulb" style="color:var(--accent-gold);margin-right:6px;"></i>Un cambio de aceite a tiempo cuesta ₡15.000. Una reparación de motor por falta de lubricación puede costar ₡500.000 o más.</p></div>' +
+          '<h3>No ignorés los pequeños problemas</h3>' +
+          '<p>Una vibración, un ruido nuevo, una luz en el tablero: estos son mensajes de tu vehículo. Ignorarlos casi siempre resulta en fallas mayores. Atender un problema pequeño a tiempo es siempre más barato que reparar la falla en cascada que genera.</p>' +
+          '<h3>Revisá la presión de los neumáticos</h3>' +
+          '<p>Los neumáticos inflados a la presión correcta mejoran el rendimiento del combustible hasta un 3%, reducen el desgaste irregular y mejoran la seguridad de manejo. Es un hábito simple y gratuito que marca una diferencia real en el consumo mensual.</p>' +
+          '<h3>Conducción eficiente</h3>' +
+          '<p>La forma en que manejás impacta directamente en el desgaste de tu vehículo. Aceleraciones bruscas, frenadas de emergencia constantes y altas RPM por tiempos prolongados aumentan el desgaste del motor, los frenos y los neumáticos. Una conducción suave y anticipada reduce todos estos costos.</p>' +
+          '<h3>Elegí un taller de confianza</h3>' +
+          '<p>Tener un taller de confianza donde te conozcan y conozcan tu vehículo es invaluable. Evitás los diagnósticos innecesarios, los repuestos de mala calidad y los trabajos mal hechos que generan nuevas visitas. La transparencia y la honestidad de tu mecánico te ahorran dinero a largo plazo.</p>' +
+          '<div class="art-tip-box"><p><i class="bi bi-wrench" style="color:var(--accent-gold);margin-right:6px;"></i>En Lubricentro Montecillos ofrecemos presupuesto sin costo y explicamos cada trabajo antes de realizarlo. Tu confianza es nuestra mejor herramienta.</p></div>'
+      }
+    ];
+
+    /* ── Helpers ─────────────────────────────────────────────── */
+    function esc(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+    /* ── Service modal ───────────────────────────────────────── */
+    var svcBackdrop = document.getElementById('svcModalBackdrop');
+    var svcHd       = document.getElementById('svcModalHd');
+    var svcBd       = document.getElementById('svcModalBd');
+
+    function openSvcModal(idx) {
+      var s = SERVICES[idx];
+      svcHd.innerHTML =
+        '<i class="bi ' + s.icon + ' svc-modal-bg-ico"></i>' +
+        '<div class="svc-eyebrow">Nuestros Servicios</div>' +
+        '<h2 class="svc-modal-title" id="svcModalTitle">' + esc(s.title) + '</h2>';
+
+      var incItems = s.includes.map(function(item) {
+        return '<div class="svc-inc-item"><i class="bi bi-check-circle-fill"></i>' + esc(item) + '</div>';
+      }).join('');
+
+      svcBd.innerHTML =
+        '<p class="svc-desc">' + esc(s.desc) + '</p>' +
+        '<div class="svc-inc-label">¿Qué incluye?</div>' +
+        '<div class="svc-inc-grid">' + incItems + '</div>' +
+        '<div class="svc-meta-bar">' +
+          '<div class="svc-meta-chip"><i class="bi bi-clock"></i><span>Duración: <strong>' + esc(s.duration) + '</strong></span></div>' +
+          '<div class="svc-meta-chip"><i class="bi bi-tag"></i><span>Precio: <strong>' + esc(s.price) + '</strong></span></div>' +
+        '</div>' +
+        '<div class="svc-actions">' +
+          '<a href="./auth_client.html" class="btn-svc-book"><i class="bi bi-calendar2-check"></i> Agendar Cita</a>' +
+          '<button type="button" class="btn-svc-dismiss js-svc-close">Cerrar</button>' +
+        '</div>';
+
+      svcBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+      svcBd.querySelector('.js-svc-close').addEventListener('click', closeSvcModal);
+    }
+
+    function closeSvcModal() {
+      svcBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('svcCloseX').addEventListener('click', closeSvcModal);
+    svcBackdrop.addEventListener('click', function(e) { if (e.target === svcBackdrop) closeSvcModal(); });
+
+    /* ── Article modal ───────────────────────────────────────── */
+    var artBackdrop = document.getElementById('artModalBackdrop');
+    var artContent  = document.getElementById('artModalContent');
+
+    function openArtModal(idx) {
+      var a = ARTICLES[idx];
+      artContent.innerHTML =
+        '<div class="art-modal-hero">' +
+          '<img src="' + esc(a.img) + '" alt="' + esc(a.title) + '">' +
+          '<div class="art-modal-hero-fade"></div>' +
+          '<div class="art-modal-hero-badge">' +
+            '<span class="art-modal-cat">' + esc(a.cat) + '</span>' +
+            '<span class="art-modal-date"><i class="bi bi-calendar3 me-1"></i>' + esc(a.date) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<div class="art-modal-bd">' +
+          '<h2 class="art-modal-title" id="artModalTitle">' + esc(a.title) + '</h2>' +
+          '<div class="art-modal-byline"><i class="bi bi-person me-1"></i>' + esc(a.author) + ' &nbsp;·&nbsp; <i class="bi bi-calendar3 me-1"></i>' + esc(a.date) + '</div>' +
+          '<div class="art-modal-copy">' + a.html + '</div>' +
+          '<div class="art-cta-strip">' +
+            '<div><div class="art-cta-txt">¿Necesitás ayuda con tu auto?</div><div class="art-cta-sub">Agendá tu cita online en minutos.</div></div>' +
+            '<a href="./auth_client.html" class="btn-svc-book"><i class="bi bi-calendar2-check"></i> Agendar Cita</a>' +
+          '</div>' +
+        '</div>';
+
+      artBackdrop.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeArtModal() {
+      artBackdrop.classList.remove('open');
+      document.body.style.overflow = '';
+    }
+
+    document.getElementById('artCloseX').addEventListener('click', closeArtModal);
+    artBackdrop.addEventListener('click', function(e) { if (e.target === artBackdrop) closeArtModal(); });
+
+    /* ── Event delegation ────────────────────────────────────── */
+    document.addEventListener('click', function(e) {
+      var svcCard = e.target.closest('[data-svc]');
+      if (svcCard && !svcBackdrop.classList.contains('open')) {
+        openSvcModal(parseInt(svcCard.dataset.svc, 10));
+        return;
+      }
+      var artCard = e.target.closest('[data-art]');
+      if (artCard && !artBackdrop.classList.contains('open')) {
+        openArtModal(parseInt(artCard.dataset.art, 10));
+      }
+    });
+
+    /* ── Escape to close ─────────────────────────────────────── */
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeSvcModal(); closeArtModal(); }
+    });
+  })();
+  </script>
+
+  <!-- Stats count-up animation -->
+  <script>
+  (function () {
+    var DURATION = 1800; // ms
+
+    function easeOutQuart(t) {
+      return 1 - Math.pow(1 - t, 4);
+    }
+
+    function formatNum(n, format) {
+      if (format === 'comma') {
+        return n.toLocaleString('es-CR');
+      }
+      return String(n);
+    }
+
+    function animateStat(el) {
+      var target  = parseInt(el.getAttribute('data-count'), 10);
+      var suffix  = el.getAttribute('data-suffix') || '';
+      var format  = el.getAttribute('data-format') || 'plain';
+      var start   = performance.now();
+
+      function tick(now) {
+        var elapsed  = now - start;
+        var progress = Math.min(elapsed / DURATION, 1);
+        var eased    = easeOutQuart(progress);
+        var current  = Math.round(eased * target);
+        el.textContent = formatNum(current, format) + suffix;
+        if (progress < 1) requestAnimationFrame(tick);
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    // Trigger once when stats-bar enters viewport
+    var bar = document.querySelector('.stats-bar');
+    if (!bar) return;
+
+    var observer = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          var stats = bar.querySelectorAll('[data-count]');
+          stats.forEach(function (el) { animateStat(el); });
+          observer.disconnect();
+        }
+      });
+    }, { threshold: 0.4 });
+
+    observer.observe(bar);
+  })();
+  </script>
 </body>
 </html>
