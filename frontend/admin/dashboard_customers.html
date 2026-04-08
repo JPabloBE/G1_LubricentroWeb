@@ -70,7 +70,7 @@
                   <th style="width:160px;">Acciones</th>
                 </tr>
               </thead>
-              <tbody id="tbody"></tbody>
+              <tbody id="tbody" aria-live="polite" aria-atomic="false"></tbody>
             </table>
           </div>
         </div>
@@ -90,7 +90,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 id="modalTitle" class="modal-title">Cliente</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="id">

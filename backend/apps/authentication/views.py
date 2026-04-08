@@ -77,12 +77,27 @@ class StaffUserViewSet(viewsets.ModelViewSet):
 def dashboard_metrics(request):
     """
     Devuelve 4 grupos de métricas en una sola llamada para el dashboard principal.
+    Acepta ?month=YYYY-MM para filtrar gráficos por un mes específico.
     """
-    from datetime import date
+    from datetime import date, timedelta
     from django.db import connection
 
     today = date.today()
     month_start = today.replace(day=1)
+
+    # Filtro de mes opcional para los gráficos
+    month_param = request.query_params.get("month")  # "YYYY-MM"
+    filter_start = filter_end = None
+    if month_param:
+        try:
+            y, m = map(int, month_param.split("-"))
+            filter_start = date(y, m, 1)
+            filter_end = date(y + (m // 12), (m % 12) + 1, 1) - timedelta(days=1)
+        except (ValueError, TypeError):
+            pass
+
+    MONTH_NAMES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
+                   "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre"]
 
     with connection.cursor() as cursor:
         # 1. Citas por estado
@@ -91,25 +106,45 @@ def dashboard_metrics(request):
         )
         appointments_by_status = {r[0]: int(r[1]) for r in cursor.fetchall()}
 
-        # 2. OTs por estado
-        cursor.execute(
-            "SELECT status, COUNT(*) FROM public.work_orders GROUP BY status"
-        )
+        # 2. OTs por estado (filtrado por mes si se indica)
+        if filter_start:
+            cursor.execute(
+                "SELECT status, COUNT(*) FROM public.work_orders WHERE opened_at::date >= %s AND opened_at::date <= %s GROUP BY status",
+                [filter_start, filter_end],
+            )
+        else:
+            cursor.execute(
+                "SELECT status, COUNT(*) FROM public.work_orders GROUP BY status"
+            )
         work_orders_by_status = {r[0]: int(r[1]) for r in cursor.fetchall()}
 
-        # 3. Ingresos diarios del mes actual (movimientos positivos)
-        cursor.execute(
-            """
-            SELECT cm.created_at::date AS day, COALESCE(SUM(cm.amount), 0)
-            FROM django_app.cash_movements cm
-            JOIN django_app.cash_sessions cs ON cs.cash_session_id = cm.cash_session_id
-            WHERE cs.opened_at::date >= %s AND cm.amount > 0
-            GROUP BY cm.created_at::date
-            ORDER BY day
-            """,
-            [month_start],
-        )
-        daily_income = [{"day": str(r[0]), "amount": float(r[1])} for r in cursor.fetchall()]
+        # 3. Ingresos: diarios si hay filtro de mes, mensuales (12 meses) si no
+        if filter_start:
+            cursor.execute(
+                """
+                SELECT cm.created_at::date AS day, COALESCE(SUM(cm.amount), 0)
+                FROM django_app.cash_movements cm
+                JOIN django_app.cash_sessions cs ON cs.cash_session_id = cm.cash_session_id
+                WHERE cm.created_at::date >= %s AND cm.created_at::date <= %s AND cm.amount > 0
+                GROUP BY cm.created_at::date
+                ORDER BY day
+                """,
+                [filter_start, filter_end],
+            )
+            monthly_income = [{"month": str(r[0]), "amount": float(r[1])} for r in cursor.fetchall()]
+        else:
+            cursor.execute(
+                """
+                SELECT DATE_TRUNC('month', cm.created_at)::date AS month, COALESCE(SUM(cm.amount), 0)
+                FROM django_app.cash_movements cm
+                JOIN django_app.cash_sessions cs ON cs.cash_session_id = cm.cash_session_id
+                WHERE cm.created_at::date >= (DATE_TRUNC('month', CURRENT_DATE) - INTERVAL '11 months')::date
+                  AND cm.amount > 0
+                GROUP BY DATE_TRUNC('month', cm.created_at)
+                ORDER BY month
+                """,
+            )
+            monthly_income = [{"month": str(r[0]), "amount": float(r[1])} for r in cursor.fetchall()]
 
         # 4. Movimientos por tipo en el mes actual
         cursor.execute(
@@ -137,17 +172,24 @@ def dashboard_metrics(request):
         )
         cash_session_open = int(cursor.fetchone()[0]) > 0
 
+    if filter_start:
+        income_label = f"Ingresos diarios — {MONTH_NAMES[filter_start.month]} {filter_start.year}"
+        wo_label     = f"OTs abiertas en {MONTH_NAMES[filter_start.month]} {filter_start.year}"
+    else:
+        income_label = "Ingresos mensuales — últimos 12 meses"
+        wo_label     = "Pipeline del taller"
+
     return Response(
         {
             "appointments_by_status": appointments_by_status,
             "work_orders_by_status": work_orders_by_status,
-            "daily_income": daily_income,
+            "monthly_income": monthly_income,
             "movements_by_type": movements_by_type,
             "wo_closed_month": wo_closed_month,
             "cash_session_open": cash_session_open,
-            "month_label": [
-                "", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
-                "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre",
-            ][month_start.month] + " " + str(month_start.year),
+            "income_label": income_label,
+            "wo_label": wo_label,
+            "is_filtered": bool(filter_start),
+            "month_label": MONTH_NAMES[month_start.month] + " " + str(month_start.year),
         }
     )

@@ -2,7 +2,7 @@
 import io
 from datetime import timedelta
 
-from django.db import connection
+from django.db import connection, transaction
 from django.http import HttpResponse
 from django.utils import timezone
 from rest_framework import status, viewsets
@@ -142,6 +142,17 @@ class AppointmentSlotAdminViewSet(viewsets.ModelViewSet):
     def destroy(self, request, *args, **kwargs):
         slot = self.get_object()
         with connection.cursor() as cursor:
+            cursor.execute(
+                "SELECT COUNT(*) FROM public.appointments WHERE slot_id = %s AND coalesce(status,'') != 'cancelled'",
+                [str(slot.slot_id)],
+            )
+            active_count = cursor.fetchone()[0]
+        if active_count:
+            return Response(
+                {"detail": f"No se puede eliminar: el slot tiene {active_count} cita(s) activa(s)."},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        with connection.cursor() as cursor:
             cursor.execute("delete from public.appointment_slots where slot_id = %s", [str(slot.slot_id)])
         return Response(status=status.HTTP_204_NO_CONTENT)
 
@@ -258,6 +269,7 @@ class AppointmentAdminViewSet(viewsets.ModelViewSet):
         ap = Appointment.objects.select_related("customer", "vehicle", "service", "slot").get(appointment_id=ap.appointment_id)
         return Response(self.get_serializer(ap).data, status=200)
 
+    @transaction.atomic
     @action(detail=True, methods=["post"], url_path="confirm")
     def confirm(self, request, pk=None):
         """Confirma la cita y crea automáticamente una OT vinculada si no existe.

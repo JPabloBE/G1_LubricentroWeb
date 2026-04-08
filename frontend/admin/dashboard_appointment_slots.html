@@ -436,7 +436,7 @@
             <div class="slot-cell active${past ? " past" : ""}" data-key="${key}">
               <input class="cap-input" type="number" min="1" value="${slot.capacity}"
                      data-key="${key}" title="Cupo disponible (Enter o clic fuera para guardar)">
-              <button class="del-btn" data-del="${key}" title="Desactivar franja"><i class="bi bi-x"></i></button>
+              <button class="del-btn" data-del="${key}" title="Desactivar franja" aria-label="Desactivar franja"><i class="bi bi-x" aria-hidden="true"></i></button>
             </div>`;
         } else {
           inner = `
@@ -534,6 +534,7 @@
 
     const days  = getWeekDays().filter(d => WORK_DAYS.includes(d.getDay()));
     const tasks = [];
+    let failed  = 0;
 
     for (const d of days) {
       for (const sec of SECTIONS) {
@@ -547,22 +548,29 @@
               body: JSON.stringify({ start_at: start.toISOString(), end_at: end.toISOString(), capacity: DEFAULT_CAP, is_active: true }),
             })
             .then(slot => { if (slot?.slot_id) slotsMap.set(key, slot); })
-            .catch(() => {})
+            .catch(() => { failed++; })
           );
         }
       }
     }
 
-    if (tasks.length === 0) {
-      showMsg("La semana Lun–Vie ya está completamente habilitada.", "info");
-    } else {
-      await Promise.all(tasks);
-      showMsg(`${tasks.length} franja(s) habilitada(s).`, "success");
+    try {
+      if (tasks.length === 0) {
+        showMsg("La semana Lun–Vie ya está completamente habilitada.", "info");
+      } else {
+        await Promise.all(tasks);
+        const ok = tasks.length - failed;
+        if (failed === 0) {
+          showMsg(`${ok} franja(s) habilitada(s).`, "success");
+        } else {
+          showMsg(`${ok} franja(s) habilitada(s). ${failed} no se pudieron crear.`, ok > 0 ? "warning" : "danger");
+        }
+      }
+    } finally {
+      renderGrid();
+      busy = false;
+      btn.disabled = false;
     }
-
-    renderGrid();
-    busy = false;
-    btn.disabled = false;
   });
 
   document.getElementById("btnClearWeek").addEventListener("click", async () => {
@@ -572,36 +580,44 @@
     const btn = document.getElementById("btnClearWeek");
     btn.disabled = true;
 
-    const daySet = new Set(getWeekDays().map(dayStr));
+    const daySet   = new Set(getWeekDays().map(dayStr));
     const toDelete = [...slotsMap.entries()].filter(([key]) => daySet.has(key.split("_")[0]));
+    let failed = 0;
 
-    if (!toDelete.length) {
-      showMsg("No hay franjas habilitadas esta semana.", "info");
-    } else {
-      await Promise.all(
-        toDelete.map(([key, slot]) =>
-          api(`${API_BASE}/api/appointment-slots/${slot.slot_id}/`, { method: "DELETE" })
-            .then(() => slotsMap.delete(key))
-            .catch(() => {})
-        )
-      );
-      showMsg(`${toDelete.length} franja(s) eliminada(s).`, "success");
+    try {
+      if (!toDelete.length) {
+        showMsg("No hay franjas habilitadas esta semana.", "info");
+      } else {
+        await Promise.all(
+          toDelete.map(([key, slot]) =>
+            api(`${API_BASE}/api/appointment-slots/${slot.slot_id}/`, { method: "DELETE" })
+              .then(() => slotsMap.delete(key))
+              .catch(() => { failed++; })
+          )
+        );
+        const ok = toDelete.length - failed;
+        if (failed === 0) {
+          showMsg(`${ok} franja(s) eliminada(s).`, "success");
+        } else {
+          showMsg(`${ok} eliminada(s). ${failed} no se pudieron eliminar (tienen citas activas).`, ok > 0 ? "warning" : "danger");
+        }
+      }
+    } finally {
+      renderGrid();
+      busy = false;
+      btn.disabled = false;
     }
-
-    renderGrid();
-    busy = false;
-    btn.disabled = false;
   });
 
   // ── Week navigation ──────────────────────────────────────────────────────────
   document.getElementById("btnPrevWeek").addEventListener("click", () => {
-    weekStart.setDate(weekStart.getDate() - 7); renderGrid();
+    weekStart.setDate(weekStart.getDate() - 7); loadSlots();
   });
   document.getElementById("btnNextWeek").addEventListener("click", () => {
-    weekStart.setDate(weekStart.getDate() + 7); renderGrid();
+    weekStart.setDate(weekStart.getDate() + 7); loadSlots();
   });
   document.getElementById("btnThisWeek").addEventListener("click", () => {
-    weekStart = getMonday(new Date()); renderGrid();
+    weekStart = getMonday(new Date()); loadSlots();
   });
 
   // ── Auth ─────────────────────────────────────────────────────────────────────

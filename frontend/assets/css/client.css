@@ -1837,3 +1837,86 @@ thead.table-light > * > * {
 .toast-warning .toast-icon     { background:rgba(232,160,48,.12); color:#E8A030; }
 .toast-warning .toast-title    { color:#E8A030; }
 .toast-warning .toast-progress { background:#E8A030; }
+
+/* ================================================================
+   UI/UX IMPROVEMENTS — Accessibility, Interaction & Polish
+================================================================ */
+
+/* ── 1. Loading Button State ── */
+.btn-loading {
+  pointer-events: none;
+  opacity: .7;
+  position: relative;
+}
+.btn-loading::after {
+  content: '';
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  border: 2px solid currentColor;
+  border-top-color: transparent;
+  border-radius: 50%;
+  animation: btn-spin .6s linear infinite;
+  margin-left: 6px;
+  vertical-align: middle;
+  flex-shrink: 0;
+}
+@keyframes btn-spin { to { transform: rotate(360deg); } }
+
+/* ── 2. Scroll padding — evita que el topbar tape el contenido ── */
+:root {
+  scroll-padding-top: 72px;
+}
+
+/* ── 3. Mobile Touch Targets ── */
+@media (max-width: 767px) {
+  .btn,
+  .btn-sm {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  /* Prevent iOS auto-zoom on form inputs */
+  input, select, textarea {
+    font-size: 16px !important;
+  }
+}
+
+/* ── 4. Inline Form Validation ── */
+.form-control.is-invalid,
+.form-select.is-invalid {
+  border-color: var(--accent-red, #FF3B1F) !important;
+  box-shadow: 0 0 0 3px rgba(255,59,31,.15) !important;
+  background-image: none;
+}
+.invalid-feedback {
+  color: #FF6B55;
+  font-size: .78rem;
+  margin-top: 4px;
+  display: none;
+}
+.was-validated .form-control:invalid ~ .invalid-feedback,
+.form-control.is-invalid ~ .invalid-feedback,
+.form-select.is-invalid ~ .invalid-feedback {
+  display: block;
+}
+
+/* ── 5. Status Badge Icons ── */
+.badge-icon {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.badge-icon svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
+}
+
+/* ── 6. Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+  }
+}

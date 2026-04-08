@@ -129,6 +129,13 @@ class ProductDetailView(generics.RetrieveUpdateDestroyAPIView):
         if logs:
             ProductChangeLog.objects.bulk_create(logs)
 
+    @transaction.atomic
+    def perform_destroy(self, instance):
+        # Eliminar movimientos y changelogs asociados antes de borrar el producto
+        ProductMovement.objects.filter(product_id=instance.pk).delete()
+        ProductChangeLog.objects.filter(product_id=instance.pk).delete()
+        instance.delete()
+
 
 class ProductChangeLogView(generics.ListAPIView):
     serializer_class = ProductChangeLogSerializer

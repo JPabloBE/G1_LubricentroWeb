@@ -109,13 +109,13 @@
         <li><a class="active" href="./appointments.html">Mis Citas</a></li>
         <li><a href="./vehicles.html">Mis Autos</a></li>
       </ul>
-      <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button">
+      <button class="btn btn-sm btn-outline-light ms-auto d-lg-none" id="btnMobileMenu" type="button" aria-label="Menú">
         <i class="bi bi-list"></i>
       </button>
       <div class="nav-user d-none d-lg-flex">
         <!-- Campana de notificaciones -->
         <div class="notif-wrap">
-          <button class="btn-notif-bell" id="btnNotifBell" title="Notificaciones">
+          <button class="btn-notif-bell" id="btnNotifBell" title="Notificaciones" aria-label="Notificaciones">
             <i class="bi bi-bell"></i>
             <span class="notif-count" id="notifCount"></span>
           </button>
@@ -244,7 +244,7 @@
             <i class="bi bi-arrow-clockwise"></i> Actualizar
           </button>
         </div>
-        <div id="activeList"></div>
+        <div id="activeList" aria-live="polite" aria-atomic="false"></div>
 
         <!-- Citas anteriores -->
         <button class="past-toggle d-none" id="pastToggle" type="button">
@@ -252,7 +252,7 @@
           <span id="pastToggleLabel">Ver citas anteriores</span>
           <i class="bi bi-chevron-down past-toggle-icon"></i>
         </button>
-        <div id="pastList"></div>
+        <div id="pastList" aria-live="polite" aria-atomic="false"></div>
 
       </div><!-- /.appt-list-col -->
 
@@ -353,7 +353,7 @@
             </div>
           </div>
           <div class="ap-card-right">
-            <span class="ap-status ${cls}"><i class="bi ${icon}"></i>${escapeHtml(label)}</span>
+            <span class="ap-status ${cls}" aria-label="${escapeHtml(label)}"><i class="bi ${icon} me-1" aria-hidden="true"></i>${escapeHtml(label)}</span>
             <a class="btn-detail" href="./appointment_detail.html?id=${escapeHtml(a.appointment_id)}">
               Ver detalle <i class="bi bi-arrow-right"></i>
             </a>
@@ -489,6 +489,11 @@
     if (!service_id) { showMsg("Seleccioná un servicio.", "warning"); return; }
     if (!slot_id)    { showMsg("Seleccioná un horario.", "warning"); return; }
 
+    const btnCreate  = document.getElementById("btnCreate");
+    const origCreate = btnCreate.innerHTML;
+    btnCreate.classList.add("btn-loading");
+    btnCreate.disabled = true;
+
     try {
       // Si el usuario eligió registrar un vehículo nuevo, crearlo primero
       if (vehicle_id === "__new__") {
@@ -521,6 +526,10 @@
       await loadAppointments();
     } catch (err) {
       showMsg(err.message || "No se pudo crear la cita.", "danger");
+    } finally {
+      btnCreate.classList.remove("btn-loading");
+      btnCreate.disabled = false;
+      btnCreate.innerHTML = origCreate;
     }
   });
 

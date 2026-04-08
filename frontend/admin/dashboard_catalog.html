@@ -99,6 +99,9 @@
           <div id="stockAlert" class="alert alert-warning d-none d-flex align-items-center gap-2 mb-3">
             <i class="bi bi-exclamation-triangle-fill"></i>
             <span id="stockAlertText"></span>
+            <button id="btnShowLowStock" class="btn btn-sm btn-warning ms-auto" style="white-space:nowrap;">
+              <i class="bi bi-eye me-1"></i>Mostrar
+            </button>
           </div>
 
           <div class="d-flex justify-content-between align-items-center mb-3">
@@ -175,7 +178,7 @@
           <div id="productFormCard" class="card shadow-sm mb-3 d-none">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span id="productFormTitle" class="fw-semibold">Nuevo producto</span>
-              <button class="btn-close" id="btnCloseProductForm"></button>
+              <button class="btn-close" id="btnCloseProductForm" aria-label="Cerrar formulario"></button>
             </div>
             <div class="card-body">
               <form id="productForm">
@@ -199,8 +202,9 @@
                     </select>
                   </div>
                   <div class="col-12 col-md-6">
-                    <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                    <label class="form-label" for="productName">Nombre <span class="text-danger">*</span></label>
                     <input class="form-control" id="productName" required>
+                    <div class="invalid-feedback" id="productNameError">El nombre es requerido.</div>
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label">Descripción</label>
@@ -294,15 +298,16 @@
           <div id="serviceFormCard" class="card shadow-sm mb-3 d-none">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span id="serviceFormTitle" class="fw-semibold">Nuevo servicio</span>
-              <button class="btn-close" id="btnCloseServiceForm"></button>
+              <button class="btn-close" id="btnCloseServiceForm" aria-label="Cerrar formulario"></button>
             </div>
             <div class="card-body">
               <form id="serviceForm">
                 <input type="hidden" id="serviceId">
                 <div class="row g-2">
                   <div class="col-12 col-md-6">
-                    <label class="form-label">Nombre <span class="text-danger">*</span></label>
+                    <label class="form-label" for="serviceName">Nombre <span class="text-danger">*</span></label>
                     <input class="form-control" id="serviceName" required>
+                    <div class="invalid-feedback" id="serviceNameError">El nombre es requerido.</div>
                   </div>
                   <div class="col-12 col-md-6">
                     <label class="form-label">Precio base</label>
@@ -331,7 +336,7 @@
                     </select>
                   </div>
                   <div class="col-12 d-flex gap-2 mt-1">
-                    <button type="submit" class="btn btn-success btn-sm">Guardar</button>
+                    <button type="submit" class="btn btn-success btn-sm" id="btnSaveService">Guardar</button>
                     <button type="button" class="btn btn-outline-secondary btn-sm" id="btnCancelService">Cancelar</button>
                   </div>
                 </div>
@@ -378,7 +383,7 @@
           <div id="categoryFormCard" class="card shadow-sm mb-3 d-none">
             <div class="card-header d-flex justify-content-between align-items-center">
               <span id="categoryFormTitle" class="fw-semibold">Nueva categoría</span>
-              <button class="btn-close" id="btnCloseCategoryForm"></button>
+              <button class="btn-close" id="btnCloseCategoryForm" aria-label="Cerrar formulario"></button>
             </div>
             <div class="card-body">
               <form id="categoryForm">
@@ -432,7 +437,7 @@
 <div class="offcanvas offcanvas-end" tabindex="-1" id="changelogOffcanvas" style="width:440px;">
   <div class="offcanvas-header">
     <h5 class="offcanvas-title" id="changelogTitle">Historial</h5>
-    <button type="button" class="btn-close" data-bs-dismiss="offcanvas"></button>
+    <button type="button" class="btn-close" aria-label="Cerrar" data-bs-dismiss="offcanvas"></button>
   </div>
   <div class="offcanvas-body d-flex flex-column p-0">
 
@@ -497,7 +502,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="adjModalTitle">Ingresar stock</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <input type="hidden" id="adjProductId">
@@ -663,8 +668,8 @@ function renderProducts() {
             <i class="bi bi-pencil"></i> Editar
           </button>
           <div class="dropdown">
-            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-three-dots-vertical"></i>
+            <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+              <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
             </button>
             <ul class="dropdown-menu dropdown-menu-end">
               <li><a class="dropdown-item" href="#" onclick="openAdjustStock('${p.product_id}','purchase');return false;">
@@ -704,6 +709,13 @@ document.getElementById("btnToggleFilters").addEventListener("click", () => {
 });
 
 document.getElementById("btnApplyFilters").addEventListener("click", applyFilters);
+
+document.getElementById("btnShowLowStock").addEventListener("click", () => {
+  document.getElementById("fStock").value = "low";
+  applyFilters();
+  document.getElementById("tabProducts").scrollIntoView({ behavior: "smooth", block: "start" });
+});
+
 document.getElementById("btnClearFilters").addEventListener("click", () => {
   ["fName","fSku","fPriceMin","fPriceMax"].forEach(id => document.getElementById(id).value = "");
   document.getElementById("fCategory").value = "";
@@ -833,10 +845,27 @@ function editProduct(id) {
 
 document.getElementById("productForm").addEventListener("submit", async e => {
   e.preventDefault();
+
+  // Limpiar errores inline previos
+  document.getElementById("productName").classList.remove("is-invalid");
+
+  // Validación client-side
+  const nameVal = document.getElementById("productName").value.trim();
+  if (!nameVal) {
+    document.getElementById("productName").classList.add("is-invalid");
+    document.getElementById("productName").focus();
+    return;
+  }
+
+  const btn = document.getElementById("btnSaveProduct");
+  const origText = btn.innerHTML;
+  btn.classList.add("btn-loading");
+  btn.disabled = true;
+
   const id = document.getElementById("productId").value;
   const catVal = document.getElementById("productCategoryId").value;
   const body = {
-    name:        document.getElementById("productName").value.trim(),
+    name:        nameVal,
     sku:         document.getElementById("productSku").value.trim() || null,
     description: document.getElementById("productDescription").value.trim() || null,
     image_url:   document.getElementById("productImageUrl").value.trim() || null,
@@ -855,11 +884,26 @@ document.getElementById("productForm").addEventListener("submit", async e => {
   };
   const url    = id ? `${API}/catalog/products/${id}/` : `${API}/catalog/products/`;
   const method = id ? "PUT" : "POST";
-  const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); showToast("Error al guardar: " + (e.detail || JSON.stringify(e)), 'error'); return; }
-  showToast('Producto guardado.', 'success');
-  closeProductForm();
-  await loadProducts();
+  try {
+    const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+    if (!r.ok) {
+      const errData = await r.json();
+      const msg = errData.name?.[0] || errData.detail || JSON.stringify(errData);
+      if (errData.name) {
+        document.getElementById("productName").classList.add("is-invalid");
+        document.getElementById("productNameError").textContent = errData.name[0];
+      }
+      showToast("Error al guardar: " + msg, 'error');
+      return;
+    }
+    showToast('Producto guardado.', 'success');
+    closeProductForm();
+    await loadProducts();
+  } finally {
+    btn.classList.remove("btn-loading");
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
 });
 
 async function deleteProduct(id) {
@@ -912,8 +956,8 @@ function renderServices(query = "") {
           <i class="bi bi-pencil"></i> Editar
         </button>
         <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-three-dots-vertical"></i>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item" href="#" onclick="openChangelog('service','${s.service_id}','${s.name.replace(/'/g,"\\'")}');return false;">
@@ -959,10 +1003,26 @@ function editService(id) {
 
 document.getElementById("serviceForm").addEventListener("submit", async e => {
   e.preventDefault();
+
+  // Limpiar errores inline previos
+  document.getElementById("serviceName").classList.remove("is-invalid");
+
+  const nameVal = document.getElementById("serviceName").value.trim();
+  if (!nameVal) {
+    document.getElementById("serviceName").classList.add("is-invalid");
+    document.getElementById("serviceName").focus();
+    return;
+  }
+
+  const btn = document.getElementById("btnSaveService");
+  const origText = btn.innerHTML;
+  btn.classList.add("btn-loading");
+  btn.disabled = true;
+
   const id   = document.getElementById("serviceId").value;
   const mins = document.getElementById("serviceMinutes").value;
   const body = {
-    name:              document.getElementById("serviceName").value.trim(),
+    name:              nameVal,
     base_price:        parseFloat(document.getElementById("servicePrice").value) || 0,
     description:       document.getElementById("serviceDescription").value.trim() || null,
     estimated_minutes: mins !== "" ? parseInt(mins) : null,
@@ -971,11 +1031,26 @@ document.getElementById("serviceForm").addEventListener("submit", async e => {
   };
   const url    = id ? `${API}/services/${id}/` : `${API}/services/`;
   const method = id ? "PUT" : "POST";
-  const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
-  if (!r.ok) { const e = await r.json(); showToast("Error al guardar: " + (e.detail || JSON.stringify(e)), 'error'); return; }
-  showToast('Servicio guardado.', 'success');
-  closeServiceForm();
-  await loadServices();
+  try {
+    const r = await fetch(url, { method, headers: authHeaders(), body: JSON.stringify(body) });
+    if (!r.ok) {
+      const errData = await r.json();
+      const msg = errData.name?.[0] || errData.detail || JSON.stringify(errData);
+      if (errData.name) {
+        document.getElementById("serviceName").classList.add("is-invalid");
+        document.getElementById("serviceNameError").textContent = errData.name[0];
+      }
+      showToast("Error al guardar: " + msg, 'error');
+      return;
+    }
+    showToast('Servicio guardado.', 'success');
+    closeServiceForm();
+    await loadServices();
+  } finally {
+    btn.classList.remove("btn-loading");
+    btn.disabled = false;
+    btn.innerHTML = origText;
+  }
 });
 
 async function deleteService(id) {
@@ -1021,8 +1096,8 @@ function renderCategories() {
           <i class="bi bi-pencil"></i> Editar
         </button>
         <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-three-dots-vertical"></i>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">
             <li><a class="dropdown-item text-danger" href="#" onclick="deleteCategory('${c.category_id}');return false;">

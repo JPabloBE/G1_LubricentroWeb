@@ -142,7 +142,19 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
         if status_q:
             qs = qs.filter(status__iexact=status_q.strip())
 
-        return qs
+        date_from = self.request.query_params.get("date_from")
+        if date_from:
+            qs = qs.filter(opened_at__date__gte=date_from)
+
+        date_to = self.request.query_params.get("date_to")
+        if date_to:
+            qs = qs.filter(opened_at__date__lte=date_to)
+
+        mechanic_id = self.request.query_params.get("mechanic_id")
+        if mechanic_id:
+            qs = qs.filter(assigned_mechanic_id=mechanic_id)
+
+        return qs.order_by("-opened_at")
 
     @action(detail=False, methods=["get"], url_path="report")
     def report(self, request):
@@ -356,8 +368,14 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
             params.append(data.get("estimated_total"))
 
         if "authorization_status" in data:
+            auth_val = (data.get("authorization_status") or "").strip()
+            if auth_val not in ("pending", "approved", "rejected"):
+                return Response(
+                    {"detail": "authorization_status inválido. Valores permitidos: pending, approved, rejected."},
+                    status=400,
+                )
             sets.append("authorization_status = %s")
-            params.append((data.get("authorization_status") or "").strip())
+            params.append(auth_val)
 
         if "authorized_at" in data:
             sets.append("authorized_at = %s")

@@ -62,16 +62,22 @@
     }
 
     /* ── Day chart ── */
-    .day-bars { display: flex; align-items: flex-end; gap: 8px; height: 100px; }
-    .day-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+    .day-chart { display: flex; flex-direction: column; gap: 0; }
+    /* Fila de counts (números) */
+    .day-chart-counts { display: flex; gap: 6px; margin-bottom: 4px; }
+    .day-chart-counts > div { flex: 1; text-align: center; font-size: .75rem; font-weight: 800; color: var(--text-primary); min-height: 1em; }
+    /* Fila de barras — altura fija, barras alineadas abajo */
+    .day-chart-bars { display: flex; align-items: flex-end; gap: 6px; height: 100px; border-bottom: 1px solid var(--border); }
     .day-bar-fill {
-      width: 100%; background: var(--accent-red); border-radius: 4px 4px 0 0;
-      min-height: 4px; transition: height .4s ease;
+      flex: 1; background: var(--accent-red); border-radius: 4px 4px 0 0;
+      transition: height .4s ease;
     }
     .day-bar-fill.zero { background: var(--bg-elevated); }
-    .day-bar-label { font-size: .68rem; font-weight: 700; color: var(--text-muted); text-align: center; }
-    .day-bar-count { font-size: .75rem; font-weight: 800; color: var(--text-primary); }
-    .day-bar-date  { font-size: .62rem; color: var(--text-muted); }
+    /* Fila de etiquetas */
+    .day-chart-labels { display: flex; gap: 6px; margin-top: 6px; }
+    .day-chart-labels > div { flex: 1; text-align: center; }
+    .day-bar-label { font-size: .68rem; font-weight: 700; color: var(--text-muted); display: block; }
+    .day-bar-date  { font-size: .62rem; color: var(--text-muted); display: block; }
 
     /* ── Table ── */
     .report-table { width: 100%; border-collapse: collapse; }
@@ -225,7 +231,7 @@
           <!-- Activity chart -->
           <div class="section-card" id="chartWrap" style="display:none;">
             <div class="section-card-title"><i class="bi bi-bar-chart-fill" style="color:var(--accent-red);"></i>Actividad por día</div>
-            <div class="day-bars" id="dayBars"></div>
+            <div class="day-chart" id="dayBars"></div>
           </div>
 
           <!-- Table -->
@@ -421,17 +427,29 @@
     if (byDay.length > 1) {
       chartWrap.style.display = "block";
       const maxCount = Math.max(...byDay.map(d => d.count), 1);
-      document.getElementById("dayBars").innerHTML = byDay.map(d => {
-        const pct = Math.round((d.count / maxCount) * 100);
-        return `
-          <div class="day-bar-wrap">
-            <div class="day-bar-count">${d.count > 0 ? d.count : ""}</div>
-            <div class="day-bar-fill ${d.count === 0 ? "zero" : ""}" style="height:${Math.max(pct, 4)}%;"></div>
-            <div class="day-bar-label">${escapeHtml(d.day.slice(0,3))}</div>
-            <div class="day-bar-date">${escapeHtml(d.date.slice(5))}</div>
-          </div>
-        `;
+      const CHART_H = 96; // px usables en la fila de barras (contenedor 100px)
+      const logMax  = Math.log(maxCount + 1);
+
+      // Tres filas separadas: counts | barras | etiquetas
+      const countsHtml = byDay.map(d =>
+        `<div>${d.count > 0 ? d.count : ""}</div>`
+      ).join("");
+
+      const barsHtml = byDay.map(d => {
+        // Escala logarítmica: amplifica diferencias entre valores pequeños
+        const px = d.count === 0 ? 4 : Math.max(Math.round((Math.log(d.count + 1) / logMax) * CHART_H), 6);
+        return `<div class="day-bar-fill ${d.count === 0 ? "zero" : ""}" style="height:${px}px;" title="${d.count} cita${d.count !== 1 ? "s" : ""} el ${escapeHtml(d.date)}"></div>`;
       }).join("");
+
+      const labelsHtml = byDay.map(d =>
+        `<div><span class="day-bar-label">${escapeHtml(d.day.slice(0,3))}</span><span class="day-bar-date">${escapeHtml(d.date.slice(5))}</span></div>`
+      ).join("");
+
+      document.getElementById("dayBars").innerHTML = `
+        <div class="day-chart-counts">${countsHtml}</div>
+        <div class="day-chart-bars">${barsHtml}</div>
+        <div class="day-chart-labels">${labelsHtml}</div>
+      `;
     } else {
       chartWrap.style.display = "none";
     }

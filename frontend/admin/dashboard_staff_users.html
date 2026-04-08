@@ -101,7 +101,7 @@
                         <th class="text-end">Acciones</th>
                       </tr>
                     </thead>
-                    <tbody id="staffTbody">
+                    <tbody id="staffTbody" aria-live="polite" aria-atomic="false">
                       <tr><td colspan="6" class="text-center text-muted py-4">Cargando...</td></tr>
                     </tbody>
                   </table>
@@ -134,7 +134,7 @@
                         <th class="text-end">Acciones</th>
                       </tr>
                     </thead>
-                    <tbody id="customersTbody">
+                    <tbody id="customersTbody" aria-live="polite" aria-atomic="false">
                       <tr><td colspan="5" class="text-center text-muted py-4">Cargando...</td></tr>
                     </tbody>
                   </table>
@@ -236,29 +236,33 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="staffModalTitle">Usuario</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form class="row g-3" id="staffForm">
           <input type="hidden" id="s_id">
           <div class="col-md-6">
-            <label class="form-label">Username</label>
+            <label class="form-label" for="s_username">Username</label>
             <input class="form-control" id="s_username" required>
+            <div class="invalid-feedback" id="s_username_err">El username es requerido.</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Email</label>
+            <label class="form-label" for="s_email">Email</label>
             <input class="form-control" id="s_email" type="email" required>
+            <div class="invalid-feedback" id="s_email_err">Email válido requerido.</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Nombre</label>
+            <label class="form-label" for="s_first">Nombre</label>
             <input class="form-control" id="s_first" required>
+            <div class="invalid-feedback" id="s_first_err">El nombre es requerido.</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Apellido</label>
+            <label class="form-label" for="s_last">Apellido</label>
             <input class="form-control" id="s_last" required>
+            <div class="invalid-feedback" id="s_last_err">El apellido es requerido.</div>
           </div>
           <div class="col-md-6">
-            <label class="form-label">Teléfono</label>
+            <label class="form-label" for="s_phone">Teléfono</label>
             <input class="form-control" id="s_phone">
           </div>
           <div class="col-md-3">
@@ -276,8 +280,9 @@
             </select>
           </div>
           <div class="col-12">
-            <label class="form-label">Contraseña <span class="text-muted small">(obligatoria al crear; dejar vacía para no cambiar)</span></label>
+            <label class="form-label" for="s_pass">Contraseña <span class="text-muted small">(obligatoria al crear; dejar vacía para no cambiar)</span></label>
             <input class="form-control" id="s_pass" type="password" minlength="8">
+            <div class="invalid-feedback" id="s_pass_err">Contraseña obligatoria (mín. 8 caracteres).</div>
           </div>
         </form>
       </div>
@@ -297,14 +302,15 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="customerModalTitle">Cliente</h5>
-        <button class="btn-close" data-bs-dismiss="modal"></button>
+        <button class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <form class="row g-3" id="customerForm">
           <input type="hidden" id="c_id">
           <div class="col-md-6">
-            <label class="form-label">Nombre completo</label>
+            <label class="form-label" for="c_name">Nombre completo</label>
             <input class="form-control" id="c_name" required>
+            <div class="invalid-feedback" id="c_name_err">El nombre completo es requerido.</div>
           </div>
           <div class="col-md-6">
             <label class="form-label">Email</label>
@@ -341,7 +347,7 @@
 <div class="offcanvas offcanvas-end" tabindex="-1" id="detailOffcanvas" style="width:360px;">
   <div class="offcanvas-header border-bottom">
     <h6 class="offcanvas-title" id="detailTitle">Detalle</h6>
-    <button class="btn-close" data-bs-dismiss="offcanvas"></button>
+    <button class="btn-close" aria-label="Cerrar" data-bs-dismiss="offcanvas"></button>
   </div>
   <div class="offcanvas-body" id="detailBody"></div>
 </div>
@@ -451,8 +457,8 @@ function renderStaff(users) {
           '<button class="btn btn-sm btn-outline-primary" onclick="openEditStaff(' + u.id + ')">' +
             '<i class="bi bi-pencil"></i> Editar</button>' +
           '<div class="dropdown">' +
-            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">' +
-              '<i class="bi bi-three-dots-vertical"></i></button>' +
+            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-label="Más acciones" aria-expanded="false">' +
+              '<i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>' +
             '<ul class="dropdown-menu dropdown-menu-end">' +
               '<li><a class="dropdown-item text-danger" href="#" onclick="deleteStaff(' + u.id + ');return false;">' +
                 '<i class="bi bi-trash me-1"></i>Eliminar</a></li>' +
@@ -520,8 +526,8 @@ function renderCustomers(customers) {
           '<button class="btn btn-sm btn-outline-primary" onclick="openEditCustomer(\'' + c.customer_id + '\')">' +
             '<i class="bi bi-pencil"></i> Editar</button>' +
           '<div class="dropdown">' +
-            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">' +
-              '<i class="bi bi-three-dots-vertical"></i></button>' +
+            '<button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-label="Más acciones" aria-expanded="false">' +
+              '<i class="bi bi-three-dots-vertical" aria-hidden="true"></i></button>' +
             '<ul class="dropdown-menu dropdown-menu-end">' +
               '<li><a class="dropdown-item text-danger" href="#" onclick="deleteCustomer(\'' + c.customer_id + '\');return false;">' +
                 '<i class="bi bi-trash me-1"></i>Eliminar</a></li>' +
@@ -695,13 +701,34 @@ function setup() {
 
   // Staff — guardar
   document.getElementById("btnSaveStaff").addEventListener("click", async function() {
-    var id   = document.getElementById("s_id").value;
-    var pass = document.getElementById("s_pass").value;
+    // Limpiar errores inline previos
+    ["s_username","s_email","s_first","s_last","s_pass"].forEach(id => {
+      document.getElementById(id).classList.remove("is-invalid");
+    });
+
+    var id       = document.getElementById("s_id").value;
+    var username = document.getElementById("s_username").value.trim();
+    var email    = document.getElementById("s_email").value.trim();
+    var first    = document.getElementById("s_first").value.trim();
+    var last     = document.getElementById("s_last").value.trim();
+    var pass     = document.getElementById("s_pass").value;
+
+    // Validación client-side
+    var hasError = false;
+    if (!username) { document.getElementById("s_username").classList.add("is-invalid"); hasError = true; }
+    if (!email)    { document.getElementById("s_email").classList.add("is-invalid"); hasError = true; }
+    if (!first)    { document.getElementById("s_first").classList.add("is-invalid"); hasError = true; }
+    if (!last)     { document.getElementById("s_last").classList.add("is-invalid"); hasError = true; }
+    if (!id && (!pass || pass.length < 8)) {
+      document.getElementById("s_pass").classList.add("is-invalid");
+      hasError = true;
+    }
+    if (hasError) return;
+
     var payload = {
-      username:   document.getElementById("s_username").value.trim(),
-      email:      document.getElementById("s_email").value.trim(),
-      first_name: document.getElementById("s_first").value.trim(),
-      last_name:  document.getElementById("s_last").value.trim(),
+      username, email,
+      first_name: first,
+      last_name:  last,
       phone:      document.getElementById("s_phone").value.trim(),
       user_type:  document.getElementById("s_type").value,
       is_active:  document.getElementById("s_active").value === "true",
@@ -709,20 +736,36 @@ function setup() {
     if (id) {
       if (pass) payload.password = pass;
     } else {
-      if (!pass || pass.length < 8) { showMsg("Contraseña obligatoria (mín. 8 caracteres).", "danger"); return; }
       payload.password = pass;
       payload.password2 = pass;
     }
+
+    var btn = document.getElementById("btnSaveStaff");
+    var origText = btn.innerHTML;
+    btn.classList.add("btn-loading");
+    btn.disabled = true;
+
     try {
       var url = id ? API + "/auth/staff-users/" + id + "/" : API + "/auth/staff-users/";
       var r = await fetch(url, { method: id ? "PATCH" : "POST", headers: authHeaders(), body: JSON.stringify(payload) });
       var data = await r.json().catch(function(){return {};});
-      if (!r.ok) { showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger"); return; }
+      if (!r.ok) {
+        // Mostrar errores de campo inline si los hay
+        if (data.username) { document.getElementById("s_username").classList.add("is-invalid"); document.getElementById("s_username_err").textContent = data.username[0]; }
+        if (data.email)    { document.getElementById("s_email").classList.add("is-invalid"); document.getElementById("s_email_err").textContent = data.email[0]; }
+        showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger");
+        return;
+      }
       staffModal.hide();
       await loadStaffUsers();
       resetReport();
       showMsg("Usuario guardado.");
     } catch (e) { showMsg("Error: " + e.message, "danger"); }
+    finally {
+      btn.classList.remove("btn-loading");
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
   });
 
   // Clientes — nuevo
@@ -739,9 +782,24 @@ function setup() {
 
   // Clientes — guardar
   document.getElementById("btnSaveCustomer").addEventListener("click", async function() {
-    var id = document.getElementById("c_id").value;
+    // Limpiar errores inline previos
+    document.getElementById("c_name").classList.remove("is-invalid");
+
+    var id        = document.getElementById("c_id").value;
+    var full_name = document.getElementById("c_name").value.trim();
+    if (!full_name) {
+      document.getElementById("c_name").classList.add("is-invalid");
+      document.getElementById("c_name").focus();
+      return;
+    }
+
+    var btn = document.getElementById("btnSaveCustomer");
+    var origText = btn.innerHTML;
+    btn.classList.add("btn-loading");
+    btn.disabled = true;
+
     var payload = {
-      full_name: document.getElementById("c_name").value.trim(),
+      full_name,
       email:     document.getElementById("c_email").value.trim() || null,
       phone:     document.getElementById("c_phone").value.trim() || null,
       notes:     document.getElementById("c_notes").value.trim() || null,
@@ -751,12 +809,21 @@ function setup() {
       var url = id ? API + "/customers/" + id + "/" : API + "/customers/";
       var r = await fetch(url, { method: id ? "PATCH" : "POST", headers: authHeaders(), body: JSON.stringify(payload) });
       var data = await r.json().catch(function(){return {};});
-      if (!r.ok) { showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger"); return; }
+      if (!r.ok) {
+        if (data.full_name) { document.getElementById("c_name").classList.add("is-invalid"); document.getElementById("c_name_err").textContent = data.full_name[0]; }
+        showMsg(data.detail || Object.values(data).flat().join(", ") || "Error al guardar.", "danger");
+        return;
+      }
       customerModal.hide();
       await loadCustomers();
       resetReport();
       showMsg("Cliente guardado.");
     } catch (e) { showMsg("Error: " + e.message, "danger"); }
+    finally {
+      btn.classList.remove("btn-loading");
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
   });
 
   // Reporte — filtros y export

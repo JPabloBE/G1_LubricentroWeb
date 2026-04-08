@@ -97,6 +97,7 @@ class StaffUserCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = [
+            "id",
             "username",
             "email",
             "first_name",
@@ -107,6 +108,7 @@ class StaffUserCreateSerializer(serializers.ModelSerializer):
             "password",
             "password2",
         ]
+        read_only_fields = ["id"]
 
     def validate(self, attrs):
         if attrs.get("password") != attrs.get("password2"):

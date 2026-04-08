@@ -22,7 +22,7 @@
   <div id="toast" class="toast align-items-center text-white border-0" role="alert">
     <div class="d-flex">
       <div class="toast-body" id="toastMsg"></div>
-      <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+      <button type="button" class="btn-close btn-close-white me-2 m-auto" aria-label="Cerrar" data-bs-dismiss="toast"></button>
     </div>
   </div>
 </div>
@@ -33,7 +33,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Detalle de Cita</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
         <div class="row g-3 mb-3">
@@ -122,6 +122,7 @@
         <div class="d-flex gap-2 align-items-center">
           <select id="filterStatus" class="form-select form-select-sm" style="width: 200px;">
             <option value="">Todos los estados</option>
+            <option value="pending">Pendientes (programada + confirmada)</option>
             <option value="scheduled">Programada</option>
             <option value="confirmed">Confirmada</option>
             <option value="in_progress">En progreso</option>
@@ -167,7 +168,7 @@
                   <th style="width: 160px;">Acciones</th>
                 </tr>
               </thead>
-              <tbody id="tbody"></tbody>
+              <tbody id="tbody" aria-live="polite" aria-atomic="false"></tbody>
             </table>
           </div>
         </div>
@@ -184,12 +185,17 @@
   const token = localStorage.getItem("access_token");
 
   const APT_STATUS = {
-    scheduled:   { label: "Programada",  badge: "bg-secondary" },
-    confirmed:   { label: "Confirmada",  badge: "bg-primary"   },
-    in_progress: { label: "En progreso", badge: "bg-warning text-dark" },
-    completed:   { label: "Completada",  badge: "bg-success"   },
-    cancelled:   { label: "Cancelada",   badge: "bg-danger"    },
+    scheduled:   { label: "Programada",  badge: "bg-secondary",        icon: "bi-calendar-event"    },
+    confirmed:   { label: "Confirmada",  badge: "bg-primary",          icon: "bi-calendar-check"    },
+    in_progress: { label: "En progreso", badge: "bg-warning text-dark", icon: "bi-arrow-repeat"     },
+    completed:   { label: "Completada",  badge: "bg-success",          icon: "bi-check-circle-fill" },
+    cancelled:   { label: "Cancelada",   badge: "bg-danger",           icon: "bi-x-circle-fill"     },
   };
+
+  function renderBadge(st) {
+    const icon = st.icon ? `<i class="bi ${st.icon} me-1" aria-hidden="true"></i>` : "";
+    return `<span class="badge badge-icon ${st.badge}" aria-label="${escapeHtml(st.label)}">${icon}${escapeHtml(st.label)}</span>`;
+  }
 
   // ── Helpers ─────────────────────────────────────────────────────────────────
   function escapeHtml(s) {
@@ -269,8 +275,8 @@
       <div class="d-flex align-items-center gap-1">
         ${primaryBtn}
         <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-three-dots-vertical"></i>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">${menuItems}</ul>
         </div>
@@ -280,22 +286,39 @@
   // ── Cargar citas ─────────────────────────────────────────────────────────────
   let allAppointments = [];
 
+  function showSkeletonRows(tbodyId, cols = 7, numRows = 5) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.setAttribute("aria-busy", "true");
+    tbody.innerHTML = Array.from({ length: numRows }, () =>
+      `<tr class="skeleton-row">${Array.from({ length: cols }, () =>
+        `<td><span class="skeleton skeleton-cell" style="width:${60 + Math.random()*35 | 0}%">&nbsp;</span></td>`
+      ).join("")}</tr>`
+    ).join("");
+  }
+
   async function loadAppointments() {
     const statusVal = document.getElementById("filterStatus").value;
-    const qs = statusVal ? `?status=${encodeURIComponent(statusVal)}` : "";
+    const isPendingPreset = statusVal === "pending";
+    const qs = (statusVal && !isPendingPreset) ? `?status=${encodeURIComponent(statusVal)}` : "";
+    showSkeletonRows("tbody", 7, 5);
     try {
       const data = await api(`${API_BASE}/api/appointments/${qs}`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
       allAppointments = Array.isArray(data) ? data : (data.results || []);
-      renderTable(allAppointments);
+      const rows = isPendingPreset
+        ? allAppointments.filter(a => ["scheduled", "confirmed"].includes(a.status))
+        : allAppointments;
+      renderTable(rows);
     } catch (err) {
       showMsg(err.message, "danger");
+      document.getElementById("tbody").removeAttribute("aria-busy");
     }
   }
 
   function renderTable(rows) {
     const tbody = document.getElementById("tbody");
+    tbody.removeAttribute("aria-busy");
     tbody.innerHTML = "";
 
     if (!rows.length) {
@@ -328,7 +351,7 @@
         </td>
         <td class="small">${escapeHtml(a.service_name || "")}</td>
         <td class="small">${escapeHtml(horario)}</td>
-        <td><span class="badge ${st.badge}">${st.label}</span></td>
+        <td>${renderBadge(st)}</td>
         <td>${otBadge}</td>
         <td>${renderActions(a)}</td>
       `;
@@ -387,7 +410,7 @@
     document.getElementById("dVehicle").textContent  = vehicleInfo || "—";
     document.getElementById("dService").textContent  = a.service_name || "—";
     document.getElementById("dSlot").textContent     = fmt(slotTime);
-    document.getElementById("dStatus").innerHTML     = `<span class="badge ${st.badge}">${st.label}</span>`;
+    document.getElementById("dStatus").innerHTML     = renderBadge(st);
     document.getElementById("dRequestedWork").textContent = a.requested_work || "—";
     document.getElementById("dAdminMsg").value       = a.admin_message || "";
 
@@ -406,6 +429,10 @@
 
   document.getElementById("btnSaveMsg").addEventListener("click", async () => {
     if (!currentDetailId) return;
+    const btn = document.getElementById("btnSaveMsg");
+    const origText = btn.innerHTML;
+    btn.classList.add("btn-loading");
+    btn.disabled = true;
     try {
       await api(`${API_BASE}/api/appointments/${currentDetailId}/`, {
         method: "PATCH",
@@ -417,6 +444,10 @@
       await loadAppointments();
     } catch (err) {
       showMsg(err.message, "danger");
+    } finally {
+      btn.classList.remove("btn-loading");
+      btn.disabled = false;
+      btn.innerHTML = origText;
     }
   });
 
@@ -452,6 +483,11 @@
     const me = await res.json();
     document.getElementById("whoami").textContent =
       `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
+
+    const urlParams  = new URLSearchParams(window.location.search);
+    const statusParam = urlParams.get("status");
+    if (statusParam) document.getElementById("filterStatus").value = statusParam;
+
     loadAppointments();
   })();
 </script>

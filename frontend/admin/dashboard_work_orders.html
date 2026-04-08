@@ -15,6 +15,46 @@
       100% { background-color: transparent !important; outline: none; }
     }
     .wo-highlight { animation: woHighlight 3s ease forwards; }
+
+    /* ── Picker modal ─────────────────────────────────────────────────── */
+    .picker-item {
+      display: flex; align-items: center; gap: 12px;
+      width: 100%; text-align: left;
+      padding: 10px 16px;
+      background: transparent; border: none;
+      border-bottom: 1px solid var(--border);
+      color: var(--text-primary);
+      cursor: pointer;
+      transition: background .15s ease;
+    }
+    .picker-item:hover { background: var(--bg-elevated); }
+    .picker-item.selected {
+      background: var(--accent-red-dim);
+      border-left: 3px solid var(--accent-red);
+      padding-left: 13px;
+    }
+    .picker-item:last-child { border-bottom: none; }
+    .picker-item-icon {
+      width: 32px; height: 32px; border-radius: 8px;
+      background: var(--bg-elevated);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; font-size: 14px; color: var(--text-muted);
+    }
+    .picker-item.selected .picker-item-icon {
+      background: var(--accent-red-dim); color: var(--accent-red);
+    }
+    .picker-empty {
+      padding: 40px 16px; text-align: center;
+      color: var(--text-muted); font-size: .875rem;
+    }
+    .picker-empty i { display: block; font-size: 2rem; margin-bottom: 8px; opacity: .4; }
+    #pickerSearch:focus { border-color: var(--accent-red) !important; box-shadow: none !important; }
+    #pickerFooter { border-top: 1px solid var(--border-bright) !important; }
+    .picker-selected-pill {
+      display: flex; align-items: center; gap: 8px;
+      background: var(--accent-red-dim); border: 1px solid rgba(255,59,31,.25);
+      border-radius: 8px; padding: 8px 12px; width: 100%;
+    }
   </style>
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
@@ -57,27 +97,7 @@
     <main class="col-12 col-md-9 col-lg-10 p-4">
       <div id="msg" class="alert d-none" role="alert"></div>
 
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h3 class="m-0">Órdenes de Trabajo</h3>
-        <div class="d-flex gap-2">
-          <select id="filterStatus" class="form-select form-select-sm" style="width: 200px;">
-            <option value="">Todos los estados</option>
-            <option value="open">Abierta</option>
-            <option value="in_progress">En progreso</option>
-            <option value="ready">Lista para entregar</option>
-            <option value="closed">Cerrada</option>
-            <option value="cancelled">Cancelada</option>
-          </select>
-          <button id="btnReload" class="btn btn-sm btn-dark">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
-              <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/>
-              <path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.9A5.002 5.002 0 0 0 8 3zM3.1 9a5.002 5.002 0 0 0 8.757 2.182.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.1z"/>
-            </svg>
-            Recargar
-          </button>
-        </div>
-      </div>
-
+      <h3 class="mb-2">Órdenes de Trabajo</h3>
       <!-- Leyenda de flujo -->
       <div class="d-flex flex-wrap gap-2 mb-3 small">
         <span class="badge bg-secondary">Abierta</span>
@@ -88,6 +108,43 @@
         <span class="text-muted">→</span>
         <span class="badge bg-dark">Cerrada</span>
       </div>
+      <div class="row g-2 mb-3">
+        <div class="col-12 col-md-2">
+          <label class="form-label small mb-1">Estado</label>
+          <select id="filterStatus" class="form-select form-select-sm">
+            <option value="">Todos</option>
+            <option value="active">En taller (abierta + en progreso)</option>
+            <option value="open">Abierta</option>
+            <option value="in_progress">En progreso</option>
+            <option value="ready">Lista para entregar</option>
+            <option value="closed">Cerrada</option>
+            <option value="cancelled">Cancelada</option>
+          </select>
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Desde</label>
+          <input type="date" id="filterDateFrom" class="form-control form-control-sm">
+        </div>
+        <div class="col-6 col-md-2">
+          <label class="form-label small mb-1">Hasta</label>
+          <input type="date" id="filterDateTo" class="form-control form-control-sm">
+        </div>
+        <div class="col-12 col-md-3">
+          <label class="form-label small mb-1">Mecánico</label>
+          <select id="filterMechanic" class="form-select form-select-sm">
+            <option value="">Todos</option>
+          </select>
+        </div>
+        <div class="col-12 col-md-auto d-flex align-items-end gap-2">
+          <button class="btn btn-primary btn-sm" id="btnApplyFilters">
+            <i class="bi bi-search me-1"></i>Buscar
+          </button>
+          <button class="btn btn-outline-secondary btn-sm" id="btnClearFilters">
+            <i class="bi bi-x-lg me-1"></i>Limpiar
+          </button>
+        </div>
+      </div>
+
 
       <!-- Tabla de OTs -->
       <div class="card shadow-sm">
@@ -105,7 +162,7 @@
                   <th style="width:230px;"></th>
                 </tr>
               </thead>
-              <tbody id="tbody"></tbody>
+              <tbody id="tbody" aria-live="polite" aria-atomic="false"></tbody>
             </table>
           </div>
         </div>
@@ -120,7 +177,7 @@
                 <h5 class="modal-title m-0">Orden de Trabajo</h5>
                 <div class="small text-muted" id="detailSubtitle"></div>
               </div>
-              <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+              <button type="button" class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
             </div>
 
             <div class="modal-body">
@@ -189,16 +246,10 @@
 
                     <!-- Tab Servicios -->
                     <div class="tab-pane fade show active" id="tabServices">
-                      <div class="row g-2 mb-3">
-                        <div class="col-7">
-                          <select id="svcServiceSelect" class="form-select form-select-sm"></select>
-                        </div>
-                        <div class="col-2">
-                          <input id="svcQty" class="form-control form-control-sm" placeholder="Cant." value="1">
-                        </div>
-                        <div class="col-3">
-                          <button id="btnAddService" class="btn btn-sm btn-primary w-100">+ Agregar</button>
-                        </div>
+                      <div class="d-flex justify-content-end mb-3">
+                        <button id="btnOpenServicePicker" class="btn btn-sm btn-primary">
+                          <i class="bi bi-plus-lg me-1"></i>Agregar servicio
+                        </button>
                       </div>
 
                       <div class="table-responsive">
@@ -209,7 +260,7 @@
                               <th>Cant.</th>
                               <th>Precio</th>
                               <th>Estado</th>
-                              <th style="width:110px;"></th>
+                              <th style="width:48px;"></th>
                             </tr>
                           </thead>
                           <tbody id="svcTbody"></tbody>
@@ -219,28 +270,21 @@
 
                     <!-- Tab Productos -->
                     <div class="tab-pane fade" id="tabProducts">
-                      <div class="row g-2 mb-2">
-                        <div class="col-12 col-md-5">
-                          <select id="prdProductSelect" class="form-select form-select-sm"></select>
-                        </div>
-                        <div class="col-6 col-md-2">
-                          <input id="prdQty" class="form-control form-control-sm" type="number" min="1" step="1" placeholder="Cant." value="1">
-                        </div>
-                        <div class="col-12 col-md-2">
-                          <button id="btnAddProduct" class="btn btn-sm btn-primary w-100">+ Agregar</button>
-                        </div>
+                      <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="small text-muted"><i class="bi bi-info-circle me-1"></i>El stock se ajusta automáticamente al agregar, editar o eliminar.</span>
+                        <button id="btnOpenProductPicker" class="btn btn-sm btn-primary ms-2 flex-shrink-0">
+                          <i class="bi bi-plus-lg me-1"></i>Agregar producto
+                        </button>
                       </div>
-                      <div class="small text-muted mb-2">El stock se ajusta automáticamente al agregar, editar o eliminar.</div>
 
                       <div class="table-responsive">
                         <table class="table table-sm table-hover align-middle">
                           <thead class="table-light">
                             <tr>
                               <th>Producto</th>
-                              <th>SKU</th>
                               <th>Cant.</th>
                               <th>Precio</th>
-                              <th style="width:110px;"></th>
+                              <th style="width:72px;"></th>
                             </tr>
                           </thead>
                           <tbody id="prdTbody"></tbody>
@@ -255,6 +299,55 @@
 
             <div class="modal-footer">
               <button class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Modal picker (anidado sobre detailModal) -->
+      <div class="modal fade" id="pickerModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false">
+        <div class="modal-dialog modal-dialog-centered" style="max-width:520px">
+          <div class="modal-content" style="height:560px; display:flex; flex-direction:column;">
+            <div class="modal-header" style="flex-shrink:0;">
+              <div>
+                <h5 class="modal-title m-0" id="pickerModalTitle">Agregar servicio</h5>
+                <div class="small text-muted" id="pickerSubtitle"></div>
+              </div>
+              <button type="button" class="btn-close" id="btnPickerClose" aria-label="Cerrar"></button>
+            </div>
+
+            <div class="modal-body p-0 d-flex flex-column overflow-hidden" style="flex:1;">
+              <!-- Barra de búsqueda -->
+              <div class="px-3 py-2" style="background:var(--bg-elevated); border-bottom:1px solid var(--border-bright); flex-shrink:0;">
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text" style="background:var(--bg-elevated);border-color:var(--border-bright);color:var(--text-muted);">
+                    <i class="bi bi-search"></i>
+                  </span>
+                  <input type="text" id="pickerSearch" class="form-control form-control-sm" placeholder="Buscar por nombre…" autocomplete="off">
+                </div>
+              </div>
+              <!-- Lista de items — ocupa el espacio restante -->
+              <div id="pickerList" style="flex:1; overflow-y:auto;"></div>
+            </div>
+
+            <!-- Footer: visible solo cuando hay item seleccionado, no mueve el modal -->
+            <div class="modal-footer d-none flex-column align-items-stretch gap-3" id="pickerFooter" style="flex-shrink:0;">
+              <!-- Info del item seleccionado -->
+              <div class="picker-selected-pill">
+                <i class="bi bi-check-circle-fill" style="color:var(--accent-red);font-size:1.1rem;flex-shrink:0;"></i>
+                <div class="flex-grow-1 overflow-hidden">
+                  <div class="fw-semibold small text-truncate" id="pickerSelectedName">—</div>
+                  <div class="small" style="color:var(--text-muted);" id="pickerSelectedMeta">—</div>
+                </div>
+              </div>
+              <!-- Cantidad + confirmar -->
+              <div class="d-flex align-items-center gap-2 w-100">
+                <label class="form-label mb-0 fw-semibold small text-nowrap" style="color:var(--text-muted);">Cantidad</label>
+                <input type="number" id="pickerQty" class="form-control form-control-sm" min="1" step="1" value="1" style="width:90px;">
+                <button id="btnPickerConfirm" class="btn btn-primary btn-sm ms-auto">
+                  <i class="bi bi-plus-lg me-1"></i>Agregar
+                </button>
+              </div>
             </div>
           </div>
         </div>
@@ -279,19 +372,24 @@
 
   // ── Estados ───────────────────────────────────────────────────────────────
   const WO_STATUS = {
-    open:        { label: "Abierta",            badge: "bg-secondary" },
-    in_progress: { label: "En progreso",         badge: "bg-primary"   },
-    ready:       { label: "Lista para entregar", badge: "bg-success"   },
-    closed:      { label: "Cerrada",             badge: "bg-dark"      },
-    cancelled:   { label: "Cancelada",           badge: "bg-danger"    },
+    open:        { label: "Abierta",            badge: "bg-secondary", icon: "bi-circle"            },
+    in_progress: { label: "En progreso",         badge: "bg-primary",   icon: "bi-arrow-repeat"     },
+    ready:       { label: "Lista para entregar", badge: "bg-success",   icon: "bi-check-circle-fill" },
+    closed:      { label: "Cerrada",             badge: "bg-dark",      icon: "bi-lock-fill"         },
+    cancelled:   { label: "Cancelada",           badge: "bg-danger",    icon: "bi-x-circle-fill"     },
   };
 
   const SVC_STATUS = {
-    pending:     { label: "Pendiente",   badge: "bg-secondary" },
-    in_progress: { label: "En progreso", badge: "bg-primary"   },
-    done:        { label: "Completado",  badge: "bg-success"   },
-    cancelled:   { label: "Cancelado",   badge: "bg-danger"    },
+    pending:     { label: "Pendiente",   badge: "bg-secondary", icon: "bi-hourglass-split"  },
+    in_progress: { label: "En progreso", badge: "bg-primary",   icon: "bi-arrow-repeat"     },
+    done:        { label: "Completado",  badge: "bg-success",   icon: "bi-check-circle-fill" },
+    cancelled:   { label: "Cancelado",   badge: "bg-danger",    icon: "bi-x-circle-fill"     },
   };
+
+  function renderBadge(st) {
+    const icon = st.icon ? `<i class="bi ${st.icon} me-1" aria-hidden="true"></i>` : "";
+    return `<span class="badge badge-icon ${st.badge}" aria-label="${escapeHtml(st.label)}">${icon}${escapeHtml(st.label)}</span>`;
+  }
 
   const ICO_PLAY  = '<i class="bi bi-play-fill"></i>';
   const ICO_CHECK = '<i class="bi bi-check-lg"></i>';
@@ -436,8 +534,8 @@
       <div class="d-flex align-items-center gap-1">
         ${primaryBtn}
         <div class="dropdown">
-          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false">
-            <i class="bi bi-three-dots-vertical"></i>
+          <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown" aria-expanded="false" aria-label="Más acciones">
+            <i class="bi bi-three-dots-vertical" aria-hidden="true"></i>
           </button>
           <ul class="dropdown-menu dropdown-menu-end">${menuItems}</ul>
         </div>
@@ -451,8 +549,9 @@
     const st = WO_STATUS[s] || { label: s, badge: "bg-secondary" };
 
     const badge = document.getElementById("woBadge");
-    badge.className = `badge fs-6 px-3 py-2 ${st.badge}`;
-    badge.textContent = st.label;
+    badge.className = `badge badge-icon fs-6 px-3 py-2 ${st.badge}`;
+    badge.setAttribute("aria-label", st.label);
+    badge.innerHTML = `<i class="bi ${st.icon || 'bi-circle'} me-1" aria-hidden="true"></i>${escapeHtml(st.label)}`;
 
     const actionsDiv = document.getElementById("woStatusActions");
     actionsDiv.innerHTML = "";
@@ -479,55 +578,66 @@
     ]);
     servicesCache = normalizeList(svc);
     productsCache = normalizeList(prd);
-
-    const svcSel = document.getElementById("svcServiceSelect");
-    svcSel.innerHTML = '<option value="">Seleccionar servicio...</option>';
-    for (const s of servicesCache) {
-      const id    = s.service_id || s.id;
-      const price = s.base_price ?? s.unit_price ?? s.price ?? 0;
-      const opt   = new Option(`${s.name || "Servicio"} — ₡${price}`, id);
-      opt.dataset.price = price;
-      svcSel.appendChild(opt);
-    }
-
-    const prdSel = document.getElementById("prdProductSelect");
-    prdSel.innerHTML = '<option value="">Seleccionar producto...</option>';
-    for (const p of productsCache) {
-      const id       = p.product_id || p.id;
-      const stock    = p.stock_qty ?? 0;
-      const price    = p.unit_price ?? 0;
-      const sku      = p.sku ? ` (${p.sku})` : "";
-      const baseUnit = p.base_unit || "unidad";
-      const opt      = new Option(`${p.name || "Producto"}${sku} — Stock: ${stock} ${baseUnit} — ₡${price}`, id);
-      opt.dataset.price             = price;
-      opt.dataset.baseUnit          = baseUnit;
-      opt.dataset.secondaryUnit     = p.secondary_unit || "";
-      opt.dataset.secondaryFactor   = p.secondary_unit_factor || "";
-      prdSel.appendChild(opt);
-    }
   }
 
   async function loadStaffUsers() {
     try {
       const resp = await fetchJSON(STAFF_URL, { headers: authH() });
       staffCache = normalizeList(resp);
-      const sel  = document.getElementById("woMechanic");
-      sel.innerHTML = '<option value="">— Sin asignar —</option>';
+      const sel       = document.getElementById("woMechanic");
+      const filterSel = document.getElementById("filterMechanic");
+      sel.innerHTML       = '<option value="">— Sin asignar —</option>';
+      filterSel.innerHTML = '<option value="">Todos</option>';
       for (const u of staffCache) {
         const name = [u.first_name, u.last_name].filter(Boolean).join(" ") || u.username;
         sel.appendChild(new Option(`${name} (${u.username})`, u.id));
+        filterSel.appendChild(new Option(name, u.id));
       }
     } catch (_) {}
   }
 
   // ── Tabla principal ───────────────────────────────────────────────────────
+  function showSkeletonRows(tbodyId, cols = 7, rows = 5) {
+    const tbody = document.getElementById(tbodyId);
+    tbody.setAttribute("aria-busy", "true");
+    tbody.innerHTML = Array.from({ length: rows }, () =>
+      `<tr class="skeleton-row">${Array.from({ length: cols }, () =>
+        `<td><span class="skeleton skeleton-cell" style="width:${60 + Math.random()*35 | 0}%">&nbsp;</span></td>`
+      ).join("")}</tr>`
+    ).join("");
+  }
+
   async function loadWorkOrders() {
-    const st  = document.getElementById("filterStatus").value;
-    const url = st ? `${WO_URL}?status=${encodeURIComponent(st)}` : WO_URL;
+    const params = new URLSearchParams();
+    const st = document.getElementById("filterStatus").value;
+    const df = document.getElementById("filterDateFrom").value;
+    const dt = document.getElementById("filterDateTo").value;
+    const mc = document.getElementById("filterMechanic").value;
+    if (df) params.set("date_from", df);
+    if (dt) params.set("date_to", dt);
+    if (mc) params.set("mechanic_id", mc);
+
+    showSkeletonRows("tbody", 7, 5);
+
     try {
-      const data = await fetchJSON(url, { headers: authH() });
-      const rows = normalizeList(data);
+      let rows;
+      if (st === "active") {
+        // Dos llamadas paralelas para evitar paginación incompleta al filtrar client-side
+        const extraParams = params.toString() ? `&${params}` : "";
+        const [dOpen, dProgress] = await Promise.all([
+          fetchJSON(`${WO_URL}?status=open${extraParams}`, { headers: authH() }),
+          fetchJSON(`${WO_URL}?status=in_progress${extraParams}`, { headers: authH() }),
+        ]);
+        rows = [...normalizeList(dOpen), ...normalizeList(dProgress)];
+        rows.sort((a, b) => (b.opened_at || "").localeCompare(a.opened_at || ""));
+      } else {
+        if (st) params.set("status", st);
+        const url = params.toString() ? `${WO_URL}?${params}` : WO_URL;
+        const data = await fetchJSON(url, { headers: authH() });
+        rows = normalizeList(data);
+      }
       const tbody = document.getElementById("tbody");
+      tbody.removeAttribute("aria-busy");
       tbody.innerHTML = "";
 
       if (!rows.length) {
@@ -545,7 +655,7 @@
             <div class="small text-muted">${escapeHtml(wo.customer_email || "")}</div>
           </td>
           <td class="fw-semibold">${escapeHtml(wo.vehicle_plate || "—")}</td>
-          <td><span class="badge ${st.badge}">${escapeHtml(st.label)}</span></td>
+          <td>${renderBadge(st)}</td>
           <td class="small text-muted">${escapeHtml(staffName(wo.assigned_mechanic_id))}</td>
           <td class="small">₡${money(wo.estimated_total || 0)}</td>
           <td class="small text-muted">${fmt(wo.opened_at)}</td>
@@ -615,7 +725,7 @@
     for (const r of svcLines) {
       const st  = SVC_STATUS[r.status] || { label: r.status, badge: "bg-secondary" };
       const s   = r.status || "pending";
-      let svcActions = `<span class="badge ${st.badge}">${st.label}</span>`;
+      let svcActions = renderBadge(st);
       if (s === "pending") {
         svcActions = `<button class="btn btn-xs btn-sm btn-primary py-0 px-2"
           onclick="changeSvcStatus('${r.work_order_service_id}','in_progress','${work_order_id}')">${ICO_PLAY}</button>`;
@@ -627,17 +737,23 @@
             onclick="changeSvcStatus('${r.work_order_service_id}','cancelled','${work_order_id}')">${ICO_X}</button>`;
       }
 
+      const subtotal = (parseFloat(r.qty) * parseFloat(r.unit_price || 0)).toFixed(2);
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>
           <div class="fw-semibold small">${escapeHtml(r.service_name || "—")}</div>
           ${r.description ? `<div class="small text-muted">${escapeHtml(r.description)}</div>` : ""}
         </td>
-        <td class="small">${escapeHtml(String(r.qty))}</td>
-        <td class="small">₡${money(r.unit_price)}</td>
+        <td><span class="badge rounded-pill bg-secondary">${escapeHtml(String(r.qty))}</span></td>
+        <td class="small">
+          <div>₡${money(r.unit_price)}</div>
+          ${parseFloat(r.qty) > 1 ? `<div class="text-muted" style="font-size:.75rem;">Total: ₡${money(subtotal)}</div>` : ""}
+        </td>
         <td><div class="d-flex gap-1">${svcActions}</div></td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger" data-del>Quitar</button>
+          <button class="btn btn-sm btn-outline-danger" data-del title="Quitar servicio">
+            <i class="bi bi-trash3"></i>
+          </button>
         </td>
       `;
 
@@ -673,29 +789,34 @@
 
     for (const r of prdLines) {
       const baseUnit = r.product_base_unit || "unidad";
+      const subtotal = (parseFloat(r.qty) * parseFloat(r.unit_price || 0)).toFixed(2);
       const tr = document.createElement("tr");
       tr.innerHTML = `
         <td>
-          <div class="fw-semibold small">${escapeHtml(r.product_name || "—")}</div>
+          <div class="fw-semibold small">${escapeHtml(r.product_name || "—")}${r.product_sku ? `<span class="badge bg-secondary ms-1" style="font-size:.65rem;font-weight:500;">${escapeHtml(r.product_sku)}</span>` : ""}</div>
           ${r.description ? `<div class="small text-muted">${escapeHtml(r.description)}</div>` : ""}
         </td>
-        <td class="small text-muted">${escapeHtml(r.product_sku || "—")}</td>
         <td class="small">
-          <div>${r.qty} <span class="text-muted small">${escapeHtml(baseUnit)}</span></div>
-          <div class="d-flex align-items-center gap-1 mt-1">
+          <div class="d-flex align-items-center gap-1">
             <input class="form-control form-control-sm" type="number" min="1" step="1" style="width:70px" value="${escapeHtml(String(r.qty))}" data-qty title="Cantidad en ${baseUnit}">
             <span class="text-muted small">${escapeHtml(baseUnit)}</span>
           </div>
         </td>
-        <td class="small">₡${money(r.unit_price)}</td>
+        <td class="small">
+          <div>₡${money(r.unit_price)}</div>
+          ${parseFloat(r.qty) > 1 ? `<div class="text-muted" style="font-size:.75rem;">Total: ₡${money(subtotal)}</div>` : ""}
+        </td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-dark me-1" data-save>Guardar</button>
-          <button class="btn btn-sm btn-outline-danger" data-del>Quitar</button>
+          <button class="btn btn-sm btn-outline-danger" data-del title="Quitar producto">
+            <i class="bi bi-trash3"></i>
+          </button>
         </td>
       `;
 
-      tr.querySelector("[data-save]").onclick = async () => {
-        const newQty = tr.querySelector("[data-qty]").value;
+      tr.querySelector("[data-qty]").addEventListener("change", async (e) => {
+        const newQty = e.target.value;
+        if (!newQty || parseInt(newQty, 10) < 1) { e.target.value = r.qty; return; }
+        e.target.disabled = true;
         try {
           await fetchJSON(`${WOP_URL}${r.work_order_product_id}/`, {
             method: "PATCH", headers: authH(),
@@ -705,8 +826,12 @@
           await loadProducts(work_order_id);
           refreshEstimatedTotal();
           try { await loadCatalogs(); } catch (_) {}
-        } catch (e) { showMsg(e.message || "No se pudo actualizar.", "danger", 5500); }
-      };
+        } catch (err) {
+          showMsg(err.message || "No se pudo actualizar.", "danger", 5500);
+          e.target.value = r.qty;
+          e.target.disabled = false;
+        }
+      });
 
       tr.querySelector("[data-del]").onclick = async () => {
         try {
@@ -744,11 +869,22 @@
   }
 
   // ── Eventos ───────────────────────────────────────────────────────────────
-  document.getElementById("btnReload").onclick = () => loadWorkOrders();
+  document.getElementById("btnApplyFilters").onclick = () => loadWorkOrders();
+  document.getElementById("btnClearFilters").onclick = () => {
+    document.getElementById("filterStatus").value   = "";
+    document.getElementById("filterDateFrom").value = "";
+    document.getElementById("filterDateTo").value   = "";
+    document.getElementById("filterMechanic").value = "";
+    loadWorkOrders();
+  };
   document.getElementById("filterStatus").addEventListener("change", () => loadWorkOrders());
 
   document.getElementById("btnSaveWo").onclick = async () => {
     if (!currentWo) return;
+    const btn = document.getElementById("btnSaveWo");
+    const origText = btn.innerHTML;
+    btn.classList.add("btn-loading");
+    btn.disabled = true;
     try {
       const total = calcTotal();
       setEstimatedUI(total);
@@ -763,6 +899,11 @@
       showMsg("Mecánico y notas guardados.", "success");
       await loadWorkOrders();
     } catch (e) { showMsg(e.message || "Error guardando.", "danger", 5500); }
+    finally {
+      btn.classList.remove("btn-loading");
+      btn.disabled = false;
+      btn.innerHTML = origText;
+    }
   };
 
   document.getElementById("btnDeleteWo").onclick = async () => {
@@ -773,46 +914,161 @@
     } catch (e) { showMsg(e.message || "No se pudo eliminar.", "danger", 5500); }
   };
 
-  document.getElementById("btnAddService").onclick = async () => {
-    if (!currentWo) return;
-    const sel        = document.getElementById("svcServiceSelect");
-    const service_id = sel.value;
-    if (!service_id) { showMsg("Seleccioná un servicio.", "warning"); return; }
-    const qty        = document.getElementById("svcQty").value;
-    const unit_price = sel.selectedOptions[0]?.dataset?.price ?? "0";
-    try {
-      await fetchJSON(WOS_URL, {
-        method: "POST", headers: authH(),
-        body: JSON.stringify({ work_order_id: currentWo.work_order_id, service_id, qty, unit_price }),
-      });
-      document.getElementById("svcQty").value = "1";
-      sel.value = "";
-      await loadServices(currentWo.work_order_id);
-      refreshEstimatedTotal();
-    } catch (e) { showMsg(e.message || "Error agregando servicio.", "danger", 5500); }
-  };
+  // ── Picker modal ─────────────────────────────────────────────────────────
+  let pickerMode     = "";
+  let pickerSelected = null;
+  let pickerDebounce = null;
+  const pickerModal  = new bootstrap.Modal(document.getElementById("pickerModal"), { keyboard: false });
 
-  document.getElementById("btnAddProduct").onclick = async () => {
-    if (!currentWo) return;
-    const sel        = document.getElementById("prdProductSelect");
-    const product_id = sel.value;
-    if (!product_id) { showMsg("Seleccioná un producto.", "warning"); return; }
-    const qty        = document.getElementById("prdQty").value;
-    const unit_price = sel.selectedOptions[0]?.dataset?.price ?? "0";
-    const payload = { work_order_id: currentWo.work_order_id, product_id, qty, unit_price };
+  function openPicker(mode) {
+    pickerMode     = mode;
+    pickerSelected = null;
+    document.getElementById("pickerSearch").value = "";
+    document.getElementById("pickerQty").value    = "1";
+    document.getElementById("pickerFooter").classList.add("d-none");
+    document.getElementById("pickerModalTitle").textContent =
+      mode === "service" ? "Agregar servicio" : "Agregar producto";
+    document.getElementById("pickerSubtitle").textContent =
+      currentWo ? [currentWo.vehicle_plate, currentWo.customer_name].filter(Boolean).join(" · ") : "";
+    renderPickerList("");
+    pickerModal.show();
+  }
+
+  function renderPickerList(query) {
+    const list   = document.getElementById("pickerList");
+    const source = pickerMode === "service" ? servicesCache : productsCache;
+    const q      = query.trim().toLowerCase();
+
+    const filtered = q
+      ? source.filter(item => {
+          const name = (item.name || "").toLowerCase();
+          const sku  = (item.sku  || "").toLowerCase();
+          const desc = (item.description || "").toLowerCase();
+          return name.includes(q) || sku.includes(q) || desc.includes(q);
+        })
+      : source;
+
+    if (!filtered.length) {
+      list.innerHTML = `<div class="picker-empty">
+        <i class="bi bi-search"></i>
+        Sin resultados para "<strong>${escapeHtml(query)}</strong>"
+      </div>`;
+      return;
+    }
+
+    list.innerHTML = "";
+    for (const item of filtered) {
+      const btn = document.createElement("button");
+      btn.className = "picker-item";
+      btn.type      = "button";
+
+      if (pickerMode === "service") {
+        const price = item.base_price ?? item.unit_price ?? item.price ?? 0;
+        btn.innerHTML = `
+          <div class="picker-item-icon"><i class="bi bi-wrench-adjustable"></i></div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="fw-semibold small text-truncate">${escapeHtml(item.name || "Servicio")}</div>
+            <div class="small" style="color:var(--text-muted);">₡${money(price)}</div>
+          </div>`;
+        btn.dataset.id    = item.service_id || item.id;
+        btn.dataset.price = price;
+        btn.dataset.name  = item.name || "";
+      } else {
+        const price    = item.unit_price ?? 0;
+        const stock    = item.stock_qty  ?? 0;
+        const baseUnit = item.base_unit  || "unidad";
+        const sku      = item.sku        || "";
+        btn.innerHTML = `
+          <div class="picker-item-icon"><i class="bi bi-box-seam"></i></div>
+          <div class="flex-grow-1 overflow-hidden">
+            <div class="fw-semibold small text-truncate">
+              ${escapeHtml(item.name || "Producto")}
+              ${sku ? `<span class="badge bg-secondary ms-1" style="font-size:.65rem;">${escapeHtml(sku)}</span>` : ""}
+            </div>
+            <div class="small" style="color:var(--text-muted);">Stock: ${stock} ${escapeHtml(baseUnit)} · ₡${money(price)}</div>
+          </div>`;
+        btn.dataset.id             = item.product_id || item.id;
+        btn.dataset.price          = price;
+        btn.dataset.name           = item.name || "";
+        btn.dataset.baseUnit       = baseUnit;
+        btn.dataset.secondaryUnit  = item.secondary_unit || "";
+        btn.dataset.secondaryFactor= item.secondary_unit_factor || "";
+      }
+
+      btn.onclick = () => selectPickerItem(btn, item);
+      list.appendChild(btn);
+    }
+  }
+
+  function selectPickerItem(btn, item) {
+    // Marcar selección visual
+    document.querySelectorAll(".picker-item").forEach(b => b.classList.remove("selected"));
+    btn.classList.add("selected");
+    pickerSelected = item;
+
+    // Mostrar footer con info
+    const price    = pickerMode === "service"
+      ? (item.base_price ?? item.unit_price ?? item.price ?? 0)
+      : (item.unit_price ?? 0);
+    const metaLine = pickerMode === "service"
+      ? `Precio unitario: ₡${money(price)}`
+      : `₡${money(price)} · Stock: ${item.stock_qty ?? 0} ${item.base_unit || "unidad"}`;
+
+    document.getElementById("pickerSelectedName").textContent = item.name || "—";
+    document.getElementById("pickerSelectedMeta").textContent = metaLine;
+    document.getElementById("pickerFooter").classList.remove("d-none");
+    document.getElementById("pickerQty").value = "1";
+    document.getElementById("pickerQty").focus();
+  }
+
+  document.getElementById("pickerSearch").addEventListener("input", e => {
+    clearTimeout(pickerDebounce);
+    pickerDebounce = setTimeout(() => renderPickerList(e.target.value), 150);
+  });
+
+  document.getElementById("btnPickerClose").addEventListener("click", () => pickerModal.hide());
+
+  document.getElementById("btnPickerConfirm").addEventListener("click", async () => {
+    if (!pickerSelected || !currentWo) return;
+    const qty = parseInt(document.getElementById("pickerQty").value, 10) || 1;
+    const btn = document.getElementById("btnPickerConfirm");
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span>Agregando…';
+
     try {
-      await fetchJSON(WOP_URL, {
-        method: "POST", headers: authH(),
-        body: JSON.stringify(payload),
-      });
-      document.getElementById("prdQty").value = "1";
-      sel.value = "";
-      showMsg("Producto agregado (stock descontado).", "success");
-      await loadProducts(currentWo.work_order_id);
-      refreshEstimatedTotal();
-      try { await loadCatalogs(); } catch (_) {}
-    } catch (e) { showMsg(e.message || "Error agregando producto (posible stock insuficiente).", "danger", 5500); }
-  };
+      if (pickerMode === "service") {
+        const service_id = pickerSelected.service_id || pickerSelected.id;
+        const unit_price = pickerSelected.base_price ?? pickerSelected.unit_price ?? pickerSelected.price ?? 0;
+        await fetchJSON(WOS_URL, {
+          method: "POST", headers: authH(),
+          body: JSON.stringify({ work_order_id: currentWo.work_order_id, service_id, qty, unit_price }),
+        });
+        pickerModal.hide();
+        await loadServices(currentWo.work_order_id);
+        refreshEstimatedTotal();
+      } else {
+        const product_id = pickerSelected.product_id || pickerSelected.id;
+        const unit_price = pickerSelected.unit_price ?? 0;
+        await fetchJSON(WOP_URL, {
+          method: "POST", headers: authH(),
+          body: JSON.stringify({ work_order_id: currentWo.work_order_id, product_id, qty, unit_price }),
+        });
+        showMsg("Producto agregado (stock descontado).", "success");
+        pickerModal.hide();
+        await loadProducts(currentWo.work_order_id);
+        refreshEstimatedTotal();
+        try { await loadCatalogs(); } catch (_) {}
+      }
+    } catch (e) {
+      showMsg(e.message || "Error al agregar. Verificá el stock disponible.", "danger", 5500);
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-plus-lg me-1"></i>Agregar';
+    }
+  });
+
+  document.getElementById("btnOpenServicePicker").addEventListener("click", () => openPicker("service"));
+  document.getElementById("btnOpenProductPicker").addEventListener("click", () => openPicker("product"));
 
   document.getElementById("btnLogout").addEventListener("click", async () => {
     try {
@@ -839,10 +1095,15 @@
       loadCatalogs().catch(() => showMsg("No se pudieron cargar servicios/productos.", "warning", 5000)),
     ]);
 
-    const highlightId = new URLSearchParams(window.location.search).get("highlight");
-    // Si hay un ID para resaltar, limpiar el filtro para mostrar todas las OTs
+    const params      = new URLSearchParams(window.location.search);
+    const highlightId = params.get("highlight");
+    const statusParam = params.get("status");
+
+    // highlight tiene precedencia; si no hay highlight, aplicar filtro de estado si viene en la URL
     if (highlightId) {
       document.getElementById("filterStatus").value = "";
+    } else if (statusParam) {
+      document.getElementById("filterStatus").value = statusParam;
     }
     await loadWorkOrders();
 

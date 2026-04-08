@@ -117,7 +117,7 @@
                 <div class="kpi-v2-label">Autos en taller</div>
               </div>
               <div class="kpi-v2-value" id="kpiInTaller">—</div>
-              <div class="kpi-v2-link"><a href="./dashboard_work_orders.html">Ver órdenes →</a></div>
+              <div class="kpi-v2-link"><a href="./dashboard_work_orders.html?status=active">Ver órdenes →</a></div>
             </div>
           </div>
         </div>
@@ -130,7 +130,7 @@
                 <div class="kpi-v2-label">Listos para entrega</div>
               </div>
               <div class="kpi-v2-value" id="kpiReady">—</div>
-              <div class="kpi-v2-link"><a href="./dashboard_work_orders.html">Llamar clientes →</a></div>
+              <div class="kpi-v2-link"><a href="./dashboard_work_orders.html?status=ready">Llamar clientes →</a></div>
             </div>
           </div>
         </div>
@@ -143,7 +143,7 @@
                 <div class="kpi-v2-label">Citas pendientes</div>
               </div>
               <div class="kpi-v2-value" id="kpiCitas">—</div>
-              <div class="kpi-v2-link"><a href="./dashboard_appointments.html">Ver citas →</a></div>
+              <div class="kpi-v2-link"><a href="./dashboard_appointments.html?status=pending">Ver citas →</a></div>
             </div>
           </div>
         </div>
@@ -195,20 +195,29 @@
       </div>
 
       <!-- Gráficos -->
+      <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
+        <span class="text-muted small fw-semibold">Gráficos</span>
+        <div class="d-flex align-items-center gap-2">
+          <label class="text-muted small mb-0" for="chartMonthFilter">Mes:</label>
+          <select id="chartMonthFilter" class="form-select form-select-sm" style="width:170px;">
+            <option value="">Todos</option>
+          </select>
+        </div>
+      </div>
       <div class="row g-4">
         <div class="col-12 col-lg-8">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <h6 class="card-title text-muted mb-3" id="incomeTitle">Ingresos diarios del mes</h6>
+              <h6 class="card-title text-muted mb-3" id="incomeTitle">Ingresos mensuales — últimos 12 meses</h6>
               <canvas id="chartIncome" height="120"></canvas>
-              <div id="emptyIncome" class="text-center text-muted py-4 d-none">Sin ingresos registrados este mes</div>
+              <div id="emptyIncome" class="text-center text-muted py-4 d-none">Sin ingresos registrados</div>
             </div>
           </div>
         </div>
         <div class="col-12 col-lg-4">
           <div class="card shadow-sm h-100">
             <div class="card-body">
-              <h6 class="card-title text-muted mb-3">Pipeline del taller</h6>
+              <h6 class="card-title text-muted mb-3" id="woTitle">Pipeline del taller</h6>
               <canvas id="chartWO"></canvas>
               <div id="emptyWO" class="text-center text-muted py-4 d-none">Sin órdenes registradas</div>
             </div>
@@ -226,7 +235,7 @@
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="modalVRLabel"><i class="bi bi-cart3 me-2"></i>Venta rápida</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        <button type="button" class="btn-close" aria-label="Cerrar" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
 
@@ -511,24 +520,47 @@
     renderAgenda();
   });
 
+  // ── COUNT-UP ANIMATION ───────────────────────────────────────────────────────
+  const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  function animateCount(el, target, duration = 700) {
+    if (prefersReducedMotion || isNaN(target)) {
+      el.textContent = target;
+      return;
+    }
+    const start     = performance.now();
+    const startVal  = 0;
+    const isInt     = Number.isInteger(target);
+    function step(now) {
+      const elapsed  = now - start;
+      const progress = Math.min(elapsed / duration, 1);
+      // ease-out-cubic
+      const eased    = 1 - Math.pow(1 - progress, 3);
+      const current  = startVal + (target - startVal) * eased;
+      el.textContent = isInt ? Math.round(current) : current.toFixed(2);
+      if (progress < 1) requestAnimationFrame(step);
+    }
+    requestAnimationFrame(step);
+  }
+
   // ── MÉTRICAS ────────────────────────────────────────────────────────────────
   function renderMetrics(data) {
     const wo   = data.work_orders_by_status   || {};
     const appt = data.appointments_by_status  || {};
 
-    document.getElementById("kpiInTaller").textContent = (wo["open"] || 0) + (wo["in_progress"] || 0);
+    animateCount(document.getElementById("kpiInTaller"), (wo["open"] || 0) + (wo["in_progress"] || 0));
 
     const ready = wo["ready"] || 0;
     const kpiReadyEl = document.getElementById("kpiReady");
-    kpiReadyEl.textContent = ready;
+    animateCount(kpiReadyEl, ready);
 
-    document.getElementById("kpiCitas").textContent =
-      (appt["scheduled"] || 0) + (appt["confirmed"] || 0);
+    animateCount(document.getElementById("kpiCitas"),
+      (appt["scheduled"] || 0) + (appt["confirmed"] || 0));
 
-    const totalIncome = (data.daily_income || []).reduce((s, d) => s + d.amount, 0);
+    const totalIncome = (data.monthly_income || []).reduce((s, d) => s + d.amount, 0);
     document.getElementById("kpiIncome").textContent     = fmtMoney(totalIncome);
     document.getElementById("kpiIncomeLabel").textContent = data.month_label || "";
-    document.getElementById("kpiClosed").textContent     = data.wo_closed_month ?? "—";
+    animateCount(document.getElementById("kpiClosed"), data.wo_closed_month ?? 0);
 
     const badge = document.getElementById("kpiCashBadge");
     if (data.cash_session_open) {
@@ -540,21 +572,25 @@
     }
 
     document.getElementById("monthLabel").textContent  = `Resumen de ${data.month_label || "este mes"}`;
-    document.getElementById("incomeTitle").textContent = `Ingresos diarios — ${data.month_label || ""}`;
+    document.getElementById("incomeTitle").textContent = data.income_label || "Ingresos mensuales — últimos 12 meses";
+    document.getElementById("woTitle").textContent     = data.wo_label     || "Pipeline del taller";
 
-    // Gráfico 1: ingresos diarios
+    // Gráfico 1: ingresos (mensuales o diarios según filtro)
     if (chartIncome) { chartIncome.destroy(); chartIncome = null; }
-    const daily = data.daily_income || [];
-    if (daily.length) {
+    const monthly = data.monthly_income || [];
+    const isFiltered = data.is_filtered || false;
+    if (monthly.length) {
       document.getElementById("emptyIncome").classList.add("d-none");
       document.getElementById("chartIncome").classList.remove("d-none");
       chartIncome = new Chart(document.getElementById("chartIncome"), {
         type: "bar",
         data: {
-          labels: daily.map(d => new Date(d.day + "T12:00:00").toLocaleDateString("es-CR", { day:"2-digit", month:"short" })),
+          labels: monthly.map(d => new Date(d.month + "T12:00:00").toLocaleDateString("es-CR",
+            isFiltered ? { day:"2-digit", month:"short" } : { month:"short", year:"2-digit" }
+          )),
           datasets: [{
             label: "Ingresos (₡)",
-            data: daily.map(d => d.amount),
+            data: monthly.map(d => d.amount),
             backgroundColor:      "rgba(255,59,31,.55)",
             borderColor:          "#FF3B1F",
             borderWidth:          0,
@@ -606,6 +642,14 @@
         options: {
           responsive: true,
           cutout: "65%",
+          onClick: (evt, elements) => {
+            if (!elements.length) return;
+            const status = woKeys[elements[0].index];
+            if (status) window.location.href = `dashboard_work_orders.html?status=${encodeURIComponent(status)}`;
+          },
+          onHover: (evt) => {
+            evt.native.target.style.cursor = evt.active?.length ? "pointer" : "default";
+          },
           plugins: {
             legend: {
               position: "bottom",
@@ -625,10 +669,25 @@
     }
   }
 
+  function buildMonthOptions() {
+    const MONTHS = ["Enero","Febrero","Marzo","Abril","Mayo","Junio","Julio","Agosto","Septiembre","Octubre","Noviembre","Diciembre"];
+    const sel = document.getElementById("chartMonthFilter");
+    const now = new Date();
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+      const opt = document.createElement("option");
+      opt.value = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}`;
+      opt.textContent = `${MONTHS[d.getMonth()]} ${d.getFullYear()}`;
+      sel.appendChild(opt);
+    }
+  }
+
   async function loadMetrics() {
     document.getElementById("monthLabel").textContent = "Cargando métricas...";
+    const monthVal = document.getElementById("chartMonthFilter").value;
+    const qs = monthVal ? `?month=${encodeURIComponent(monthVal)}` : "";
     try {
-      const res = await fetch(`${API_BASE}/api/dashboard/metrics/`, {
+      const res = await fetch(`${API_BASE}/api/dashboard/metrics/${qs}`, {
         headers: { "Authorization": `Bearer ${token}` },
       });
       if (res.status === 401) { doLogout(); return; }
@@ -994,6 +1053,8 @@
     document.getElementById("whoami").textContent =
       `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
 
+    buildMonthOptions();
+    document.getElementById("chartMonthFilter").addEventListener("change", () => loadMetrics());
     loadMetrics();
     loadAgenda();
   })();
