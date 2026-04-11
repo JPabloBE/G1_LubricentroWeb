@@ -92,20 +92,35 @@ WSGI_APPLICATION = 'config.wsgi.application'
 # -------------------------
 DATABASE_URL = config('DATABASE_URL')
 
+# Supabase pooler (pgBouncer) uses a different host than the direct connection.
+# Transaction-mode pooler doesn't support startup options like search_path.
+_is_pooler = 'pooler.supabase.com' in DATABASE_URL
+
 DATABASES = {
     'default': dj_database_url.parse(
         DATABASE_URL,
-        conn_max_age=600,
-        conn_health_checks=True,
+        # Transaction-mode pooler doesn't support persistent connections.
+        conn_max_age=0 if _is_pooler else 600,
+        conn_health_checks=not _is_pooler,
     )
 }
 
-#   IMPORTANT:
 DATABASES['default'].setdefault('OPTIONS', {})
-DATABASES['default']['OPTIONS'].update({
-    'sslmode': 'require',
-    'options': '-c search_path=django_app,public',
-})
+DATABASES['default']['OPTIONS']['sslmode'] = 'require'
+
+if not _is_pooler:
+    # Direct connection: set search_path via startup option.
+    DATABASES['default']['OPTIONS']['options'] = '-c search_path=django_app,public'
+
+# For pooler connections, set search_path on every new connection via signal.
+if _is_pooler:
+    from django.db.backends.signals import connection_created
+
+    def _set_search_path(sender, connection, **kwargs):
+        with connection.cursor() as cursor:
+            cursor.execute("SET search_path TO django_app, public")
+
+    connection_created.connect(_set_search_path)
 
 # Custom User Model
 AUTH_USER_MODEL = 'authentication.User'
@@ -129,11 +144,34 @@ USE_I18N = True
 USE_TZ = True
 
 # -------------------------
+# Logging — errores a stdout para Railway
+# -------------------------
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {'class': 'logging.StreamHandler'},
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'WARNING',
+    },
+    'loggers': {
+        'django': {'handlers': ['console'], 'level': 'WARNING', 'propagate': False},
+        'django.request': {'handlers': ['console'], 'level': 'ERROR', 'propagate': False},
+    },
+}
+
+# -------------------------
 # Static files (CSS, JavaScript, Images)
 # -------------------------
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Sirve el frontend estático desde la raíz del dominio
+WHITENOISE_ROOT = BASE_DIR.parent / 'frontend'
+WHITENOISE_INDEX_FILE = True
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
@@ -227,6 +265,7 @@ SIMPLE_JWT = {
 # Security Settings for Production
 # -------------------------
 if not DEBUG:
+    SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
