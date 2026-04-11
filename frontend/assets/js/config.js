@@ -4,5 +4,5 @@
  * Este es el ÚNICO archivo que cambia entre entornos.
  */
 window.APP_CONFIG = {
-  API_BASE: "http://127.0.0.1:8000"
+  API_BASE: "https://lubricentroweb-production.up.railway.app"
 };
