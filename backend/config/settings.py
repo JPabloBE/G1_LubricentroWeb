@@ -18,7 +18,13 @@ SECRET_KEY = config('SECRET_KEY', default='django-insecure-dev-only-change-in-pr
 # Default False — producción segura aunque no se defina la variable
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+_allowed = config('ALLOWED_HOSTS', default='localhost,127.0.0.1').split(',')
+# Railway inyecta RAILWAY_PUBLIC_DOMAIN automáticamente
+import os as _os
+_railway_domain = _os.environ.get('RAILWAY_PUBLIC_DOMAIN', '')
+ALLOWED_HOSTS = [h.strip() for h in _allowed if h.strip()] + (
+    [_railway_domain] if _railway_domain else []
+)
 
 # -------------------------
 # Application definition
@@ -51,7 +57,8 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
-    'corsheaders.middleware.CorsMiddleware',  
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -126,6 +133,7 @@ USE_TZ = True
 # -------------------------
 STATIC_URL = 'static/'
 STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
