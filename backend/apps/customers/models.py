@@ -18,6 +18,11 @@ class Customer(models.Model):
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()
 
+    # Required by DRF throttle system which calls request.user.is_authenticated
+    @property
+    def is_authenticated(self):
+        return True
+
     class Meta:
         managed = False
         db_table = "customers"
