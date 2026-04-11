@@ -6,8 +6,8 @@ from django.urls import path, include
 from apps.authentication.views import dashboard_metrics
 
 urlpatterns = [
-    # Admin
-    path('admin/', admin.site.urls),
+    # Admin — URL no obvia para reducir exposición
+    path('panel-gestion-interno/', admin.site.urls),
     path("api/dashboard/metrics/", dashboard_metrics),
     
     # API Authentication

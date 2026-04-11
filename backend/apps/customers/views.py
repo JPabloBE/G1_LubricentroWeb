@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from apps.authentication.permissions import IsStaffOrAdmin
+from apps.authentication.views import LoginRateThrottle
 from .auth import CustomerJWTAuthentication
 from .permissions import IsAuthenticatedCustomer
 from .models import Customer
@@ -91,7 +92,11 @@ class CustomerViewSet(viewsets.ModelViewSet):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def customer_register(request):
+    throttle = LoginRateThrottle()
+    if not throttle.allow_request(request, None):
+        return Response({"detail": "Demasiados intentos. Intenta de nuevo en un minuto."}, status=429)
     serializer = CustomerRegisterSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     customer = serializer.save()
@@ -103,7 +108,11 @@ def customer_register(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
+@authentication_classes([])
 def customer_login(request):
+    throttle = LoginRateThrottle()
+    if not throttle.allow_request(request, None):
+        return Response({"detail": "Demasiados intentos. Intenta de nuevo en un minuto."}, status=429)
     serializer = CustomerLoginSerializer(data=request.data)
     serializer.is_valid(raise_exception=True)
     return Response(serializer.validated_data, status=status.HTTP_200_OK)

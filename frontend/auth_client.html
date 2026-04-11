@@ -646,7 +646,7 @@
   </main>
 
 <script>
-  const API_BASE     = "http://localhost:8000";
+  const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8000";
   const LOGIN_URL    = `${API_BASE}/api/customer-auth/login/`;
   const REG_URL      = `${API_BASE}/api/customer-auth/register/`;
   const ADMIN_ME_URL = `${API_BASE}/api/auth/me/`;

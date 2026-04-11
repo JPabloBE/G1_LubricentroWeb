@@ -132,9 +132,10 @@
   </div>
 </div>
 
-<script src="../assets/js/toast.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="<script src="../assets/js/toast.js"></script>">
 <script>
-  const API_BASE = "http://localhost:8000";
+  const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8000";
   const token = localStorage.getItem("access_token");
 
   function authHeaders() {
@@ -168,7 +169,8 @@
     try {
       await fetch(`${API_BASE}/api/auth/logout/`, {
         method: "POST",
-        headers: { "Authorization": `Bearer ${token}` }
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${token}` },
+        body: JSON.stringify({ refresh: localStorage.getItem("refresh_token") }),
       });
     } catch (_) {}
     localStorage.removeItem("access_token");

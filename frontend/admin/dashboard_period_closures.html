@@ -205,9 +205,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-<script src="../assets/js/toast.js"></script>
+<script src="../assets/js/config.js"></script>
+<script src="<script src="../assets/js/toast.js"></script>">
 <script>
-  const API = "http://127.0.0.1:8000/api";
+  const API = ((window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8000") + "/api";
   let TOKEN = localStorage.getItem("access_token");
   let currentUser = null;
   let canReopen = false;  // solo admin
@@ -227,7 +228,14 @@
     return fetch(url, { method: "POST", headers: authHeaders(), body: JSON.stringify(body) });
   }
 
-  function logout() {
+  async function logout() {
+    try {
+      await fetch(`${API}/auth/logout/`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", "Authorization": `Bearer ${TOKEN}` },
+        body: JSON.stringify({ refresh: localStorage.getItem("refresh_token") }),
+      });
+    } catch (_) {}
     localStorage.clear();
     window.location.href = "./login.html";
   }
@@ -241,6 +249,12 @@
   }
 
   function showMsg(text, type = "danger") { showToast(text, type); }
+
+  function escapeHtml(str) {
+    return String(str ?? "").replace(/[&<>"']/g, function(c) {
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c];
+    });
+  }
 
   // ── Format helpers ───────────────────────────────────────────────────────────
   const MESES = ["", "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -452,7 +466,7 @@
 
     if (r.status === 409) {
       const err = await r.json();
-      resultDiv.innerHTML = `<div class="alert alert-danger">${err.detail}</div>`;
+      resultDiv.innerHTML = `<div class="alert alert-danger">${escapeHtml(err.detail || "Error desconocido")}</div>`;
       resultDiv.classList.remove("d-none");
       document.getElementById("btnConfirmClose").disabled = true;
       return;
@@ -460,7 +474,7 @@
 
     if (!r.ok) {
       const errText = await r.text();
-      resultDiv.innerHTML = `<div class="alert alert-danger">Error al obtener vista previa (${r.status}). ${errText}</div>`;
+      resultDiv.innerHTML = `<div class="alert alert-danger">Error al obtener vista previa (${r.status}). ${escapeHtml(errText)}</div>`;
       resultDiv.classList.remove("d-none");
       return;
     }

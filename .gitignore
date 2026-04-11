@@ -40,3 +40,6 @@ media/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# ── SQL scripts (referencia local, no subir) ─────────────────────────────────
+sql/

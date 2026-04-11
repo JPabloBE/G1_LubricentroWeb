@@ -3,7 +3,10 @@ from rest_framework import status, viewsets
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
+from rest_framework.throttling import AnonRateThrottle
 from rest_framework_simplejwt.views import TokenObtainPairView
+from rest_framework_simplejwt.tokens import RefreshToken
+from rest_framework_simplejwt.exceptions import TokenError
 
 from .permissions import IsStaffOrAdmin, IsAdminOnly
 from .serializers import (
@@ -17,11 +20,16 @@ from .serializers import (
 User = get_user_model()
 
 
+class LoginRateThrottle(AnonRateThrottle):
+    scope = 'login'
+
+
 # -------------------------
 # Login SOLO staff/admin
 # -------------------------
 class StaffLoginView(TokenObtainPairView):
     permission_classes = [AllowAny]
+    throttle_classes = [LoginRateThrottle]
     serializer_class = StaffTokenObtainPairSerializer
 
 
@@ -37,7 +45,12 @@ def me(request):
 @api_view(["POST"])
 @permission_classes([IsAuthenticated, IsStaffOrAdmin])
 def logout(request):
-    # El cliente borra tokens. (Si quisieras blacklist aquí se agrega.)
+    try:
+        refresh_token = request.data.get("refresh")
+        if refresh_token:
+            RefreshToken(refresh_token).blacklist()
+    except TokenError:
+        pass  # Ya en blacklist o token inválido — no es un error
     return Response({"message": "Sesión cerrada."}, status=status.HTTP_200_OK)
 
 

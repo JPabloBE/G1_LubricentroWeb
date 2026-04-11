@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.API_BASE) || "http://127.0.0.1:8000";
 
 // Este JS se usa dentro de /admin/
 // Necesitas el puente: frontend/admin/auth.html -> ../auth_admin.html
@@ -114,7 +114,7 @@ async function init() {
   if (btn) {
     btn.addEventListener("click", async () => {
       try {
-        await fetchJSON(`${API_BASE}/api/auth/logout/`, { method: "POST", headers: authHeaders() });
+        await fetchJSON(`${API_BASE}/api/auth/logout/`, { method: "POST", headers: authHeaders(), body: JSON.stringify({ refresh: localStorage.getItem("refresh_token") }) });
       } catch (_) {}
 
       localStorage.removeItem("access_token");
