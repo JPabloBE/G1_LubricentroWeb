@@ -1234,6 +1234,30 @@ body{
   .why-badge-num{ font-size: 18px; }
   .trust-checklist{ grid-template-columns: 1fr; }
   .section-title{ letter-spacing: -.3px; }
+
+  /* ── Alineación de texto consistente en mobile ── */
+  .eyebrow,
+  .section-title,
+  .section-desc,
+  .svc-card-title,
+  .svc-card-desc,
+  .trust-title,
+  .trust-content .section-desc,
+  .news-title,
+  .news-excerpt,
+  .why-feat-title,
+  .why-feat-desc { text-align: center; }
+
+  .eyebrow { justify-content: center; }
+  .eyebrow::before { display: none; }
+
+  .trust-content { text-align: center; }
+  .trust-checklist-item { justify-content: center; }
+
+  .hero-copy { text-align: center; }
+  .hero-actions { justify-content: center; }
+  .hero-sub::before { display: none; }
+  .hero-sub { padding-left: 0; }
 }
 
 /* ===================================================
