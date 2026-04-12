@@ -3,6 +3,8 @@
    Lubricentro · Dark Automotive
    ══════════════════════════════════════════════════════════════ */
 
+html, body { overflow-x: hidden; }
+
 /* ── Variables ── */
 :root {
   --bg-base:        #0C0D11;
