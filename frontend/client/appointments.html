@@ -131,6 +131,10 @@
       </div>
     </div>
     <div class="mobile-drawer" id="mobileDrawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Menú</span>
+        <button class="btn-drawer-close" id="btnCloseDrawer" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
+      </div>
       <a href="./dashboard.html">Dashboard</a>
       <a class="active" href="./appointments.html">Mis Citas</a>
       <a href="./vehicles.html">Mis Autos</a>
@@ -155,6 +159,11 @@
 
       <!-- ── Columna izquierda: formulario ── -->
       <div class="appt-form-col">
+        <div class="sheet-handle d-lg-none">
+          <div class="sheet-drag-pill"></div>
+          <span class="sheet-handle-title">Nueva cita</span>
+          <button class="btn-sheet-close" id="btnCloseSheet" aria-label="Cerrar"><i class="bi bi-x-lg"></i></button>
+        </div>
         <div class="form-card">
           <div class="form-card-header">
             <h6><i class="bi bi-plus-circle me-2"></i>Nueva cita</h6>
@@ -258,6 +267,13 @@
 
     </div><!-- /.appt-layout -->
   </main>
+
+  <!-- FAB visible solo en mobile -->
+  <button class="btn-fab-new-appt d-lg-none" id="btnOpenSheet" aria-label="Nueva cita">
+    <i class="bi bi-plus-lg"></i>
+  </button>
+  <!-- Overlay detrás del bottom sheet -->
+  <div class="sheet-overlay" id="sheetOverlay"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 <script src="../assets/js/config.js"></script>
@@ -520,6 +536,7 @@
         body: JSON.stringify({ vehicle_id, service_id, slot_id, requested_work: requested_work || null, notes: notes || null })
       });
       showMsg("¡Cita agendada correctamente!", "success");
+      closeSheet();
       document.getElementById("requestedWork").value = "";
       document.getElementById("notes").value         = "";
       await loadVehicles();
@@ -700,6 +717,28 @@
       if (urgent) showReminderPopup(urgent);
     } catch (_) { /* no crítico */ }
   }
+
+  // ── Mobile drawer close ──────────────────────────────────────────────────────
+  document.getElementById('btnCloseDrawer')?.addEventListener('click', () => {
+    document.getElementById('mobileDrawer').classList.remove('open');
+  });
+
+  // ── Bottom sheet (mobile only) ───────────────────────────────────────────────
+  const _sheet   = document.querySelector('.appt-form-col');
+  const _overlay = document.getElementById('sheetOverlay');
+  function openSheet() {
+    _sheet.classList.add('sheet-open');
+    _overlay.classList.add('visible');
+    document.body.style.overflow = 'hidden';
+  }
+  function closeSheet() {
+    _sheet.classList.remove('sheet-open');
+    _overlay.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+  document.getElementById('btnOpenSheet')?.addEventListener('click', openSheet);
+  document.getElementById('btnCloseSheet')?.addEventListener('click', closeSheet);
+  _overlay.addEventListener('click', closeSheet);
 </script>
 
 <!-- Modal pop-up de recordatorio -->

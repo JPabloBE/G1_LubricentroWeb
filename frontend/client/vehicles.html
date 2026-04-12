@@ -70,6 +70,10 @@
       </div>
     </div>
     <div class="mobile-drawer" id="mobileDrawer">
+      <div class="drawer-header">
+        <span class="drawer-title">Menú</span>
+        <button class="btn-drawer-close" id="btnCloseDrawer" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
+      </div>
       <a href="./dashboard.html">Dashboard</a>
       <a href="./appointments.html">Mis Citas</a>
       <a class="active" href="./vehicles.html">Mis Autos</a>
@@ -170,6 +174,9 @@
   document.getElementById("btnLogoutMobile").addEventListener("click", logout);
   document.getElementById("btnMobileMenu").addEventListener("click", () => {
     document.getElementById("mobileDrawer").classList.toggle("open");
+  });
+  document.getElementById("btnCloseDrawer")?.addEventListener("click", () => {
+    document.getElementById("mobileDrawer").classList.remove("open");
   });
 
   // Notification bell toggle
