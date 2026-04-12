@@ -43,6 +43,7 @@ def _count_used_capacity(slot_id: str) -> int:
 class AppointmentSlotAdminViewSet(viewsets.ModelViewSet):
     serializer_class = AppointmentSlotSerializer
     permission_classes = [IsAuthenticated, IsStaffOrAdmin]
+    pagination_class = None  # Grid view needs all slots at once
 
     def get_queryset(self):
         qs = AppointmentSlot.objects.all().order_by("start_at")
