@@ -153,6 +153,11 @@
     }
     .auth-nav-badge i { color: var(--accent-red); font-size: 13px; }
 
+    @media (max-width: 575px) {
+      .auth-nav-badge { display: none; }
+      .auth-nav-inner { justify-content: space-between; }
+    }
+
     /* ── Área principal — centrada, sin scroll ── */
     .auth-main {
       flex: 1;

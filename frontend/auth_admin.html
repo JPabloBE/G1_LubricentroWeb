@@ -94,6 +94,11 @@
     }
     .auth-nav-badge i { color: var(--accent-gold); font-size: 13px; }
 
+    @media (max-width: 575px) {
+      .auth-nav-badge { display: none; }
+      .auth-nav-inner { justify-content: space-between; }
+    }
+
     /* Back link — navlink puro sin borde (igual que auth_client) */
     .auth-nav-back {
       display: inline-flex;
