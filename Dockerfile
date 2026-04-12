@@ -18,7 +18,8 @@ EXPOSE 8000
 CMD python manage.py collectstatic --noinput && \
     gunicorn config.wsgi:application \
     --bind 0.0.0.0:$PORT \
-    --workers 1 \
+    --workers 2 \
+    --threads 2 \
     --access-logfile - \
     --error-logfile - \
-    --log-level debug
+    --log-level warning

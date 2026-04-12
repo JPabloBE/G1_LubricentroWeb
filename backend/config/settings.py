@@ -99,9 +99,8 @@ _is_pooler = 'pooler.supabase.com' in DATABASE_URL
 DATABASES = {
     'default': dj_database_url.parse(
         DATABASE_URL,
-        # Transaction-mode pooler doesn't support persistent connections.
-        conn_max_age=0 if _is_pooler else 600,
-        conn_health_checks=not _is_pooler,
+        conn_max_age=60,   # Session pooler supports persistent connections
+        conn_health_checks=True,
     )
 }
 
