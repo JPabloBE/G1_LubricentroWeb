@@ -370,6 +370,7 @@
   const SERVICES_URL = `${API_BASE}/api/services/`;
   const PRODUCTS_URL = `${API_BASE}/api/catalog/products/`;
   const STAFF_URL    = `${API_BASE}/api/auth/staff-users/`;
+  const APPT_URL     = `${API_BASE}/api/appointments/`;
 
   // ── Estados ───────────────────────────────────────────────────────────────
   const WO_STATUS = {
@@ -505,6 +506,65 @@
     }
   }
 
+  // ── Cerrar OT + completar cita + animación + ir a caja ───────────────────
+  async function closeAndCharge(work_order_id) {
+    try {
+      await fetchJSON(`${WO_URL}${work_order_id}/`, {
+        method: "PATCH", headers: authH(),
+        body: JSON.stringify({ status: "closed" }),
+      });
+
+      if (currentWo && currentWo.appointment_id) {
+        try {
+          await fetchJSON(`${APPT_URL}${currentWo.appointment_id}/`, {
+            method: "PATCH", headers: authH(),
+            body: JSON.stringify({ status: "completed" }),
+          });
+        } catch (_) {}
+      }
+
+      showCloseAnimation(work_order_id);
+    } catch (e) {
+      showMsg(e.message || "No se pudo cerrar la orden.", "danger", 5500);
+    }
+  }
+
+  function showCloseAnimation(work_order_id) {
+    if (!document.getElementById("closeAnimStyle")) {
+      const s = document.createElement("style");
+      s.id = "closeAnimStyle";
+      s.textContent = `@keyframes fadeInScale{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}`;
+      document.head.appendChild(s);
+    }
+
+    const overlay = document.createElement("div");
+    overlay.id = "closeSuccessOverlay";
+    overlay.style.cssText = [
+      "position:absolute", "inset:0",
+      "background:rgba(255,255,255,.97)",
+      "display:flex", "flex-direction:column",
+      "align-items:center", "justify-content:center",
+      "z-index:9999", "border-radius:inherit",
+      "animation:fadeInScale .35s ease",
+    ].join(";");
+    overlay.innerHTML = `
+      <div style="font-size:4rem;color:#198754;margin-bottom:.75rem;line-height:1">
+        <i class="bi bi-check-circle-fill"></i>
+      </div>
+      <div class="fw-semibold fs-5 mb-1">¡Orden cerrada!</div>
+      <div class="text-muted small">Redirigiendo a caja&hellip;</div>`;
+
+    const modalContent = document.querySelector("#detailModal .modal-content");
+    if (modalContent) {
+      modalContent.style.position = "relative";
+      modalContent.appendChild(overlay);
+    }
+
+    setTimeout(() => {
+      window.location.href = `./dashboard_cash_register.html?work_order_id=${encodeURIComponent(work_order_id)}`;
+    }, 1800);
+  }
+
   // ── Botones contextuales en tabla ─────────────────────────────────────────
   function renderRowActions(wo) {
     const id = wo.work_order_id;
@@ -567,7 +627,7 @@
         <button class="btn btn-outline-danger" onclick="changeWoStatus('${id}','cancelled')"><i class="bi bi-x-circle me-1"></i>Cancelar OT</button>`;
     } else if (s === "ready") {
       actionsDiv.innerHTML = `
-        <button class="btn btn-dark" onclick="changeWoStatus('${id}','closed')"><i class="bi bi-lock-fill me-1"></i>Cerrar OT</button>`;
+        <button class="btn btn-dark" onclick="closeAndCharge('${id}')"><i class="bi bi-cash-coin me-1"></i>Cerrar y Cobrar</button>`;
     }
   }
 

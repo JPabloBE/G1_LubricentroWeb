@@ -169,24 +169,40 @@ class CashSessionViewSet(viewsets.ModelViewSet):
 
     @action(detail=False, methods=["get"], url_path="work-orders-summary")
     def work_orders_summary(self, request):
-        """OTs abiertas con info de cliente y vehículo para el dropdown del frontend."""
+        """OTs abiertas con info de cliente y vehículo para el dropdown del frontend.
+        Acepta ?work_order_id=<uuid> para incluir una OT específica aunque esté cerrada
+        (útil al redirigir desde 'Cerrar y Cobrar')."""
         qs = WorkOrder.objects.select_related("customer", "vehicle").filter(
             status__in=["open", "in_progress", "ready"]
         ).order_by("-opened_at")[:100]
 
-        data = []
-        for wo in qs:
+        def wo_to_dict(wo):
             customer_name = wo.customer.full_name if wo.customer else "—"
             vehicle_info = ""
             if wo.vehicle:
                 parts = [wo.vehicle.make, wo.vehicle.model, wo.vehicle.plate]
                 vehicle_info = " ".join(p for p in parts if p)
             opened = wo.opened_at.strftime("%d/%m/%Y") if wo.opened_at else ""
-            data.append({
+            return {
                 "work_order_id":   str(wo.work_order_id),
                 "display":         f"{customer_name} — {vehicle_info} — {opened}",
                 "estimated_total": str(wo.estimated_total or "0.00"),
-            })
+            }
+
+        data = [wo_to_dict(wo) for wo in qs]
+
+        include_id = request.query_params.get("work_order_id")
+        if include_id:
+            existing_ids = {d["work_order_id"] for d in data}
+            if include_id not in existing_ids:
+                try:
+                    wo = WorkOrder.objects.select_related("customer", "vehicle").get(
+                        work_order_id=include_id
+                    )
+                    data.insert(0, wo_to_dict(wo))
+                except WorkOrder.DoesNotExist:
+                    pass
+
         return Response(data)
 
 

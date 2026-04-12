@@ -74,36 +74,71 @@
       </div>
 
       <!-- ── Agenda del taller ─────────────────────────────────────────────────── -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
-          <span class="fw-semibold"><i class="bi bi-calendar3 me-2"></i>Agenda del taller</span>
-          <div class="d-flex align-items-center gap-2">
-            <div class="btn-group btn-group-sm" role="group">
-              <button type="button" class="btn btn-primary" id="agendaToday">Hoy</button>
-              <button type="button" class="btn btn-outline-secondary" id="agendaUpcoming">Próximas</button>
+      <div class="row g-3 mb-4">
+
+        <!-- Panel izquierdo: En el taller ahora -->
+        <div class="col-12 col-xl-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+              <span class="fw-semibold"><i class="bi bi-tools me-2 text-warning"></i>En el taller ahora</span>
+              <span id="woTallerCount" class="badge bg-primary rounded-pill" title="Vehículos activos">—</span>
             </div>
-            <span id="agendaDateLabel" class="text-muted small"></span>
+            <div class="card-body p-0" style="max-height:320px;overflow-y:auto;">
+              <div id="woTallerLoading" class="text-center text-muted py-3 small">Cargando...</div>
+              <div id="woTallerEmpty"  class="text-center py-3 d-none" style="color:#888;font-size:.875rem;">Sin vehículos en el taller en este momento</div>
+              <div class="table-responsive d-none" id="woTallerTableWrap">
+                <table class="table table-hover mb-0 align-middle">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3">Vehículo</th>
+                      <th>Cliente</th>
+                      <th>Estado</th>
+                      <th class="text-center" style="width:80px;">Abierta</th>
+                      <th class="text-center" style="width:80px;">OT</th>
+                    </tr>
+                  </thead>
+                  <tbody id="woTallerTbody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
-        <div class="card-body p-0">
-          <div id="agendaLoading" class="text-center text-muted py-3 small">Cargando...</div>
-          <div id="agendaEmpty"   class="text-center agenda-empty py-3 d-none">Sin citas para este período</div>
-          <div class="table-responsive d-none" id="agendaTableWrap">
-            <table class="table table-hover mb-0">
-              <thead class="table-light">
-                <tr>
-                  <th class="ps-3" style="width:90px;">Hora</th>
-                  <th>Cliente</th>
-                  <th>Vehículo</th>
-                  <th>Servicio</th>
-                  <th style="width:110px;">Estado</th>
-                  <th style="width:90px;" class="text-center">OT</th>
-                </tr>
-              </thead>
-              <tbody id="agendaTbody"></tbody>
-            </table>
+
+        <!-- Panel derecho: Agenda de citas -->
+        <div class="col-12 col-xl-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-header bg-white d-flex align-items-center justify-content-between py-2">
+              <span class="fw-semibold"><i class="bi bi-calendar3 me-2"></i>Agenda de citas</span>
+              <div class="d-flex align-items-center gap-2">
+                <div class="btn-group btn-group-sm" role="group">
+                  <button type="button" class="btn btn-primary btn-sm" id="agendaToday">Hoy</button>
+                  <button type="button" class="btn btn-outline-secondary btn-sm" id="agendaUpcoming">7 días</button>
+                </div>
+                <span id="agendaDateLabel" class="text-muted small"></span>
+              </div>
+            </div>
+            <div class="card-body p-0" style="max-height:320px;overflow-y:auto;">
+              <div id="agendaLoading" class="text-center text-muted py-3 small">Cargando...</div>
+              <div id="agendaEmpty"   class="text-center agenda-empty py-3 d-none">Sin citas para este período</div>
+              <div class="table-responsive d-none" id="agendaTableWrap">
+                <table class="table table-hover mb-0">
+                  <thead class="table-light">
+                    <tr>
+                      <th class="ps-3" style="width:90px;">Hora</th>
+                      <th>Cliente</th>
+                      <th>Vehículo</th>
+                      <th>Servicio</th>
+                      <th style="width:110px;">Estado</th>
+                      <th style="width:90px;" class="text-center">OT</th>
+                    </tr>
+                  </thead>
+                  <tbody id="agendaTbody"></tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
+
       </div>
 
       <!-- Fila 1: KPIs accionables -->
@@ -224,6 +259,7 @@
           </div>
         </div>
       </div>
+
 
     </main>
   </div>
@@ -420,6 +456,96 @@
     return { "Authorization": `Bearer ${token}`, "Content-Type": "application/json", ...extra };
   }
 
+  // ── EN EL TALLER (WOs activos) ──────────────────────────────────────────────
+  const ACTIVE_WO_STATUSES = new Set([
+    "open","in_progress","diagnosing","waiting_parts","awaiting_authorization","authorized","ready"
+  ]);
+
+  const WO_ALL_LABELS = {
+    open:                   "Abierta",
+    in_progress:            "En curso",
+    diagnosing:             "Diagnóstico",
+    waiting_parts:          "Esp. piezas",
+    awaiting_authorization: "Pend. autorización",
+    authorized:             "Autorizada",
+    ready:                  "Lista p/ entregar",
+    closed:                 "Cerrada",
+    completed:              "Completada",
+    cancelled:              "Cancelada",
+  };
+
+  const WO_BADGE_CLS = {
+    open:                   "bg-primary",
+    in_progress:            "bg-warning text-dark",
+    diagnosing:             "bg-info text-dark",
+    waiting_parts:          "bg-secondary",
+    awaiting_authorization: "bg-danger",
+    authorized:             "bg-success",
+    ready:                  "bg-success",
+  };
+
+  let allWorkOrders = [];
+
+  async function loadWorkOrders() {
+    document.getElementById("woTallerLoading").classList.remove("d-none");
+    document.getElementById("woTallerEmpty").classList.add("d-none");
+    document.getElementById("woTallerTableWrap").classList.add("d-none");
+
+    const statusList = [...ACTIVE_WO_STATUSES].join(",");
+    try {
+      const res = await fetch(`${API_BASE}/api/work-orders/?statuses=${encodeURIComponent(statusList)}&ordering=-opened_at`, {
+        headers: { "Authorization": `Bearer ${token}` },
+      });
+      if (!res.ok) {
+        document.getElementById("woTallerLoading").textContent = "Error al cargar órdenes.";
+        return;
+      }
+      const data = await res.json();
+      allWorkOrders = Array.isArray(data) ? data : (data.results || []);
+    } catch {
+      document.getElementById("woTallerLoading").textContent = "No se pudo conectar.";
+      return;
+    }
+    renderWorkOrders();
+  }
+
+  function renderWorkOrders() {
+    const active = allWorkOrders;
+    document.getElementById("woTallerCount").textContent = active.length;
+    document.getElementById("woTallerLoading").classList.add("d-none");
+
+    if (!active.length) {
+      document.getElementById("woTallerEmpty").classList.remove("d-none");
+      document.getElementById("woTallerTableWrap").classList.add("d-none");
+      return;
+    }
+
+    document.getElementById("woTallerEmpty").classList.add("d-none");
+    document.getElementById("woTallerTableWrap").classList.remove("d-none");
+
+    const tbody = document.getElementById("woTallerTbody");
+    tbody.innerHTML = active.map(wo => {
+      const vehicle = [wo.vehicle_plate, wo.vehicle_make, wo.vehicle_model].filter(Boolean).join(" ") || "—";
+      const label   = WO_ALL_LABELS[wo.status] || wo.status;
+      const cls     = WO_BADGE_CLS[wo.status]  || "bg-secondary";
+      const opened  = wo.opened_at
+        ? new Date(wo.opened_at).toLocaleDateString("es-CR", { day:"2-digit", month:"short" })
+        : "—";
+      const woId = wo.work_order_id || "";
+      const link = `./dashboard_work_orders.html?highlight=${encodeURIComponent(woId)}`;
+      return `
+        <tr style="cursor:pointer;" onclick="window.location.href='${link}'">
+          <td class="ps-3 fw-semibold">${vehicle}</td>
+          <td>${wo.customer_name || "—"}</td>
+          <td><span class="badge ${cls}" style="font-size:.72rem;">${label}</span></td>
+          <td class="text-center small text-muted">${opened}</td>
+          <td class="text-center">
+            <a href="${link}" class="btn btn-xs btn-outline-primary" style="font-size:.75rem;padding:2px 8px;" onclick="event.stopPropagation()">Ver OT</a>
+          </td>
+        </tr>`;
+    }).join("");
+  }
+
   // ── AGENDA ──────────────────────────────────────────────────────────────────
   let agendaMode = "today"; // "today" | "upcoming"
   let allAppointments = [];
@@ -455,8 +581,8 @@
     let rows = allAppointments.filter(a => {
       const dayStr = (a.scheduled_start || "").slice(0, 10);
       if (agendaMode === "today") return dayStr === today && !excluded.includes(a.status);
-      // upcoming: next 7 days (excluding today)
-      return dayStr > today && dayStr <= cutoff && !excluded.includes(a.status);
+      // upcoming: next 7 days (including today)
+      return dayStr >= today && dayStr <= cutoff && !excluded.includes(a.status);
     });
 
     rows.sort((a, b) => (a.scheduled_start || "").localeCompare(b.scheduled_start || ""));
@@ -668,6 +794,7 @@
       document.getElementById("chartWO").classList.add("d-none");
       document.getElementById("emptyWO").classList.remove("d-none");
     }
+
   }
 
   function buildMonthOptions() {
@@ -1038,6 +1165,7 @@
   document.getElementById("btnReload").addEventListener("click", () => {
     loadMetrics();
     loadAgenda();
+    loadWorkOrders();
   });
 
   (async () => {
@@ -1059,6 +1187,7 @@
     document.getElementById("chartMonthFilter").addEventListener("change", () => loadMetrics());
     loadMetrics();
     loadAgenda();
+    loadWorkOrders();
   })();
 </script>
 </body>

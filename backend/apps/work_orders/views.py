@@ -142,6 +142,12 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
         if status_q:
             qs = qs.filter(status__iexact=status_q.strip())
 
+        statuses_q = self.request.query_params.get("statuses")
+        if statuses_q:
+            allowed = [s.strip().lower() for s in statuses_q.split(",") if s.strip()]
+            if allowed:
+                qs = qs.filter(status__in=allowed)
+
         date_from = self.request.query_params.get("date_from")
         if date_from:
             qs = qs.filter(opened_at__date__gte=date_from)

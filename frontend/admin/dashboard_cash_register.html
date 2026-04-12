@@ -500,27 +500,33 @@
 
   // ── Dropdown data (productos + OTs) ──────────────────────────────────────
 
-  async function loadDropdownData() {
-    if (dropdownDataLoaded) return;
+  async function loadDropdownData(workOrderId = null) {
+    const forceWoReload = workOrderId !== null;
+    if (dropdownDataLoaded && !forceWoReload) return;
 
-    // Productos activos con stock
-    try {
-      const resp = await api(`${API_BASE}/api/catalog/products/`, { headers: authHeaders() });
-      allProducts = (Array.isArray(resp) ? resp : resp.results || []).filter(p => p.is_active);
-    } catch (_) { allProducts = []; }
+    if (!dropdownDataLoaded) {
+      // Productos activos con stock
+      try {
+        const resp = await api(`${API_BASE}/api/catalog/products/`, { headers: authHeaders() });
+        allProducts = (Array.isArray(resp) ? resp : resp.results || []).filter(p => p.is_active);
+      } catch (_) { allProducts = []; }
 
-    // Categorías para el filtro
-    try {
-      const resp = await api(`${API_BASE}/api/catalog/categories/`, { headers: authHeaders() });
-      const cats = Array.isArray(resp) ? resp : resp.results || [];
-      const catSel = document.getElementById("filterCategory");
-      catSel.innerHTML = '<option value="">Todas las categorías</option>';
-      for (const c of cats) catSel.appendChild(new Option(c.name, c.category_id));
-    } catch (_) {}
+      // Categorías para el filtro
+      try {
+        const resp = await api(`${API_BASE}/api/catalog/categories/`, { headers: authHeaders() });
+        const cats = Array.isArray(resp) ? resp : resp.results || [];
+        const catSel = document.getElementById("filterCategory");
+        catSel.innerHTML = '<option value="">Todas las categorías</option>';
+        for (const c of cats) catSel.appendChild(new Option(c.name, c.category_id));
+      } catch (_) {}
+    }
 
-    // OTs abiertas
+    // OTs (siempre recargar al forzar, o la primera vez)
     try {
-      const wos = await api(`${API_SESSION}work-orders-summary/`, { headers: authHeaders() });
+      const woUrl = workOrderId
+        ? `${API_SESSION}work-orders-summary/?work_order_id=${encodeURIComponent(workOrderId)}`
+        : `${API_SESSION}work-orders-summary/`;
+      const wos = await api(woUrl, { headers: authHeaders() });
       const woSel = document.getElementById("movWorkOrder");
       woSel.innerHTML = '<option value="">— Seleccionar OT —</option>';
       for (const wo of wos) {
@@ -872,6 +878,33 @@
       `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
 
     await loadActiveSession();
+
+    // Pre-abrir modal de cobro si viene desde "Cerrar y Cobrar" en OTs
+    const _woParam = new URLSearchParams(window.location.search).get("work_order_id");
+    if (_woParam && currentSession) {
+      document.getElementById("movType").value         = "payment";
+      document.getElementById("movAmount").value       = "";
+      document.getElementById("movDescription").value  = "";
+      document.getElementById("movProductId").value    = "";
+      document.getElementById("movProductPrice").value = "";
+      document.getElementById("movQty").value          = "1";
+      document.getElementById("selectedProductInfo").classList.add("d-none");
+      document.getElementById("filterProductName").value = "";
+      document.getElementById("filterCategory").value    = "";
+      showMovementFields("payment");
+      modalMovement.show();
+      await loadDropdownData(_woParam);
+      renderProductList();
+      // Pre-seleccionar la OT y pre-cargar el monto estimado
+      const woSel = document.getElementById("movWorkOrder");
+      woSel.value = _woParam;
+      for (const opt of woSel.options) {
+        if (opt.value === _woParam && opt.dataset.total) {
+          document.getElementById("movAmount").value = parseFloat(opt.dataset.total || 0).toFixed(2);
+          break;
+        }
+      }
+    }
   })();
 </script>
 </body>
