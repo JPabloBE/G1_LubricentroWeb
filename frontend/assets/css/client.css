@@ -1760,6 +1760,7 @@ thead.table-light > * > * {
 
 /* ══ RESPONSIVE ══ */
 @media (max-width: 767px) {
+  .topbar { display: none !important; }
   .topbar-info { display: none !important; }
 
   .ap-card-row {
