@@ -188,6 +188,18 @@
             <div class="form-text">Seleccionar pre-rellena el monto con el total estimado.</div>
           </div>
 
+          <!-- ─ Detalles de OT seleccionada ─ -->
+          <div id="rowWoDetails" class="col-12 d-none">
+            <button type="button" id="btnToggleWoDetails" class="btn btn-sm btn-outline-secondary w-100">
+              <i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT
+            </button>
+            <div id="woDetailPanel" class="d-none mt-2 rounded border p-2" style="font-size:.82rem;">
+              <div id="woDetailContent" class="text-muted text-center py-2">
+                <span class="spinner-border spinner-border-sm me-1"></span>Cargando…
+              </div>
+            </div>
+          </div>
+
           <!-- ─ Buscador de producto (solo para "sale") ─ -->
           <div id="rowProduct" class="col-12 d-none">
             <label class="form-label fw-semibold">Buscar producto</label>
@@ -574,6 +586,7 @@
     document.getElementById("rowProduct").classList.toggle("d-none", !isProduct);
     document.getElementById("rowQty").classList.toggle("d-none", !isProduct);
     document.getElementById("rowWorkOrder").classList.toggle("d-none", !isPayment);
+    if (!isPayment) resetWoDetailsPanel(false);
 
     // Monto: editable siempre, pero readonly + hint cambia
     const amtInput = document.getElementById("movAmount");
@@ -635,6 +648,88 @@
       document.getElementById("movAmount").value = parseFloat(opt.dataset.total || 0).toFixed(2);
     } else {
       document.getElementById("movAmount").value = "";
+    }
+    resetWoDetailsPanel(!!opt?.value);
+  });
+
+  function resetWoDetailsPanel(hasWo) {
+    const row   = document.getElementById("rowWoDetails");
+    const panel = document.getElementById("woDetailPanel");
+    const btn   = document.getElementById("btnToggleWoDetails");
+    row.classList.toggle("d-none", !hasWo);
+    panel.classList.add("d-none");
+    btn.innerHTML = '<i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT';
+    document.getElementById("woDetailContent").innerHTML =
+      '<span class="spinner-border spinner-border-sm me-1"></span>Cargando…';
+  }
+
+  document.getElementById("btnToggleWoDetails").addEventListener("click", async () => {
+    const panel = document.getElementById("woDetailPanel");
+    const btn   = document.getElementById("btnToggleWoDetails");
+    const woId  = document.getElementById("movWorkOrder").value;
+    if (!woId) return;
+
+    if (!panel.classList.contains("d-none")) {
+      panel.classList.add("d-none");
+      btn.innerHTML = '<i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT';
+      return;
+    }
+
+    panel.classList.remove("d-none");
+    btn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Ocultar detalles';
+
+    try {
+      const [svcs, prds] = await Promise.all([
+        api(`${API_BASE}/api/work-order-services/?work_order_id=${encodeURIComponent(woId)}`, { headers: authHeaders() }),
+        api(`${API_BASE}/api/work-order-products/?work_order_id=${encodeURIComponent(woId)}`, { headers: authHeaders() }),
+      ]);
+
+      const svcList = Array.isArray(svcs) ? svcs : (svcs.results || []);
+      const prdList = Array.isArray(prds) ? prds : (prds.results || []);
+
+      let html = "";
+
+      if (svcList.length) {
+        html += `<div class="fw-semibold mb-1" style="color:var(--text-muted);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em;">Servicios</div>`;
+        html += svcList.map(s => {
+          const subtotal = parseFloat(s.qty || 1) * parseFloat(s.unit_price || 0);
+          return `<div class="d-flex justify-content-between py-1 border-bottom" style="border-color:var(--border)!important;">
+            <span>${escapeHtml(s.service_name || "—")}${parseFloat(s.qty||1) > 1 ? ` <span class="text-muted">×${s.qty}</span>` : ""}</span>
+            <span class="fw-semibold">₡${money(subtotal)}</span>
+          </div>`;
+        }).join("");
+      }
+
+      if (prdList.length) {
+        html += `<div class="fw-semibold mt-2 mb-1" style="color:var(--text-muted);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em;">Productos</div>`;
+        html += prdList.map(p => {
+          const subtotal = parseFloat(p.qty || 1) * parseFloat(p.unit_price || 0);
+          return `<div class="d-flex justify-content-between py-1 border-bottom" style="border-color:var(--border)!important;">
+            <span>${escapeHtml(p.product_name || "—")} <span class="text-muted">×${p.qty}</span></span>
+            <span class="fw-semibold">₡${money(subtotal)}</span>
+          </div>`;
+        }).join("");
+      }
+
+      if (!svcList.length && !prdList.length) {
+        html = `<div class="text-muted text-center py-1">Sin líneas registradas.</div>`;
+      } else {
+        const total = [...svcList, ...prdList].reduce((acc, l) =>
+          acc + parseFloat(l.qty || 1) * parseFloat(l.unit_price || 0), 0);
+        html += `<div class="d-flex justify-content-between pt-2 fw-semibold">
+          <span>Total</span><span>₡${money(total)}</span>
+        </div>`;
+        // Si el monto del form está en 0 o vacío, pre-rellenarlo con el total calculado
+        const amtInput = document.getElementById("movAmount");
+        if (!amtInput.value || parseFloat(amtInput.value) === 0) {
+          amtInput.value = total.toFixed(2);
+        }
+      }
+
+      document.getElementById("woDetailContent").innerHTML = html;
+    } catch (e) {
+      document.getElementById("woDetailContent").innerHTML =
+        `<div class="text-danger small">No se pudieron cargar los detalles.</div>`;
     }
   });
 
@@ -904,6 +999,8 @@
           break;
         }
       }
+      // Mostrar el botón de detalles
+      resetWoDetailsPanel(true);
     }
   })();
 </script>
