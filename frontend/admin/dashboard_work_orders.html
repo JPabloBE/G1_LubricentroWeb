@@ -767,6 +767,11 @@
     const tb   = document.getElementById("svcTbody");
     tb.innerHTML = "";
 
+    const woLocked = currentWo && ["closed", "cancelled"].includes(currentWo.status);
+
+    // Mostrar/ocultar botón "Agregar servicio" según estado de la OT
+    document.getElementById("btnOpenServicePicker").classList.toggle("d-none", !!woLocked);
+
     if (!svcLines.length) {
       tb.innerHTML = `<tr><td colspan="5" class="text-muted small text-center py-2">Sin servicios agregados.</td></tr>`;
       return;
@@ -776,15 +781,17 @@
       const st  = SVC_STATUS[r.status] || { label: r.status, badge: "bg-secondary" };
       const s   = r.status || "pending";
       let svcActions = renderBadge(st);
-      if (s === "pending") {
-        svcActions = `<button class="btn btn-xs btn-sm btn-primary py-0 px-2"
-          onclick="changeSvcStatus('${r.work_order_service_id}','in_progress','${work_order_id}')">${ICO_PLAY}</button>`;
-      } else if (s === "in_progress") {
-        svcActions = `
-          <button class="btn btn-sm btn-success py-0 px-2"
-            onclick="changeSvcStatus('${r.work_order_service_id}','done','${work_order_id}')">${ICO_CHECK}</button>
-          <button class="btn btn-sm btn-outline-danger py-0 px-2"
-            onclick="changeSvcStatus('${r.work_order_service_id}','cancelled','${work_order_id}')">${ICO_X}</button>`;
+      if (!woLocked) {
+        if (s === "pending") {
+          svcActions = `<button class="btn btn-xs btn-sm btn-primary py-0 px-2"
+            onclick="changeSvcStatus('${r.work_order_service_id}','in_progress','${work_order_id}')">${ICO_PLAY}</button>`;
+        } else if (s === "in_progress") {
+          svcActions = `
+            <button class="btn btn-sm btn-success py-0 px-2"
+              onclick="changeSvcStatus('${r.work_order_service_id}','done','${work_order_id}')">${ICO_CHECK}</button>
+            <button class="btn btn-sm btn-outline-danger py-0 px-2"
+              onclick="changeSvcStatus('${r.work_order_service_id}','cancelled','${work_order_id}')">${ICO_X}</button>`;
+        }
       }
 
       const subtotal = (parseFloat(r.qty) * parseFloat(r.unit_price || 0)).toFixed(2);
@@ -801,25 +808,25 @@
         </td>
         <td><div class="d-flex gap-1">${svcActions}</div></td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger" data-del title="Quitar servicio">
-            <i class="bi bi-trash3"></i>
-          </button>
+          ${woLocked ? "" : `<button class="btn btn-sm btn-outline-danger" data-del title="Quitar servicio"><i class="bi bi-trash3"></i></button>`}
         </td>
       `;
 
-      tr.querySelector("[data-del]").onclick = async () => {
-        try {
-          const res = await fetch(`${WOS_URL}${r.work_order_service_id}/`, {
-            method: "DELETE", headers: authH(),
-          });
-          if (!res.ok) {
-            let d = null; try { d = await res.json(); } catch (_) {}
-            throw new Error(d?.detail || "No se pudo eliminar el servicio.");
-          }
-          await loadServices(work_order_id);
-          refreshEstimatedTotal();
-        } catch (e) { showMsg(e.message || "No se pudo eliminar.", "danger", 5500); }
-      };
+      if (!woLocked) {
+        tr.querySelector("[data-del]").onclick = async () => {
+          try {
+            const res = await fetch(`${WOS_URL}${r.work_order_service_id}/`, {
+              method: "DELETE", headers: authH(),
+            });
+            if (!res.ok) {
+              let d = null; try { d = await res.json(); } catch (_) {}
+              throw new Error(d?.detail || "No se pudo eliminar el servicio.");
+            }
+            await loadServices(work_order_id);
+            refreshEstimatedTotal();
+          } catch (e) { showMsg(e.message || "No se pudo eliminar.", "danger", 5500); }
+        };
+      }
 
       tb.appendChild(tr);
     }
@@ -831,6 +838,11 @@
     prdLines   = normalizeList(data);
     const tb   = document.getElementById("prdTbody");
     tb.innerHTML = "";
+
+    const woLocked = currentWo && ["closed", "cancelled"].includes(currentWo.status);
+
+    // Mostrar/ocultar botón "Agregar producto" según estado de la OT
+    document.getElementById("btnOpenProductPicker").classList.toggle("d-none", !!woLocked);
 
     if (!prdLines.length) {
       tb.innerHTML = `<tr><td colspan="5" class="text-muted small text-center py-2">Sin productos agregados.</td></tr>`;
@@ -847,57 +859,60 @@
           ${r.description ? `<div class="small text-muted">${escapeHtml(r.description)}</div>` : ""}
         </td>
         <td class="small">
-          <div class="d-flex align-items-center gap-1">
-            <input class="form-control form-control-sm" type="number" min="1" step="1" style="width:70px" value="${escapeHtml(String(r.qty))}" data-qty title="Cantidad en ${baseUnit}">
-            <span class="text-muted small">${escapeHtml(baseUnit)}</span>
-          </div>
+          ${woLocked
+            ? `<span class="badge rounded-pill bg-secondary">${escapeHtml(String(r.qty))} ${escapeHtml(baseUnit)}</span>`
+            : `<div class="d-flex align-items-center gap-1">
+                <input class="form-control form-control-sm" type="number" min="1" step="1" style="width:70px" value="${escapeHtml(String(r.qty))}" data-qty title="Cantidad en ${baseUnit}">
+                <span class="text-muted small">${escapeHtml(baseUnit)}</span>
+               </div>`
+          }
         </td>
         <td class="small">
           <div>₡${money(r.unit_price)}</div>
           ${parseFloat(r.qty) > 1 ? `<div class="text-muted" style="font-size:.75rem;">Total: ₡${money(subtotal)}</div>` : ""}
         </td>
         <td class="text-end">
-          <button class="btn btn-sm btn-outline-danger" data-del title="Quitar producto">
-            <i class="bi bi-trash3"></i>
-          </button>
+          ${woLocked ? "" : `<button class="btn btn-sm btn-outline-danger" data-del title="Quitar producto"><i class="bi bi-trash3"></i></button>`}
         </td>
       `;
 
-      tr.querySelector("[data-qty]").addEventListener("change", async (e) => {
-        const newQty = e.target.value;
-        if (!newQty || parseInt(newQty, 10) < 1) { e.target.value = r.qty; return; }
-        e.target.disabled = true;
-        try {
-          await fetchJSON(`${WOP_URL}${r.work_order_product_id}/`, {
-            method: "PATCH", headers: authH(),
-            body: JSON.stringify({ qty: newQty }),
-          });
-          showMsg("Cantidad actualizada.", "success");
-          await loadProducts(work_order_id);
-          refreshEstimatedTotal();
-          try { await loadCatalogs(); } catch (_) {}
-        } catch (err) {
-          showMsg(err.message || "No se pudo actualizar.", "danger", 5500);
-          e.target.value = r.qty;
-          e.target.disabled = false;
-        }
-      });
-
-      tr.querySelector("[data-del]").onclick = async () => {
-        try {
-          const res = await fetch(`${WOP_URL}${r.work_order_product_id}/`, {
-            method: "DELETE", headers: authH(),
-          });
-          if (!res.ok) {
-            let d = null; try { d = await res.json(); } catch (_) {}
-            throw new Error(d?.detail || "No se pudo eliminar el producto.");
+      if (!woLocked) {
+        tr.querySelector("[data-qty]").addEventListener("change", async (e) => {
+          const newQty = e.target.value;
+          if (!newQty || parseInt(newQty, 10) < 1) { e.target.value = r.qty; return; }
+          e.target.disabled = true;
+          try {
+            await fetchJSON(`${WOP_URL}${r.work_order_product_id}/`, {
+              method: "PATCH", headers: authH(),
+              body: JSON.stringify({ qty: newQty }),
+            });
+            showMsg("Cantidad actualizada.", "success");
+            await loadProducts(work_order_id);
+            refreshEstimatedTotal();
+            try { await loadCatalogs(); } catch (_) {}
+          } catch (err) {
+            showMsg(err.message || "No se pudo actualizar.", "danger", 5500);
+            e.target.value = r.qty;
+            e.target.disabled = false;
           }
-          showMsg("Producto eliminado (stock revertido).", "success");
-          await loadProducts(work_order_id);
-          refreshEstimatedTotal();
-          try { await loadCatalogs(); } catch (_) {}
-        } catch (e) { showMsg(e.message || "No se pudo eliminar.", "danger", 5500); }
-      };
+        });
+
+        tr.querySelector("[data-del]").onclick = async () => {
+          try {
+            const res = await fetch(`${WOP_URL}${r.work_order_product_id}/`, {
+              method: "DELETE", headers: authH(),
+            });
+            if (!res.ok) {
+              let d = null; try { d = await res.json(); } catch (_) {}
+              throw new Error(d?.detail || "No se pudo eliminar el producto.");
+            }
+            showMsg("Producto eliminado (stock revertido).", "success");
+            await loadProducts(work_order_id);
+            refreshEstimatedTotal();
+            try { await loadCatalogs(); } catch (_) {}
+          } catch (e) { showMsg(e.message || "No se pudo eliminar.", "danger", 5500); }
+        };
+      }
 
       tb.appendChild(tr);
     }
