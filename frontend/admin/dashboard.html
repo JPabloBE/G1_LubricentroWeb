@@ -675,7 +675,7 @@
     const wo   = data.work_orders_by_status   || {};
     const appt = data.appointments_by_status  || {};
 
-    animateCount(document.getElementById("kpiInTaller"), (wo["open"] || 0) + (wo["in_progress"] || 0));
+    animateCount(document.getElementById("kpiInTaller"), (wo["open"] || 0) + (wo["in_progress"] || 0) + (wo["ready"] || 0));
 
     const ready = wo["ready"] || 0;
     const kpiReadyEl = document.getElementById("kpiReady");
