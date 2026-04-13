@@ -506,8 +506,14 @@
     }
   }
 
-  // ── Cerrar OT + completar cita + animación + ir a caja ───────────────────
+  // ── Cerrar OT + completar cita + ir a caja ───────────────────────────────
   async function closeAndCharge(work_order_id) {
+    const btn = document.querySelector("#woStatusActions button");
+    if (btn) {
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Cerrando…';
+    }
+
     try {
       await fetchJSON(`${WO_URL}${work_order_id}/`, {
         method: "PATCH", headers: authH(),
@@ -523,46 +529,29 @@
         } catch (_) {}
       }
 
-      showCloseAnimation(work_order_id);
+      const actionsDiv = document.getElementById("woStatusActions");
+      if (actionsDiv) {
+        actionsDiv.innerHTML = `
+          <div class="d-flex align-items-center gap-2" style="color:#3fb950;">
+            <i class="bi bi-check-circle-fill fs-5"></i>
+            <div>
+              <div class="fw-semibold small">¡Orden cerrada!</div>
+              <div class="small" style="color:var(--text-muted);">Redirigiendo a caja&hellip;</div>
+            </div>
+          </div>`;
+      }
+
+      setTimeout(() => {
+        window.location.href = `./dashboard_cash_register.html?work_order_id=${encodeURIComponent(work_order_id)}`;
+      }, 1200);
+
     } catch (e) {
+      if (btn) {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="bi bi-cash-coin me-1"></i>Cerrar y Cobrar';
+      }
       showMsg(e.message || "No se pudo cerrar la orden.", "danger", 5500);
     }
-  }
-
-  function showCloseAnimation(work_order_id) {
-    if (!document.getElementById("closeAnimStyle")) {
-      const s = document.createElement("style");
-      s.id = "closeAnimStyle";
-      s.textContent = `@keyframes fadeInScale{from{opacity:0;transform:scale(.92)}to{opacity:1;transform:scale(1)}}`;
-      document.head.appendChild(s);
-    }
-
-    const overlay = document.createElement("div");
-    overlay.id = "closeSuccessOverlay";
-    overlay.style.cssText = [
-      "position:absolute", "inset:0",
-      "background:rgba(255,255,255,.97)",
-      "display:flex", "flex-direction:column",
-      "align-items:center", "justify-content:center",
-      "z-index:9999", "border-radius:inherit",
-      "animation:fadeInScale .35s ease",
-    ].join(";");
-    overlay.innerHTML = `
-      <div style="font-size:4rem;color:#198754;margin-bottom:.75rem;line-height:1">
-        <i class="bi bi-check-circle-fill"></i>
-      </div>
-      <div class="fw-semibold fs-5 mb-1">¡Orden cerrada!</div>
-      <div class="text-muted small">Redirigiendo a caja&hellip;</div>`;
-
-    const modalContent = document.querySelector("#detailModal .modal-content");
-    if (modalContent) {
-      modalContent.style.position = "relative";
-      modalContent.appendChild(overlay);
-    }
-
-    setTimeout(() => {
-      window.location.href = `./dashboard_cash_register.html?work_order_id=${encodeURIComponent(work_order_id)}`;
-    }, 1800);
   }
 
   // ── Botones contextuales en tabla ─────────────────────────────────────────
