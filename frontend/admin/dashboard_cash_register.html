@@ -10,6 +10,95 @@
   <style>
     .product-item:hover { background: #f8f9fa; }
     .product-item.selected { background: #e8f4ff; border-left: 3px solid #0d6efd; }
+
+    /* ── WO Detail Accordion ── */
+    #btnToggleWoDetails {
+      all: unset;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 8px 0;
+      border-top: 1px solid var(--border-bright);
+      cursor: pointer;
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      transition: color .2s var(--ease-out-expo), border-color .2s var(--ease-out-expo);
+    }
+    #btnToggleWoDetails:hover { color: var(--text-primary); border-color: var(--accent-red); }
+    #btnToggleWoDetails .wo-toggle-chevron {
+      font-size: .75rem;
+      transition: transform .25s var(--ease-out-expo);
+    }
+    #btnToggleWoDetails.open .wo-toggle-chevron { transform: rotate(90deg); }
+
+    #woDetailPanel {
+      background: var(--bg-elevated);
+      border: 1px solid var(--border-bright) !important;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+    .wo-detail-section-label {
+      font-family: var(--font-display);
+      font-size: .62rem;
+      font-weight: 700;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      padding: 8px 12px 4px;
+    }
+    .wo-detail-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      padding: 5px 12px;
+      border-top: 1px solid var(--border);
+      font-size: .8rem;
+      color: var(--text-primary);
+    }
+    .wo-detail-line:first-of-type { border-top: none; }
+    .wo-detail-line .line-name { color: var(--text-primary); }
+    .wo-detail-line .line-qty {
+      font-size: .72rem;
+      color: var(--text-muted);
+      margin-left: 4px;
+    }
+    .wo-detail-line .line-price {
+      font-family: var(--font-display);
+      font-size: .85rem;
+      font-weight: 600;
+      letter-spacing: .02em;
+      color: var(--text-primary);
+      white-space: nowrap;
+    }
+    .wo-detail-total {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 8px 12px;
+      margin-top: 2px;
+      border-top: 1px solid var(--border-bright);
+      background: rgba(232,160,48,.07);
+    }
+    .wo-detail-total .total-label {
+      font-family: var(--font-display);
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--accent-gold);
+    }
+    .wo-detail-total .total-value {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      color: var(--accent-gold);
+      letter-spacing: .02em;
+    }
   </style>
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
@@ -190,11 +279,12 @@
 
           <!-- ─ Detalles de OT seleccionada ─ -->
           <div id="rowWoDetails" class="col-12 d-none">
-            <button type="button" id="btnToggleWoDetails" class="btn btn-sm btn-outline-secondary w-100">
-              <i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT
+            <button type="button" id="btnToggleWoDetails">
+              <span>Detalles de la orden</span>
+              <i class="bi bi-chevron-right wo-toggle-chevron"></i>
             </button>
-            <div id="woDetailPanel" class="d-none mt-2 rounded border p-2" style="font-size:.82rem;">
-              <div id="woDetailContent" class="text-muted text-center py-2">
+            <div id="woDetailPanel" class="d-none mt-2">
+              <div id="woDetailContent" style="padding:12px;color:var(--text-muted);font-size:.8rem;text-align:center;">
                 <span class="spinner-border spinner-border-sm me-1"></span>Cargando…
               </div>
             </div>
@@ -658,9 +748,9 @@
     const btn   = document.getElementById("btnToggleWoDetails");
     row.classList.toggle("d-none", !hasWo);
     panel.classList.add("d-none");
-    btn.innerHTML = '<i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT';
+    btn.classList.remove("open");
     document.getElementById("woDetailContent").innerHTML =
-      '<span class="spinner-border spinner-border-sm me-1"></span>Cargando…';
+      '<div style="padding:12px;color:var(--text-muted);font-size:.8rem;text-align:center;"><span class="spinner-border spinner-border-sm me-1"></span>Cargando…</div>';
   }
 
   document.getElementById("btnToggleWoDetails").addEventListener("click", async () => {
@@ -671,12 +761,12 @@
 
     if (!panel.classList.contains("d-none")) {
       panel.classList.add("d-none");
-      btn.innerHTML = '<i class="bi bi-list-ul me-1"></i>Mostrar detalles de la OT';
+      btn.classList.remove("open");
       return;
     }
 
     panel.classList.remove("d-none");
-    btn.innerHTML = '<i class="bi bi-chevron-up me-1"></i>Ocultar detalles';
+    btn.classList.add("open");
 
     try {
       const [svcs, prds] = await Promise.all([
@@ -687,49 +777,54 @@
       const svcList = Array.isArray(svcs) ? svcs : (svcs.results || []);
       const prdList = Array.isArray(prds) ? prds : (prds.results || []);
 
+      if (!svcList.length && !prdList.length) {
+        document.getElementById("woDetailContent").innerHTML =
+          `<div style="padding:12px;color:var(--text-muted);font-size:.8rem;text-align:center;">Sin líneas registradas.</div>`;
+        return;
+      }
+
       let html = "";
 
       if (svcList.length) {
-        html += `<div class="fw-semibold mb-1" style="color:var(--text-muted);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em;">Servicios</div>`;
+        html += `<div class="wo-detail-section-label">Servicios</div>`;
         html += svcList.map(s => {
           const subtotal = parseFloat(s.qty || 1) * parseFloat(s.unit_price || 0);
-          return `<div class="d-flex justify-content-between py-1 border-bottom" style="border-color:var(--border)!important;">
-            <span>${escapeHtml(s.service_name || "—")}${parseFloat(s.qty||1) > 1 ? ` <span class="text-muted">×${s.qty}</span>` : ""}</span>
-            <span class="fw-semibold">₡${money(subtotal)}</span>
+          return `<div class="wo-detail-line">
+            <span><span class="line-name">${escapeHtml(s.service_name || "—")}</span>${parseFloat(s.qty||1) > 1 ? `<span class="line-qty">×${s.qty}</span>` : ""}</span>
+            <span class="line-price">₡${money(subtotal)}</span>
           </div>`;
         }).join("");
       }
 
       if (prdList.length) {
-        html += `<div class="fw-semibold mt-2 mb-1" style="color:var(--text-muted);text-transform:uppercase;font-size:.7rem;letter-spacing:.06em;">Productos</div>`;
+        html += `<div class="wo-detail-section-label" style="${svcList.length ? 'margin-top:6px;' : ''}">Productos</div>`;
         html += prdList.map(p => {
           const subtotal = parseFloat(p.qty || 1) * parseFloat(p.unit_price || 0);
-          return `<div class="d-flex justify-content-between py-1 border-bottom" style="border-color:var(--border)!important;">
-            <span>${escapeHtml(p.product_name || "—")} <span class="text-muted">×${p.qty}</span></span>
-            <span class="fw-semibold">₡${money(subtotal)}</span>
+          return `<div class="wo-detail-line">
+            <span><span class="line-name">${escapeHtml(p.product_name || "—")}</span><span class="line-qty">×${p.qty}</span></span>
+            <span class="line-price">₡${money(subtotal)}</span>
           </div>`;
         }).join("");
       }
 
-      if (!svcList.length && !prdList.length) {
-        html = `<div class="text-muted text-center py-1">Sin líneas registradas.</div>`;
-      } else {
-        const total = [...svcList, ...prdList].reduce((acc, l) =>
-          acc + parseFloat(l.qty || 1) * parseFloat(l.unit_price || 0), 0);
-        html += `<div class="d-flex justify-content-between pt-2 fw-semibold">
-          <span>Total</span><span>₡${money(total)}</span>
-        </div>`;
-        // Si el monto del form está en 0 o vacío, pre-rellenarlo con el total calculado
-        const amtInput = document.getElementById("movAmount");
-        if (!amtInput.value || parseFloat(amtInput.value) === 0) {
-          amtInput.value = total.toFixed(2);
-        }
-      }
+      const total = [...svcList, ...prdList].reduce((acc, l) =>
+        acc + parseFloat(l.qty || 1) * parseFloat(l.unit_price || 0), 0);
+
+      html += `<div class="wo-detail-total">
+        <span class="total-label">Total</span>
+        <span class="total-value">₡${money(total)}</span>
+      </div>`;
 
       document.getElementById("woDetailContent").innerHTML = html;
+
+      // Pre-rellenar monto si está vacío o en cero
+      const amtInput = document.getElementById("movAmount");
+      if (!amtInput.value || parseFloat(amtInput.value) === 0) {
+        amtInput.value = total.toFixed(2);
+      }
     } catch (e) {
       document.getElementById("woDetailContent").innerHTML =
-        `<div class="text-danger small">No se pudieron cargar los detalles.</div>`;
+        `<div style="padding:12px;color:var(--accent-red);font-size:.8rem;">No se pudieron cargar los detalles.</div>`;
     }
   });
 
