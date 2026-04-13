@@ -10,8 +10,8 @@
   <style>
     .table td { vertical-align: middle; }
     @keyframes woHighlight {
-      0%   { background-color: #fef08a !important; outline: 2px solid #eab308; }
-      75%  { background-color: #fef08a !important; outline: 2px solid #eab308; }
+      0%   { background-color: rgba(232,160,48,.18) !important; outline: 2px solid #E8A030; }
+      75%  { background-color: rgba(232,160,48,.18) !important; outline: 2px solid #E8A030; }
       100% { background-color: transparent !important; outline: none; }
     }
     .wo-highlight { animation: woHighlight 3s ease forwards; }
@@ -532,7 +532,7 @@
       const actionsDiv = document.getElementById("woStatusActions");
       if (actionsDiv) {
         actionsDiv.innerHTML = `
-          <div class="d-flex align-items-center gap-2" style="color:#3fb950;">
+          <div class="d-flex align-items-center gap-2" style="color:#34d988;">
             <i class="bi bi-check-circle-fill fs-5"></i>
             <div>
               <div class="fw-semibold small">¡Orden cerrada!</div>

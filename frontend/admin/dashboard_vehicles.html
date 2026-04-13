@@ -295,7 +295,7 @@
 
     for (const v of vehicles) {
       const thumb = v.image_url
-        ? `<img src="${v.image_url}" alt="vehicle" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid #ddd;">`
+        ? `<img src="${v.image_url}" alt="vehicle" style="width:48px;height:48px;object-fit:cover;border-radius:8px;border:1px solid rgba(255,255,255,.13);">`
         : `<span class="text-muted small">—</span>`;
 
       const tr = document.createElement("tr");
