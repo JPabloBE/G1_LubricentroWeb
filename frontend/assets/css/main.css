@@ -1554,41 +1554,46 @@ a.mob-info-chip:active {
 /* ── Language toggle (index + auth) ─────────────────────── */
 .lang-toggle {
   display:       inline-flex;
-  align-items:   center;
-  background:    rgba(255,255,255,.08);
-  border:        1px solid rgba(255,255,255,.18);
-  border-radius: 20px;
-  padding:       2px 3px;
+  align-items:   stretch;
+  background:    rgba(255,255,255,.07);
+  border:        1px solid rgba(255,255,255,.2);
+  border-radius: 4px;
+  padding:       0;
   cursor:        pointer;
-  height:        28px;
+  height:        30px;
   flex-shrink:   0;
-  gap:           0;
+  overflow:      hidden;
 }
 .lang-toggle:focus-visible {
   outline: 2px solid var(--brand);
   outline-offset: 2px;
 }
 .lang-opt {
-  font-size:      0.65rem;
+  display:        flex;
+  align-items:    center;
+  font-size:      0.7rem;
   font-weight:    700;
-  letter-spacing: 0.08em;
-  padding:        2px 8px;
-  border-radius:  14px;
-  color:          rgba(255,255,255,.5);
+  letter-spacing: 0.1em;
+  padding:        0 11px;
+  border-radius:  0;
+  color:          rgba(255,255,255,.45);
   transition:     background 0.15s, color 0.15s;
   font-family:    var(--font-display, sans-serif);
   line-height:    1;
   user-select:    none;
+}
+.lang-opt:first-child {
+  border-right: 1px solid rgba(255,255,255,.15);
 }
 .lang-opt.active {
   background: var(--brand, #e53935);
   color:      #fff;
 }
 .drawer-lang-row {
-  padding:    8px 16px 4px;
+  padding:    10px 16px 4px;
   border-top: 1px solid rgba(255,255,255,.08);
   margin-top: 4px;
 }
 .lang-toggle-nav {
-  margin-right: 4px;
+  margin-right: 6px;
 }

@@ -2300,39 +2300,44 @@ thead.table-light > * > * {
 /* ── Language toggle ─────────────────────────────────────── */
 .lang-toggle {
   display:       inline-flex;
-  align-items:   center;
+  align-items:   stretch;
   background:    var(--bg-surface);
   border:        1px solid var(--border-bright);
-  border-radius: 20px;
-  padding:       2px 3px;
+  border-radius: 4px;
+  padding:       0;
   cursor:        pointer;
-  height:        28px;
+  height:        30px;
   flex-shrink:   0;
-  gap:           0;
+  overflow:      hidden;
 }
 .lang-toggle:focus-visible {
   outline: 2px solid var(--accent-red);
   outline-offset: 2px;
 }
 .lang-opt {
-  font-size:      0.65rem;
+  display:        flex;
+  align-items:    center;
+  font-size:      0.7rem;
   font-weight:    700;
-  letter-spacing: 0.08em;
-  padding:        2px 8px;
-  border-radius:  14px;
+  letter-spacing: 0.1em;
+  padding:        0 11px;
+  border-radius:  0;
   color:          var(--text-muted);
   transition:     background 0.15s, color 0.15s;
   font-family:    var(--font-display);
   line-height:    1;
   user-select:    none;
 }
+.lang-opt:first-child {
+  border-right: 1px solid var(--border-bright);
+}
 .lang-opt.active {
   background: var(--accent-red);
   color:      #fff;
 }
 .drawer-lang-row {
-  padding:        8px 16px 4px;
+  padding:        10px 16px 4px;
   border-top:     1px solid rgba(255,255,255,.08);
   margin-top:     4px;
 }
-.lang-toggle-nav { margin-right: 4px; }
+.lang-toggle-nav { margin-right: 6px; }
