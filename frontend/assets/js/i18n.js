@@ -696,7 +696,7 @@
     // Index / auth pages: inject before .nav-login
     var navLogin = document.querySelector(".nav-login");
     if (navLogin && !navLogin.querySelector(".lang-toggle")) {
-      navLogin.insertAdjacentHTML("beforebegin", '<div class="lang-toggle-nav d-none d-lg-flex align-items-center">' + TOGGLE_BTN + '</div>');
+      navLogin.insertAdjacentHTML("beforebegin", '<div class="lang-toggle-nav d-none d-lg-flex align-items-center ms-auto">' + TOGGLE_BTN + '</div>');
     }
 
     // Mobile drawer: append a lang row at the end
