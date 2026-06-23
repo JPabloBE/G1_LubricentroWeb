@@ -1,5 +1,5 @@
 from django.db import connection
-from rest_framework import status, viewsets
+from rest_framework import mixins, status, viewsets
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
@@ -118,7 +118,12 @@ class VehicleViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class CustomerVehicleViewSet(viewsets.ReadOnlyModelViewSet):
+class CustomerVehicleViewSet(
+    mixins.ListModelMixin,
+    mixins.RetrieveModelMixin,
+    mixins.CreateModelMixin,
+    viewsets.GenericViewSet,
+):
     serializer_class = VehicleLiteSerializer
     authentication_classes = [CustomerJWTAuthentication]
     permission_classes = [IsAuthenticatedCustomer]
@@ -133,21 +138,22 @@ class CustomerVehicleViewSet(viewsets.ReadOnlyModelViewSet):
         if not plate:
             return Response({"detail": "La placa es requerida."}, status=status.HTTP_400_BAD_REQUEST)
 
-        make  = str(request.data.get("make")  or "").strip() or None
-        model = str(request.data.get("model") or "").strip() or None
-        year  = request.data.get("year") or None
-        color = str(request.data.get("color") or "").strip() or None
+        make      = str(request.data.get("make")      or "").strip() or None
+        model     = str(request.data.get("model")     or "").strip() or None
+        year      = request.data.get("year") or None
+        color     = str(request.data.get("color")     or "").strip() or None
+        image_url = str(request.data.get("image_url") or "").strip() or None
 
         with connection.cursor() as cursor:
             cursor.execute(
                 """
                 insert into public.vehicles
-                  (customer_id, plate, make, model, year, color, created_at, updated_at)
+                  (customer_id, plate, make, model, year, color, image_url, created_at, updated_at)
                 values
-                  (%s, %s, %s, %s, %s, %s, now(), now())
+                  (%s, %s, %s, %s, %s, %s, %s, now(), now())
                 returning vehicle_id
                 """,
-                [str(customer.customer_id), plate, make, model, year, color],
+                [str(customer.customer_id), plate, make, model, year, color, image_url],
             )
             vehicle_id = cursor.fetchone()[0]
 

@@ -11,6 +11,12 @@
     .btn-action { min-width: 36px; }
     .table td { vertical-align: middle; }
     .toast-container { position: fixed; bottom: 1.5rem; end: 1.5rem; z-index: 9999; }
+    @keyframes aptHighlight {
+      0%   { background-color: rgba(232,160,48,.18) !important; outline: 2px solid #E8A030; }
+      75%  { background-color: rgba(232,160,48,.18) !important; outline: 2px solid #E8A030; }
+      100% { background-color: transparent !important; outline: none; }
+    }
+    .apt-highlight { animation: aptHighlight 3s ease forwards; }
   </style>
   <link rel="stylesheet" href="../assets/css/admin.css">
 </head>
@@ -145,10 +151,8 @@
       <!-- Leyenda de flujo -->
       <div class="d-flex flex-wrap gap-2 mb-3 small">
         <span class="badge bg-secondary">Programada</span>
-        <span class="text-muted">→</span>
-        <span class="badge bg-primary">Confirmada + OT creada</span>
-        <span class="text-muted">→</span>
-        <span class="badge bg-warning text-dark">En progreso</span>
+        <span class="text-muted">→ Confirmar →</span>
+        <span class="badge bg-warning text-dark">En progreso + OT creada</span>
         <span class="text-muted">→</span>
         <span class="badge bg-success">Completada</span>
       </div>
@@ -249,9 +253,6 @@
     if (s === "scheduled") {
       primaryBtn = `<button class="btn btn-sm btn-success" onclick="confirmApt('${id}')">
         <i class="bi bi-check-lg"></i> Confirmar</button>`;
-    } else if (s === "confirmed") {
-      primaryBtn = `<button class="btn btn-sm btn-primary" onclick="changeStatus('${id}','in_progress')">
-        <i class="bi bi-play-fill"></i> Iniciar</button>`;
     } else if (s === "in_progress") {
       primaryBtn = `<button class="btn btn-sm btn-success" onclick="changeStatus('${id}','completed')">
         <i class="bi bi-check-lg"></i> Completar</button>`;
@@ -261,7 +262,7 @@
     let menuItems = `<li><a class="dropdown-item" href="#" onclick="openDetail('${id}');return false;">
       <i class="bi bi-eye me-2"></i>Ver detalle</a></li>`;
 
-    if (!hasWo && (s === "confirmed" || s === "in_progress")) {
+    if (!hasWo && s === "in_progress") {
       menuItems += `<li><a class="dropdown-item" href="#" onclick="confirmApt('${id}');return false;">
         <i class="bi bi-file-earmark-plus me-2"></i>Crear OT</a></li>`;
     }
@@ -341,6 +342,7 @@
           : `<span class="text-muted small">—</span>`;
 
       const tr = document.createElement("tr");
+      tr.dataset.aptid = a.appointment_id;
       tr.innerHTML = `
         <td>
           <div class="fw-semibold">${escapeHtml(a.customer_name || "")}</div>
@@ -369,7 +371,7 @@
         body: JSON.stringify({}),
       });
       const woId = res?.work_order_id ?? "";
-      showToastLegacy("Cita confirmada. OT creada automáticamente.", "success", () => {
+      showToastLegacy("OT creada. Cita en progreso.", "success", () => {
         const qs = woId ? `?highlight=${encodeURIComponent(woId)}` : "";
         window.location.href = `./dashboard_work_orders.html${qs}`;
       });
@@ -486,11 +488,26 @@
     document.getElementById("whoami").textContent =
       `${me.username} (${me.user_type || (me.is_superuser ? "admin" : "staff")})`;
 
-    const urlParams  = new URLSearchParams(window.location.search);
-    const statusParam = urlParams.get("status");
-    if (statusParam) document.getElementById("filterStatus").value = statusParam;
+    const urlParams    = new URLSearchParams(window.location.search);
+    const highlightId  = urlParams.get("highlight");
+    const statusParam  = urlParams.get("status");
 
-    loadAppointments();
+    if (highlightId) {
+      document.getElementById("filterStatus").value = "";
+    } else if (statusParam) {
+      document.getElementById("filterStatus").value = statusParam;
+    }
+
+    await loadAppointments();
+
+    if (highlightId) {
+      const row = document.querySelector(`tr[data-aptid="${CSS.escape(highlightId)}"]`);
+      if (row) {
+        row.classList.add("apt-highlight");
+        row.scrollIntoView({ behavior: "smooth", block: "center" });
+      }
+      openDetail(highlightId);
+    }
   })();
 </script>
 </body>

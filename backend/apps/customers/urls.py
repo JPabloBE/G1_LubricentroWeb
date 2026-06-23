@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework.routers import DefaultRouter
 
-from .views import CustomerViewSet, customer_register, customer_login, customer_me
+from .views import CustomerViewSet, customer_register, customer_login, customer_me, customer_update_me
 
 router = DefaultRouter()
 router.register(r"customers", CustomerViewSet, basename="customers")
@@ -14,4 +14,5 @@ urlpatterns = [
     path("customer-auth/register/", customer_register, name="customer_register"),
     path("customer-auth/login/", customer_login, name="customer_login"),
     path("customer-auth/me/", customer_me, name="customer_me"),
+    path("customer-auth/me/update/", customer_update_me, name="customer_update_me"),
 ]

@@ -504,6 +504,7 @@
     }
   </style>
   <script src="./assets/js/config.js"></script>
+  <script src="./assets/js/i18n.js"></script>
 </head>
 <body>
 
@@ -518,10 +519,10 @@
         <img src="./assets/img/logo_white.png" alt="Lubricentro">
       </a>
       <div class="auth-nav-badge">
-        <i class="bi bi-person-circle"></i> Portal Cliente
+        <i class="bi bi-person-circle"></i> <span data-i18n="client_portal">Portal Cliente</span>
       </div>
       <a href="./index.html" class="auth-nav-back">
-        <i class="bi bi-arrow-left"></i> Volver al inicio
+        <i class="bi bi-arrow-left"></i> <span data-i18n="back_home">Volver al inicio</span>
       </a>
     </div>
   </nav>
@@ -532,37 +533,37 @@
 
     <!-- ── Columna de beneficios ── -->
     <div class="benefits-col" aria-label="Beneficios del portal">
-      <div class="auth-eyebrow">Tu portal personal</div>
-      <h2 class="benefits-title">Tu taller,<br>siempre<br><span>a mano.</span></h2>
-      <p class="benefits-sub">Creá tu cuenta y gestioná todo desde un solo lugar.</p>
+      <div class="auth-eyebrow" data-i18n="auth_eyebrow">Tu portal personal</div>
+      <h2 class="benefits-title"><span data-i18n="auth_benefit_title">Tu taller,<br>siempre<br><span>a mano.</span></span></h2>
+      <p class="benefits-sub" data-i18n="auth_benefit_sub">Creá tu cuenta y gestioná todo desde un solo lugar.</p>
 
       <div class="benefits-list">
         <div class="benefit-item" style="--d:.28s">
           <div class="benefit-icon"><i class="bi bi-car-front-fill"></i></div>
           <div class="benefit-text">
-            <h4>Seguimiento en tiempo real</h4>
-            <p>Conocé el estado de tu vehículo en cada etapa del servicio.</p>
+            <h4 data-i18n="b1_title">Seguimiento en tiempo real</h4>
+            <p data-i18n="b1_desc">Conocé el estado de tu vehículo en cada etapa del servicio.</p>
           </div>
         </div>
         <div class="benefit-item" style="--d:.38s">
           <div class="benefit-icon"><i class="bi bi-calendar2-check-fill"></i></div>
           <div class="benefit-text">
-            <h4>Agendá tu cita</h4>
-            <p>Reservá turnos online, sin llamadas ni esperas.</p>
+            <h4 data-i18n="b2_title">Agendá tu cita</h4>
+            <p data-i18n="b2_desc">Reservá turnos online, sin llamadas ni esperas.</p>
           </div>
         </div>
         <div class="benefit-item" style="--d:.48s">
           <div class="benefit-icon"><i class="bi bi-bell-fill"></i></div>
           <div class="benefit-text">
-            <h4>Avisos de mantenimiento</h4>
-            <p>Recordatorios automáticos antes de que venza tu próximo servicio.</p>
+            <h4 data-i18n="b3_title">Avisos de mantenimiento</h4>
+            <p data-i18n="b3_desc">Recordatorios automáticos antes de que venza tu próximo servicio.</p>
           </div>
         </div>
         <div class="benefit-item" style="--d:.58s">
           <div class="benefit-icon"><i class="bi bi-gift-fill"></i></div>
           <div class="benefit-text">
-            <h4>Promociones exclusivas</h4>
-            <p>Descuentos y beneficios especiales solo para clientes registrados.</p>
+            <h4 data-i18n="b4_title">Promociones exclusivas</h4>
+            <p data-i18n="b4_desc">Descuentos y beneficios especiales solo para clientes registrados.</p>
           </div>
         </div>
       </div>
@@ -574,17 +575,17 @@
     <!-- ── Columna del formulario ── -->
     <div class="auth-col">
 
-      <div class="auth-eyebrow">Acceso</div>
-      <h1 class="auth-title">Bienvenido/a</h1>
-      <p class="auth-sub">Accedé a tu portal o creá una cuenta nueva.</p>
+      <div class="auth-eyebrow" data-i18n="auth_form_eyebrow">Acceso</div>
+      <h1 class="auth-title" data-i18n="auth_form_title">Bienvenido/a</h1>
+      <p class="auth-sub" data-i18n="auth_form_sub">Accedé a tu portal o creá una cuenta nueva.</p>
 
       <div class="auth-card">
 
         <!-- Tabs -->
         <div class="auth-tabs" role="tablist">
           <div class="tab-indicator" id="tabIndicator"></div>
-          <button id="tabLogin" class="active" type="button" role="tab" aria-selected="true">Iniciar sesión</button>
-          <button id="tabRegister" type="button" role="tab" aria-selected="false">Crear cuenta</button>
+          <button id="tabLogin" class="active" type="button" role="tab" aria-selected="true" data-i18n="tab_login">Iniciar sesión</button>
+          <button id="tabRegister" type="button" role="tab" aria-selected="false" data-i18n="tab_register">Crear cuenta</button>
         </div>
 
         <!-- Mensaje -->
@@ -597,14 +598,14 @@
           <div id="panelLogin" class="form-panel visible">
             <form id="loginForm">
               <div class="form-row">
-                <label for="l_email">Correo electrónico</label>
-                <input id="l_email" type="email" placeholder="tucorreo@email.com" required/>
+                <label for="l_email" data-i18n="lbl_email">Correo electrónico</label>
+                <input id="l_email" type="email" placeholder="tucorreo@email.com" data-i18n-ph="ph_email" required/>
               </div>
               <div class="form-row">
-                <label for="l_pass">Contraseña</label>
+                <label for="l_pass" data-i18n="lbl_password">Contraseña</label>
                 <input id="l_pass" type="password" placeholder="••••••••" required/>
               </div>
-              <button class="btn-auth" type="submit">Entrar <i class="bi bi-arrow-right ms-1"></i></button>
+              <button class="btn-auth" type="submit"><span data-i18n="btn_login">Entrar</span> <i class="bi bi-arrow-right ms-1"></i></button>
             </form>
           </div>
 
@@ -613,36 +614,36 @@
             <form id="registerForm">
               <div class="form-grid-2">
                 <div class="form-row">
-                  <label for="r_name">Nombre completo</label>
-                  <input id="r_name" placeholder="Juan Pérez" required/>
+                  <label for="r_name" data-i18n="lbl_name">Nombre completo</label>
+                  <input id="r_name" placeholder="Juan Pérez" data-i18n-ph="ph_name" required/>
                 </div>
                 <div class="form-row">
-                  <label for="r_phone">Teléfono <span style="font-weight:400;">(opc.)</span></label>
-                  <input id="r_phone" placeholder="+(506) 0000-0000"/>
+                  <label for="r_phone" data-i18n="lbl_phone">Teléfono <span style="font-weight:400;">(opc.)</span></label>
+                  <input id="r_phone" placeholder="+(506) 0000-0000" data-i18n-ph="ph_phone"/>
                 </div>
               </div>
               <div class="form-row">
-                <label for="r_email">Correo electrónico</label>
-                <input id="r_email" type="email" placeholder="tucorreo@email.com" required/>
+                <label for="r_email" data-i18n="lbl_email">Correo electrónico</label>
+                <input id="r_email" type="email" placeholder="tucorreo@email.com" data-i18n-ph="ph_email" required/>
               </div>
               <div class="form-grid-2">
                 <div class="form-row">
-                  <label for="r_pass">Contraseña</label>
-                  <input id="r_pass" type="password" placeholder="Mín. 8 caracteres" minlength="8" required/>
+                  <label for="r_pass" data-i18n="lbl_password">Contraseña</label>
+                  <input id="r_pass" type="password" placeholder="Mín. 8 caracteres" data-i18n-ph="hint_password" minlength="8" required/>
                 </div>
                 <div class="form-row">
-                  <label for="r_pass2">Confirmar</label>
-                  <input id="r_pass2" type="password" placeholder="Repetí" minlength="8" required/>
+                  <label for="r_pass2" data-i18n="lbl_confirm">Confirmar</label>
+                  <input id="r_pass2" type="password" placeholder="Repetí" data-i18n-ph="ph_confirm" minlength="8" required/>
                 </div>
               </div>
-              <button class="btn-auth" type="submit">Crear cuenta <i class="bi bi-arrow-right ms-1"></i></button>
+              <button class="btn-auth" type="submit"><span data-i18n="btn_register">Crear cuenta</span> <i class="bi bi-arrow-right ms-1"></i></button>
             </form>
           </div>
 
         </div><!-- /form-panels -->
 
         <div class="auth-card-footer">
-          ¿Sos admin/staff? <a href="./auth_admin.html">Ir al acceso staff</a>
+          <span data-i18n="is_admin_text">¿Sos admin/staff?</span> <a href="./auth_admin.html" data-i18n="is_admin_link">Ir al acceso staff</a>
         </div>
 
       </div><!-- /auth-card -->
@@ -756,13 +757,15 @@
         show(msg, false);
         return;
       }
-      show("Registro exitoso. Ahora podés iniciar sesión.", true);
-      setTab(true);
+      localStorage.setItem("customer_access_token", data.access);
+      window.location.href = "./client/dashboard.html";
     } catch (err) {
       console.error(err);
       show("Error de conexión con el servidor.", false);
     }
   });
+
+  window.__i18nRefresh = function() {};
 </script>
 </body>
 </html>

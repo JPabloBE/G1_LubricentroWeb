@@ -241,6 +241,33 @@ hr {
   background-color: rgba(232,160,48,.08) !important;
 }
 
+/* Dark-theme overrides for Bootstrap table row states */
+tr.table-warning > td {
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-bg-state: transparent !important;
+  background-color: rgba(232,160,48,.10) !important;
+  color: var(--text-primary) !important;
+}
+tr.table-warning:hover > td {
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-bg-state: transparent !important;
+  background-color: rgba(232,160,48,.20) !important;
+  color: var(--text-primary) !important;
+}
+
+tr.table-danger > td {
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-bg-state: transparent !important;
+  background-color: rgba(220,53,69,.12) !important;
+  color: var(--text-primary) !important;
+}
+tr.table-danger:hover > td {
+  --bs-table-accent-bg: transparent !important;
+  --bs-table-bg-state: transparent !important;
+  background-color: rgba(220,53,69,.22) !important;
+  color: var(--text-primary) !important;
+}
+
 /* ── Tabs ── */
 .nav-tabs {
   border-bottom: 1px solid var(--border) !important;

@@ -12,9 +12,10 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/client.css">
+  <script src="../assets/js/i18n.js"></script>
 
   <style>
-    #pastList { display: none; }
+    .appt-past-section { margin-top: 2rem; padding-top: 1.5rem; border-top: 1px solid var(--border); }
 
     /* ── Sub-panel: nuevo vehículo ── */
     .new-vehicle-panel {
@@ -51,6 +52,60 @@
     }
     .nv-required { color: var(--accent-red); margin-left: 2px; }
 
+    /* ── Filter dropdown ── */
+    .appt-filter-wrap {
+      display:     inline-flex;
+      align-items: center;
+      gap:         6px;
+      background:  var(--bg-surface);
+      border:      1.5px solid var(--border-bright);
+      border-radius: 7px;
+      padding:     5px 10px;
+      transition:  border-color .2s;
+    }
+    .appt-filter-wrap:focus-within { border-color: var(--accent-red); }
+    .appt-filter-wrap .bi-funnel-fill {
+      font-size: 11px;
+      color:     var(--accent-red);
+    }
+    .appt-filter-wrap select {
+      background:  transparent;
+      border:      none;
+      outline:     none;
+      color:       var(--text-primary);
+      font-size:   12px;
+      font-weight: 600;
+      cursor:      pointer;
+      -webkit-appearance: none;
+      appearance:  none;
+    }
+    .appt-filter-wrap select option { background: var(--bg-surface); }
+    .appt-filter-chevron {
+      font-size:      9px !important;
+      color:          var(--text-muted) !important;
+      pointer-events: none;
+    }
+
+    .appt-upcoming-chip-row {
+      display:         flex;
+      justify-content: flex-end;
+      margin-bottom:   8px;
+    }
+    .appt-upcoming-chip {
+      display:        inline-flex;
+      align-items:    center;
+      gap:            5px;
+      font-size:      11px;
+      font-weight:    600;
+      color:          var(--text-muted);
+      background:     rgba(255,255,255,.04);
+      border:         1px solid var(--border);
+      border-radius:  20px;
+      padding:        3px 10px;
+      white-space:    nowrap;
+      letter-spacing: .02em;
+    }
+
     /* ── 2-column layout ── */
     .appt-layout {
       display:     flex;
@@ -86,21 +141,21 @@
         <div class="info-chip">
           <div class="info-icon"><i class="bi bi-telephone"></i></div>
           <div>
-            <div class="info-label">¡Llámanos ahora!</div>
+            <div class="info-label" data-i18n="topbar_call">¡Llámanos ahora!</div>
             <div class="info-value">+(506) 2443-6139</div>
           </div>
         </div>
         <div class="info-chip">
           <div class="info-icon"><i class="bi bi-clock"></i></div>
           <div>
-            <div class="info-label">Horario de atención</div>
+            <div class="info-label" data-i18n="topbar_hours">Horario de atención</div>
             <div class="info-value">Lun-Sáb : 09:00-19:00</div>
           </div>
         </div>
         <a class="info-chip info-chip-link" href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer">
           <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
           <div>
-            <div class="info-label">Encuéntranos</div>
+            <div class="info-label" data-i18n="topbar_find">Encuéntranos</div>
             <div class="info-value info-value-loc">Montecillos, Alajuela <i class="bi bi-box-arrow-up-right"></i></div>
           </div>
         </a>
@@ -112,9 +167,9 @@
   <nav class="mainnav">
     <div class="container d-flex align-items-center">
       <ul class="navlinks d-none d-lg-flex">
-        <li><a href="./dashboard.html">Dashboard</a></li>
-        <li><a class="active" href="./appointments.html">Mis Citas</a></li>
-        <li><a href="./vehicles.html">Mis Autos</a></li>
+        <li><a href="./dashboard.html" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a class="active" href="./appointments.html" data-i18n="nav_my_appts">Mis Citas</a></li>
+        <li><a href="./vehicles.html" data-i18n="nav_my_cars">Mis Autos</a></li>
       </ul>
       <a class="brand text-decoration-none d-lg-none me-auto" href="../index.html"><img class="brand-logo" src="../assets/img/logo_white.png" alt="Lubricentro" style="height:36px;"></a><button class="btn btn-sm btn-outline-light d-lg-none" id="btnMobileMenu" type="button" aria-label="Menú">
         <i class="bi bi-list"></i>
@@ -127,13 +182,13 @@
             <span class="notif-count" id="notifCount"></span>
           </button>
           <div class="notif-dropdown" id="notifDropdown">
-            <div class="notif-dd-header"><i class="bi bi-bell me-1"></i>Recordatorios</div>
-            <div id="notifListDd"><div class="notif-empty">Sin recordatorios pendientes</div></div>
+            <div class="notif-dd-header"><i class="bi bi-bell me-1"></i><span data-i18n="notif_title">Recordatorios</span></div>
+            <div id="notifListDd"><div class="notif-empty" data-i18n="notif_empty">Sin recordatorios pendientes</div></div>
           </div>
         </div>
         <span class="nav-user-name" id="whoami"></span>
         <button class="btn-logout" id="btnLogout">
-          <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+          <i class="bi bi-box-arrow-right me-1"></i><span data-i18n="nav_logout">Cerrar sesión</span>
         </button>
       </div>
     </div>
@@ -142,10 +197,10 @@
         <span class="drawer-title">Menú</span>
         <button class="btn-drawer-close" id="btnCloseDrawer" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
       </div>
-      <a href="./dashboard.html">Dashboard</a>
-      <a class="active" href="./appointments.html">Mis Citas</a>
-      <a href="./vehicles.html">Mis Autos</a>
-      <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
+      <a href="./dashboard.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a class="active" href="./appointments.html" data-i18n="nav_my_appts">Mis Citas</a>
+      <a href="./vehicles.html" data-i18n="nav_my_cars">Mis Autos</a>
+      <a href="#" id="btnLogoutMobile" style="color:#ffc107;" data-i18n="nav_logout">Cerrar sesión</a>
     </div>
   </nav>
 
@@ -158,7 +213,7 @@
     <div class="mob-info-sep" aria-hidden="true"></div>
     <div class="mob-info-chip">
       <i class="bi bi-clock-fill"></i>
-      <span>Lun-Sáb 9-19h</span>
+      <span data-i18n="mob_hours">Lun-Sáb 9-19h</span>
     </div>
     <div class="mob-info-sep" aria-hidden="true"></div>
     <a href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer" class="mob-info-chip" aria-label="Ver ubicación en mapa">
@@ -170,9 +225,9 @@
   <!-- ══ PAGE BANNER ══ -->
   <section class="page-banner">
     <div class="container">
-      <div class="page-eyebrow">Mis Citas</div>
-      <div class="page-title">Gestión de Citas</div>
-      <div class="page-sub">Agendá nuevas citas y revisá el estado de las existentes.</div>
+      <div class="page-eyebrow" data-i18n="page_appts_eyebrow">Mis Citas</div>
+      <div class="page-title" data-i18n="page_appts_title">Gestión de Citas</div>
+      <div class="page-sub" data-i18n="page_appts_sub">Agendá nuevas citas y revisá el estado de las existentes.</div>
     </div>
   </section>
 
@@ -191,64 +246,64 @@
         </div>
         <div class="form-card">
           <div class="form-card-header">
-            <h6><i class="bi bi-plus-circle me-2"></i>Nueva cita</h6>
+            <h6><i class="bi bi-plus-circle me-2"></i><span data-i18n="form_new_appt">Nueva cita</span></h6>
           </div>
           <div class="form-card-body" id="formBody">
             <div class="row g-3">
               <div class="col-12">
-                <label class="form-label">Vehículo</label>
+                <label class="form-label" data-i18n="lbl_vehicle">Vehículo</label>
                 <select id="vehicleSelect" class="form-select"></select>
                 <div id="newVehicleForm" style="display:none" class="new-vehicle-panel">
                   <div class="new-vehicle-panel-hd">
                     <i class="bi bi-car-front-fill"></i>
-                    Datos del vehículo nuevo
+                    <span data-i18n="new_veh_panel">Datos del vehículo nuevo</span>
                   </div>
                   <div class="new-vehicle-panel-body">
                     <div class="row g-2">
                       <div class="col-12">
-                        <label>Placa<span class="nv-required">*</span></label>
-                        <input id="nvPlate" class="form-control form-control-sm" placeholder="Ej: ABC-123" maxlength="10">
+                        <label data-i18n="lbl_plate">Placa<span class="nv-required">*</span></label>
+                        <input id="nvPlate" class="form-control form-control-sm" placeholder="Ej: ABC-123" maxlength="10" data-i18n-ph="ph_plate">
                       </div>
                       <div class="col-6">
-                        <label>Marca</label>
-                        <input id="nvMake" class="form-control form-control-sm" placeholder="Toyota">
+                        <label data-i18n="lbl_make">Marca</label>
+                        <input id="nvMake" class="form-control form-control-sm" placeholder="Toyota" data-i18n-ph="ph_make">
                       </div>
                       <div class="col-6">
-                        <label>Modelo</label>
-                        <input id="nvModel" class="form-control form-control-sm" placeholder="Corolla">
+                        <label data-i18n="lbl_model">Modelo</label>
+                        <input id="nvModel" class="form-control form-control-sm" placeholder="Corolla" data-i18n-ph="ph_model">
                       </div>
                       <div class="col-6">
-                        <label>Año</label>
-                        <input id="nvYear" class="form-control form-control-sm" type="number" min="1990" max="2030" placeholder="2024">
+                        <label data-i18n="lbl_year">Año</label>
+                        <input id="nvYear" class="form-control form-control-sm" type="number" min="1990" max="2030" placeholder="2024" data-i18n-ph="ph_year">
                       </div>
                       <div class="col-6">
-                        <label>Color</label>
-                        <input id="nvColor" class="form-control form-control-sm" placeholder="Blanco">
+                        <label data-i18n="lbl_color">Color</label>
+                        <input id="nvColor" class="form-control form-control-sm" placeholder="Blanco" data-i18n-ph="ph_color">
                       </div>
                     </div>
                   </div>
                 </div>
               </div>
               <div class="col-12">
-                <label class="form-label">Servicio</label>
+                <label class="form-label" data-i18n="lbl_service">Servicio</label>
                 <select id="serviceSelect" class="form-select"></select>
               </div>
               <div class="col-12">
-                <label class="form-label">Horario disponible</label>
+                <label class="form-label" data-i18n="lbl_slot">Horario disponible</label>
                 <select id="slotSelect" class="form-select"></select>
-                <div class="hint-text">Solo aparecen horarios con cupo disponible.</div>
+                <div class="hint-text" data-i18n="hint_slots">Solo aparecen horarios con cupo disponible.</div>
               </div>
               <div class="col-12">
-                <label class="form-label">Trabajo solicitado <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
-                <textarea id="requestedWork" class="form-control" rows="2" placeholder="Ej: cambio de aceite, revisión de frenos..."></textarea>
+                <label class="form-label" data-i18n="lbl_req_work">Trabajo solicitado <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
+                <textarea id="requestedWork" class="form-control" rows="2" placeholder="Ej: cambio de aceite, revisión de frenos..." data-i18n-ph="ph_req_work"></textarea>
               </div>
               <div class="col-12">
-                <label class="form-label">Notas adicionales <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
-                <textarea id="notes" class="form-control" rows="2" placeholder="Cualquier detalle extra."></textarea>
+                <label class="form-label" data-i18n="lbl_notes">Notas adicionales <span style="font-weight:400;color:#9ca3af;">(opcional)</span></label>
+                <textarea id="notes" class="form-control" rows="2" placeholder="Cualquier detalle extra." data-i18n-ph="ph_notes"></textarea>
               </div>
               <div class="col-12">
                 <button id="btnCreate" class="btn-submit">
-                  <i class="bi bi-calendar-plus me-2"></i>Confirmar cita
+                  <i class="bi bi-calendar-plus me-2"></i><span data-i18n="btn_confirm_appt">Confirmar cita</span>
                 </button>
               </div>
             </div>
@@ -273,20 +328,42 @@
 
         <!-- Citas activas -->
         <div class="section-header">
-          <span class="section-label" id="activeTitle">Mis citas activas</span>
-          <button class="btn-reload" id="btnReload">
-            <i class="bi bi-arrow-clockwise"></i> Actualizar
-          </button>
+          <span class="section-label" id="activeTitle">Citas activas</span>
+          <div class="d-flex align-items-center gap-2">
+            <label class="appt-filter-wrap">
+              <i class="bi bi-funnel-fill"></i>
+              <select id="filterActiveSelect" aria-label="Filtrar citas activas">
+                <option value="all" data-i18n="filter_all">Todas</option>
+                <option value="neutral" data-i18n="filter_unconfirmed">Sin confirmar</option>
+                <option value="confirmed" data-i18n="filter_confirmed">Confirmada</option>
+                <option value="in_progress" data-i18n="filter_in_progress">En progreso</option>
+                <option value="ready" data-i18n="filter_ready">Listo para retirar</option>
+              </select>
+              <i class="bi bi-chevron-down appt-filter-chevron"></i>
+            </label>
+            <button class="btn-reload" id="btnReload">
+              <i class="bi bi-arrow-clockwise"></i> <span data-i18n="btn_refresh">Actualizar</span>
+            </button>
+          </div>
         </div>
         <div id="activeList" aria-live="polite" aria-atomic="false"></div>
 
         <!-- Citas anteriores -->
-        <button class="past-toggle d-none" id="pastToggle" type="button">
-          <i class="bi bi-clock-history"></i>
-          <span id="pastToggleLabel">Ver citas anteriores</span>
-          <i class="bi bi-chevron-down past-toggle-icon"></i>
-        </button>
-        <div id="pastList" aria-live="polite" aria-atomic="false"></div>
+        <div class="appt-past-section">
+          <div class="section-header">
+            <span class="section-label" id="pastTitle">Citas anteriores</span>
+            <label class="appt-filter-wrap">
+              <i class="bi bi-funnel-fill"></i>
+              <select id="filterPastSelect" aria-label="Filtrar citas anteriores">
+                <option value="all" data-i18n="filter_all">Todas</option>
+                <option value="completed" data-i18n="filter_completed">Completada</option>
+                <option value="cancelled" data-i18n="filter_cancelled">Cancelada</option>
+              </select>
+              <i class="bi bi-chevron-down appt-filter-chevron"></i>
+            </label>
+          </div>
+          <div id="pastList" aria-live="polite" aria-atomic="false"></div>
+        </div>
 
       </div><!-- /.appt-list-col -->
 
@@ -340,43 +417,26 @@
   function authHeaders() { return { "Authorization": `Bearer ${token}` }; }
 
   // ── Status maps ──────────────────────────────────────────────────────────────
-  const AP_STATUS_LABELS = {
-    pending:     "Pendiente de confirmación",
-    scheduled:   "Confirmada",
-    accepted:    "Aceptada",
-    in_progress: "En progreso",
-    completed:   "Completada",
-    cancelled:   "Cancelada",
-    no_show:     "No se presentó",
-    rejected:    "Rechazada",
-  };
-  const AP_STATUS_ICONS = {
-    pending:     "bi-hourglass-split",
-    scheduled:   "bi-calendar-check",
-    accepted:    "bi-check-circle",
-    in_progress: "bi-gear-fill",
-    completed:   "bi-check-circle-fill",
-    cancelled:   "bi-x-circle",
-    no_show:     "bi-dash-circle",
-    rejected:    "bi-x-circle-fill",
-  };
-
-  function apStatusClass(status) {
-    const map = {
-      pending: "ap-status-pending", scheduled: "ap-status-scheduled",
-      accepted: "ap-status-accepted", in_progress: "ap-status-in_progress",
-      completed: "ap-status-completed", cancelled: "ap-status-cancelled",
-      rejected: "ap-status-rejected", no_show: "ap-status-no_show",
-    };
-    return map[status] || "ap-status-default";
+  function apptStatusBadge(status, wo) {
+    var _t = window.i18n ? window.i18n.t : function(k){ return k; };
+    const s = (status || "").toLowerCase();
+    if (wo) {
+      const ws = (wo.status || "").toLowerCase();
+      if (ws === "ready")  return { label: _t("status_ready"),       icon: "bi-check-circle-fill", cls: "ap-status-ready" };
+      if (ws === "closed") return { label: _t("status_completed"),   icon: "bi-check-circle-fill", cls: "ap-status-completed" };
+      return                      { label: _t("status_in_progress"), icon: "bi-wrench",             cls: "ap-status-in_progress" };
+    }
+    if (s === "pending" || s === "scheduled")                      return { label: _t("status_unconfirmed"), icon: "bi-clock",             cls: "ap-status-neutral" };
+    if (s === "completed")                                         return { label: _t("status_completed"),   icon: "bi-check-circle-fill", cls: "ap-status-completed" };
+    if (s === "cancelled" || s === "rejected" || s === "no_show") return { label: _t("status_cancelled"),   icon: "bi-x-circle",          cls: "ap-status-cancelled" };
+    if (s === "in_progress")                                       return { label: _t("status_in_progress"), icon: "bi-wrench",            cls: "ap-status-in_progress" };
+    return { label: _t("status_confirmed"), icon: "bi-calendar-check", cls: "ap-status-confirmed" };
   }
 
   // ── Render card ──────────────────────────────────────────────────────────────
-  function renderApCard(a) {
-    const status = String(a.status || "").toLowerCase();
-    const label  = AP_STATUS_LABELS[status] || a.status;
-    const icon   = AP_STATUS_ICONS[status]  || "bi-circle";
-    const cls    = apStatusClass(status);
+  function renderApCard(a, wo) {
+    const status  = String(a.status || "").toLowerCase();
+    const badge   = apptStatusBadge(status, wo);
     const cancellable = status === "scheduled";
 
     const vehicle = [a.vehicle_make, a.vehicle_model].filter(Boolean).join(" ") || "Vehículo";
@@ -395,55 +455,99 @@
             </div>
           </div>
           <div class="ap-card-right">
-            <span class="ap-status ${cls}" aria-label="${escapeHtml(label)}"><i class="bi ${icon} me-1" aria-hidden="true"></i>${escapeHtml(label)}</span>
+            <span class="ap-status ${badge.cls}" aria-label="${escapeHtml(badge.label)}"><i class="bi ${badge.icon} me-1" aria-hidden="true"></i>${escapeHtml(badge.label)}</span>
             <a class="btn-detail" href="./appointment_detail.html?id=${escapeHtml(a.appointment_id)}">
-              Ver detalle <i class="bi bi-arrow-right"></i>
+              ${(window.i18n ? window.i18n.t("btn_view_detail") : "Ver detalle")} <i class="bi bi-arrow-right"></i>
             </a>
             ${cancellable ? `
               <button class="btn-cancel-ap" data-action="cancel" data-id="${escapeHtml(a.appointment_id)}">
-                <i class="bi bi-x-circle"></i>Cancelar
+                <i class="bi bi-x-circle"></i>${(window.i18n ? window.i18n.t("btn_cancel") : "Cancelar")}
               </button>` : ""}
           </div>
         </div>
       </div>`;
   }
 
+  // ── Filter + render ──────────────────────────────────────────────────────────
+  const CLS_MAP = {
+    neutral:     "ap-status-neutral",
+    confirmed:   "ap-status-confirmed",
+    in_progress: "ap-status-in_progress",
+    ready:       "ap-status-ready",
+    completed:   "ap-status-completed",
+    cancelled:   "ap-status-cancelled",
+  };
+  const FILTER_LABELS = {
+    all:         "Citas activas",
+    neutral:     "Sin confirmar",
+    confirmed:   "Confirmadas",
+    in_progress: "En progreso",
+    ready:       "Listas para retirar",
+    completed:   "Completadas",
+    cancelled:   "Canceladas",
+  };
+
+  function renderAppointments() {
+    var _t = window.i18n ? window.i18n.t : function(k){ return k; };
+    const activeFilter = document.getElementById("filterActiveSelect")?.value || "all";
+    const pastFilter   = document.getElementById("filterPastSelect")?.value   || "all";
+    const rows  = window._apptRows || [];
+    const woMap = window._woMap    || {};
+
+    // Split all rows into active and closed first
+    const allActive = rows.filter(a => !CLOSED_STATUSES.has(String(a.status || "").toLowerCase()));
+    const allClosed = rows.filter(a =>  CLOSED_STATUSES.has(String(a.status || "").toLowerCase()));
+
+    // Apply each filter independently to its own section
+    const filteredActive = activeFilter === "all"
+      ? allActive
+      : allActive.filter(a => {
+          const badge = apptStatusBadge(String(a.status || "").toLowerCase(), woMap[a.appointment_id]);
+          return badge.cls === CLS_MAP[activeFilter];
+        });
+
+    const filteredClosed = pastFilter === "all"
+      ? allClosed
+      : allClosed.filter(a => {
+          const badge = apptStatusBadge(String(a.status || "").toLowerCase(), woMap[a.appointment_id]);
+          return badge.cls === CLS_MAP[pastFilter];
+        });
+
+    // Render active section
+    document.getElementById("activeTitle").textContent =
+      `${_t("appts_active_title")}${allActive.length ? ` (${allActive.length})` : ""}`;
+
+    const activeList = document.getElementById("activeList");
+    activeList.innerHTML = filteredActive.length
+      ? filteredActive.map(a => renderApCard(a, woMap[a.appointment_id])).join("")
+      : `<div class="empty-state"><i class="bi bi-calendar-check"></i>
+          <p>${activeFilter === "all" ? _t("empty_active_all") : _t("empty_active_flt")}</p>
+         </div>`;
+
+    // Render past section
+    document.getElementById("pastTitle").textContent =
+      `${_t("appts_past_title")}${allClosed.length ? ` (${allClosed.length})` : ""}`;
+
+    const pastList = document.getElementById("pastList");
+    pastList.innerHTML = filteredClosed.length
+      ? filteredClosed.map(a => renderApCard(a, woMap[a.appointment_id])).join("")
+      : `<div class="empty-state"><i class="bi bi-clock-history"></i>
+          <p>${pastFilter === "all" ? _t("empty_past_all") : _t("empty_past_flt")}</p>
+         </div>`;
+  }
+
+  window.__i18nRefresh = renderAppointments;
+
   // ── Load appointments ────────────────────────────────────────────────────────
   async function loadAppointments() {
-    const data = await fetchJSON(`${API_BASE}/api/customer-appointments/`, { headers: authHeaders() });
-    const rows = normalizeList(data);
-
-    const active = rows.filter(a => !CLOSED_STATUSES.has(String(a.status || "").toLowerCase()));
-    const closed = rows.filter(a =>  CLOSED_STATUSES.has(String(a.status || "").toLowerCase()));
-
-    // Active section
-    const activeList = document.getElementById("activeList");
-    document.getElementById("activeTitle").textContent =
-      `Mis citas activas${active.length ? ` (${active.length})` : ""}`;
-
-    if (active.length) {
-      activeList.innerHTML = active.map(renderApCard).join("");
-    } else {
-      activeList.innerHTML = `
-        <div class="empty-state">
-          <i class="bi bi-calendar-check"></i>
-          <p>No tenés citas activas en este momento.</p>
-        </div>`;
-    }
-
-    // Past section
-    const pastToggle = document.getElementById("pastToggle");
-    const pastList   = document.getElementById("pastList");
-
-    if (closed.length) {
-      document.getElementById("pastToggleLabel").textContent = `Ver citas anteriores (${closed.length})`;
-      pastToggle.classList.remove("d-none");
-      pastList.innerHTML = closed.map(renderApCard).join("");
-    } else {
-      pastToggle.classList.add("d-none");
-      pastList.innerHTML = "";
-      pastList.style.display = "none";
-    }
+    const [apptData, woData] = await Promise.all([
+      fetchJSON(`${API_BASE}/api/customer-appointments/`, { headers: authHeaders() }),
+      fetchJSON(`${API_BASE}/api/customer-work-orders/`,  { headers: authHeaders() }).catch(() => []),
+    ]);
+    window._apptRows = normalizeList(apptData);
+    window._woMap    = {};
+    normalizeList(woData).forEach(wo => { if (wo.appointment_id) window._woMap[wo.appointment_id] = wo; });
+    renderAppointments();
   }
 
   // ── Loaders ─────────────────────────────────────────────────────────────────
@@ -460,6 +564,7 @@
       sel.appendChild(opt);
     });
     const newOpt = new Option("+ Registrar vehículo nuevo", "__new__");
+    newOpt.setAttribute("data-i18n", "opt_new_vehicle");
     sel.appendChild(newOpt);
     if (!rows.length) {
       sel.value = "__new__";
@@ -509,14 +614,6 @@
     });
   }
 
-  // ── Past toggle ──────────────────────────────────────────────────────────────
-  document.getElementById("pastToggle").addEventListener("click", () => {
-    const list = document.getElementById("pastList");
-    const btn  = document.getElementById("pastToggle");
-    const open = list.style.display === "block";
-    list.style.display = open ? "none" : "block";
-    btn.classList.toggle("open", !open);
-  });
 
   // ── Create appointment ───────────────────────────────────────────────────────
   document.getElementById("btnCreate").addEventListener("click", async () => {
@@ -595,6 +692,8 @@
   });
 
   // ── Controls ─────────────────────────────────────────────────────────────────
+  document.getElementById("filterActiveSelect").addEventListener("change", renderAppointments);
+  document.getElementById("filterPastSelect").addEventListener("change", renderAppointments);
   document.getElementById("btnReload").addEventListener("click", loadAppointments);
 
   function logout() {
@@ -643,6 +742,11 @@
     } catch (_) { return iso; }
   }
 
+  function isToday(iso) {
+    const d = new Date(iso), t = new Date();
+    return d.getFullYear() === t.getFullYear() && d.getMonth() === t.getMonth() && d.getDate() === t.getDate();
+  }
+
   function renderNotifPanel(reminders) {
     const pending = reminders.filter(r => !isDismissed(r.appointment_id, r.reminder_type));
     const panel   = document.getElementById("notifPanel");
@@ -659,19 +763,21 @@
       countEl.textContent = pending.length;
       listEl.innerHTML = pending.map(r => {
         const isUrgent = r.reminder_type === "1h";
-        const msg = isUrgent ? "¡Tu cita es en menos de 1 hora!" : "Tu cita es mañana";
-        const urgencyChip = isUrgent
-          ? `<div class="np-urgency-chip urgent"><i class="bi bi-alarm-fill"></i> En 1 hora</div>`
-          : `<div class="np-urgency-chip"><i class="bi bi-calendar3"></i> Mañana</div>`;
+        const isReady  = r.reminder_type === "ready";
+        const msg = isUrgent ? "¡Tu cita es en menos de 1 hora!" : isReady ? "¡Tu vehículo está listo para retirar!" : isToday(r.scheduled_start) ? "Tu cita es hoy" : "Tu cita es mañana";
+        const chipCls = isUrgent ? "urgent" : isReady ? "ready" : "";
+        const chipIcon = isUrgent ? "alarm-fill" : isReady ? "check-circle-fill" : "calendar3";
+        const chipLabel = isUrgent ? "En 1 hora" : isReady ? "Listo para retirar" : isToday(r.scheduled_start) ? "Hoy" : "Mañana";
+        const urgencyChip = `<div class="np-urgency-chip ${chipCls}"><i class="bi bi-${chipIcon}"></i> ${chipLabel}</div>`;
         return `
-          <div class="notif-panel-item ${isUrgent ? "urgent-item" : ""}">
-            <div class="np-icon ${isUrgent ? "urgent" : "normal"}">
-              <i class="bi bi-${isUrgent ? "alarm" : "clock"}"></i>
+          <div class="notif-panel-item ${isUrgent ? "urgent-item" : isReady ? "ready-item" : ""}">
+            <div class="np-icon ${isUrgent ? "urgent" : isReady ? "ready" : "normal"}">
+              <i class="bi bi-${isUrgent ? "alarm" : isReady ? "check-circle-fill" : "clock"}"></i>
             </div>
             <div class="np-body">
               ${urgencyChip}
               <div class="np-title">${escapeHtml(msg)}</div>
-              <div class="np-meta">${escapeHtml(r.service_name)} — ${escapeHtml(r.vehicle_plate)}<br>${escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
+              <div class="np-meta">${escapeHtml(r.service_name)} — ${escapeHtml(r.vehicle_plate)}${isReady ? "" : "<br>" + escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
             </div>
             <button class="btn-np-dismiss" data-id="${escapeHtml(r.appointment_id)}" data-type="${escapeHtml(r.reminder_type)}">
               <i class="bi bi-check2"></i> Visto
@@ -696,13 +802,24 @@
     } else {
       ddCount.textContent = ddPending.length;
       ddCount.classList.add("show");
-      ddList.innerHTML = ddPending.map(r => `
-        <div style="padding:10px 14px;border-bottom:1px solid #f8fafc;font-size:.82rem;">
-          <strong>${escapeHtml(r.reminder_type === "1h" ? "¡En 1 hora!" : "Mañana")}</strong>
-          — ${escapeHtml(r.service_name)}<br>
-          <span style="color:#6c7a94;">${escapeHtml(fmtReminderTime(r.scheduled_start))}</span>
-        </div>
-      `).join("");
+      ddList.innerHTML = ddPending.map(r => {
+        const isUrgent = r.reminder_type === "1h";
+        const isReady  = r.reminder_type === "ready";
+        const cls  = isUrgent ? "urgent" : isReady ? "ready" : "normal";
+        const icon = isUrgent ? "alarm-fill" : isReady ? "check-circle-fill" : "calendar3";
+        const msg  = isUrgent ? "¡Cita en menos de 1 hora!" : isReady ? "¡Tu vehículo está listo para retirar!" : isToday(r.scheduled_start) ? "Tu cita es hoy" : "Tu cita es mañana";
+        return `
+          <div class="notif-item ${cls}">
+            <div class="notif-icon ${cls}"><i class="bi bi-${icon}"></i></div>
+            <div class="notif-body">
+              <div class="notif-service">${escapeHtml(r.service_name)}</div>
+              <div class="notif-title">${escapeHtml(msg)}</div>
+              <div class="notif-meta"><i class="bi bi-car-front-fill"></i> ${escapeHtml(r.vehicle_plate)}${isReady ? "" : " · " + escapeHtml(fmtReminderTime(r.scheduled_start))}</div>
+            </div>
+            <button class="btn-notif-dismiss" data-id="${escapeHtml(r.appointment_id)}" data-type="${escapeHtml(r.reminder_type)}">Visto</button>
+          </div>
+        `;
+      }).join("");
     }
   }
 
@@ -775,7 +892,7 @@
         <i class="bi bi-alarm-fill notif-modal-icon"></i>
       </div>
       <div class="notif-modal-hl">¡Cita en menos de 1 hora!</div>
-      <div class="notif-modal-sub">No olvides presentarte a tiempo</div>
+      <div class="notif-modal-sub">No te olvidés de presentarte a tiempo</div>
     </div>
     <div class="notif-modal-body">
       <div class="notif-modal-service"></div>
@@ -790,5 +907,6 @@
     </div>
   </div>
 </div>
+<script src="../assets/js/chat-widget.js"></script>
 </body>
 </html>

@@ -318,10 +318,10 @@ class AppointmentAdminViewSet(viewsets.ModelViewSet):
                 )
                 work_order_id = str(cursor.fetchone()[0])
 
-            # Actualizar estado de la cita solo si está en "scheduled"
-            if ap.status == "scheduled":
+            # Avanzar la cita a in_progress automáticamente al crear la OT
+            if ap.status not in ("completed", "cancelled", "in_progress"):
                 cursor.execute(
-                    "UPDATE public.appointments SET status = 'confirmed', updated_at = now() WHERE appointment_id = %s",
+                    "UPDATE public.appointments SET status = 'in_progress', updated_at = now() WHERE appointment_id = %s",
                     [str(ap.appointment_id)],
                 )
 
@@ -547,6 +547,7 @@ class AppointmentCustomerViewSet(viewsets.ModelViewSet):
         customer = self.request.user
         return (
             Appointment.objects.select_related("customer", "vehicle", "service", "slot")
+            .prefetch_related("work_orders")
             .filter(customer_id=customer.customer_id)
             .order_by("-scheduled_start")
         )
@@ -708,7 +709,7 @@ class AppointmentCustomerViewSet(viewsets.ModelViewSet):
                 left join public.services s on s.service_id = a.service_id
                 left join public.vehicles v on v.vehicle_id = a.vehicle_id
                 where a.customer_id = %s
-                  and a.status != 'cancelled'
+                  and a.status in ('confirmed', 'accepted', 'in_progress')
                   and a.scheduled_start >= %s
                   and a.scheduled_start <= %s
                 order by a.scheduled_start
@@ -732,6 +733,38 @@ class AppointmentCustomerViewSet(viewsets.ModelViewSet):
                 "service_name": service_name or "",
                 "vehicle_plate": vehicle_plate or "",
                 "reminder_type": reminder_type,
+            })
+
+        # OTs listas para retirar
+        with connection.cursor() as cursor:
+            cursor.execute(
+                """
+                select
+                    a.appointment_id,
+                    a.scheduled_start,
+                    a.status,
+                    s.name as service_name,
+                    v.plate as vehicle_plate
+                from public.appointments a
+                left join public.services s on s.service_id = a.service_id
+                left join public.vehicles v on v.vehicle_id = a.vehicle_id
+                join public.work_orders wo on wo.appointment_id = a.appointment_id
+                where a.customer_id = %s
+                  and wo.status = 'ready'
+                """,
+                [str(customer.customer_id)],
+            )
+            ready_rows = cursor.fetchall()
+
+        for row in ready_rows:
+            appt_id, scheduled_start, appt_status, service_name, vehicle_plate = row
+            result.append({
+                "appointment_id": str(appt_id),
+                "scheduled_start": scheduled_start.isoformat(),
+                "status": appt_status,
+                "service_name": service_name or "",
+                "vehicle_plate": vehicle_plate or "",
+                "reminder_type": "ready",
             })
 
         return Response(result, status=200)

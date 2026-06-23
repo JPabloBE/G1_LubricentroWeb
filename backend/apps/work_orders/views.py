@@ -298,6 +298,12 @@ class WorkOrderAdminViewSet(viewsets.ModelViewSet):
             )
             wo_id = cursor.fetchone()[0]
 
+            cursor.execute(
+                """UPDATE public.appointments SET status = 'in_progress', updated_at = now()
+                   WHERE appointment_id = %s AND status NOT IN ('completed', 'cancelled', 'in_progress')""",
+                [str(appointment_id)],
+            )
+
         wo = WorkOrder.objects.select_related("customer", "vehicle", "appointment").get(work_order_id=wo_id)
         return Response(self.get_serializer(wo).data, status=201)
 

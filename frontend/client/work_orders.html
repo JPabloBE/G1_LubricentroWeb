@@ -12,6 +12,7 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
   <link rel="stylesheet" href="../assets/css/main.css">
   <link rel="stylesheet" href="../assets/css/client.css">
+  <script src="../assets/js/i18n.js"></script>
 
   <style>
     .btn-wo-details {
@@ -62,21 +63,21 @@
         <div class="info-chip">
           <div class="info-icon"><i class="bi bi-telephone"></i></div>
           <div>
-            <div class="info-label">¡Llámanos ahora!</div>
+            <div class="info-label" data-i18n="topbar_call">¡Llámanos ahora!</div>
             <div class="info-value">+(506) 2443-6139</div>
           </div>
         </div>
         <div class="info-chip">
           <div class="info-icon"><i class="bi bi-clock"></i></div>
           <div>
-            <div class="info-label">Horario de atención</div>
+            <div class="info-label" data-i18n="topbar_hours">Horario de atención</div>
             <div class="info-value">Lun-Sáb : 09:00-19:00</div>
           </div>
         </div>
         <a class="info-chip info-chip-link" href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer">
           <div class="info-icon"><i class="bi bi-geo-alt-fill"></i></div>
           <div>
-            <div class="info-label">Encuéntranos</div>
+            <div class="info-label" data-i18n="topbar_find">Encuéntranos</div>
             <div class="info-value info-value-loc">Montecillos, Alajuela <i class="bi bi-box-arrow-up-right"></i></div>
           </div>
         </a>
@@ -88,10 +89,10 @@
   <nav class="mainnav">
     <div class="container d-flex align-items-center">
       <ul class="navlinks d-none d-lg-flex">
-        <li><a href="./dashboard.html">Dashboard</a></li>
-        <li><a href="./appointments.html">Mis Citas</a></li>
-        <li><a href="./vehicles.html">Mis Autos</a></li>
-        <li><a class="active" href="./work_orders.html">Órdenes</a></li>
+        <li><a href="./dashboard.html" data-i18n="nav_dashboard">Dashboard</a></li>
+        <li><a href="./appointments.html" data-i18n="nav_my_appts">Mis Citas</a></li>
+        <li><a href="./vehicles.html" data-i18n="nav_my_cars">Mis Autos</a></li>
+        <li><a class="active" href="./work_orders.html" data-i18n="nav_orders">Órdenes</a></li>
       </ul>
       <a class="brand text-decoration-none d-lg-none me-auto" href="../index.html"><img class="brand-logo" src="../assets/img/logo_white.png" alt="Lubricentro" style="height:36px;"></a><button class="btn btn-sm btn-outline-light d-lg-none" id="btnMobileMenu" type="button" aria-label="Menú">
         <i class="bi bi-list"></i>
@@ -103,13 +104,13 @@
             <span class="notif-count" id="notifCount"></span>
           </button>
           <div class="notif-dropdown" id="notifDropdown">
-            <div class="notif-dd-header"><i class="bi bi-bell me-1"></i>Recordatorios</div>
-            <div id="notifList"><div class="notif-empty">Sin recordatorios pendientes</div></div>
+            <div class="notif-dd-header"><i class="bi bi-bell me-1"></i><span data-i18n="notif_title">Recordatorios</span></div>
+            <div id="notifList"><div class="notif-empty" data-i18n="notif_empty">Sin recordatorios pendientes</div></div>
           </div>
         </div>
         <span class="nav-user-name" id="whoami"></span>
         <button class="btn-logout" id="btnLogout">
-          <i class="bi bi-box-arrow-right me-1"></i>Cerrar sesión
+          <i class="bi bi-box-arrow-right me-1"></i><span data-i18n="nav_logout">Cerrar sesión</span>
         </button>
       </div>
     </div>
@@ -118,11 +119,11 @@
         <span class="drawer-title">Menú</span>
         <button class="btn-drawer-close" id="btnCloseDrawer" aria-label="Cerrar menú"><i class="bi bi-x-lg"></i></button>
       </div>
-      <a href="./dashboard.html">Dashboard</a>
-      <a href="./appointments.html">Mis Citas</a>
-      <a href="./vehicles.html">Mis Autos</a>
-      <a class="active" href="./work_orders.html">Órdenes</a>
-      <a href="#" id="btnLogoutMobile" style="color:#ffc107;">Cerrar sesión</a>
+      <a href="./dashboard.html" data-i18n="nav_dashboard">Dashboard</a>
+      <a href="./appointments.html" data-i18n="nav_my_appts">Mis Citas</a>
+      <a href="./vehicles.html" data-i18n="nav_my_cars">Mis Autos</a>
+      <a class="active" href="./work_orders.html" data-i18n="nav_orders">Órdenes</a>
+      <a href="#" id="btnLogoutMobile" style="color:#ffc107;" data-i18n="nav_logout">Cerrar sesión</a>
     </div>
   </nav>
 
@@ -135,7 +136,7 @@
     <div class="mob-info-sep" aria-hidden="true"></div>
     <div class="mob-info-chip">
       <i class="bi bi-clock-fill"></i>
-      <span>Lun-Sáb 9-19h</span>
+      <span data-i18n="mob_hours">Lun-Sáb 9-19h</span>
     </div>
     <div class="mob-info-sep" aria-hidden="true"></div>
     <a href="https://maps.app.goo.gl/v2un81eScRmhvtA89" target="_blank" rel="noopener noreferrer" class="mob-info-chip" aria-label="Ver ubicación en mapa">
@@ -147,9 +148,9 @@
   <!-- ══ PAGE BANNER ══ -->
   <section class="page-banner">
     <div class="container">
-      <div class="page-eyebrow">Historial</div>
-      <div class="page-title">Mis Órdenes de Trabajo</div>
-      <div class="page-sub">Revisá el detalle de todos los servicios realizados en tu vehículo.</div>
+      <div class="page-eyebrow" data-i18n="page_wo_eyebrow">Historial</div>
+      <div class="page-title" data-i18n="page_wo_title">Mis Órdenes de Trabajo</div>
+      <div class="page-sub" data-i18n="page_wo_sub">Revisá el detalle de todos los servicios realizados en tu vehículo.</div>
     </div>
   </section>
 
@@ -158,9 +159,9 @@
     <div id="msg" class="alert d-none" role="alert"></div>
 
     <div class="section-header mb-3">
-      <span class="section-label">Órdenes registradas</span>
+      <span class="section-label" data-i18n="wo_registered">Órdenes registradas</span>
       <button class="btn-reload" id="btnReload">
-        <i class="bi bi-arrow-clockwise"></i> Actualizar
+        <i class="bi bi-arrow-clockwise"></i> <span data-i18n="btn_refresh">Actualizar</span>
       </button>
     </div>
 
@@ -215,20 +216,23 @@
     return n.toLocaleString("es-CR", { style: "currency", currency: "CRC" });
   }
 
-  const WO_STATUS_LABELS = {
-    open:                   "Abierta",
-    in_progress:            "En progreso",
-    diagnosing:             "En diagnóstico",
-    waiting_parts:          "Esperando piezas",
-    awaiting_authorization: "Pendiente de autorización",
-    authorized:             "Autorizada",
-    ready:                  "Lista para entregar",
-    closed:                 "Cerrada",
-    done:                   "Completada",
-    completed:              "Completada",
-    cancelled:              "Cancelada",
-    canceled:               "Cancelada",
-  };
+  function getWoStatusLabels() {
+    var _t = window.i18n ? window.i18n.t : function(k){ return k; };
+    return {
+      open:                   _t("wo_status_open"),
+      in_progress:            _t("wo_status_prog"),
+      diagnosing:             _t("wo_status_diag"),
+      waiting_parts:          _t("wo_status_parts"),
+      awaiting_authorization: _t("wo_status_auth"),
+      authorized:             _t("wo_status_authd"),
+      ready:                  _t("wo_status_ready"),
+      closed:                 _t("wo_status_closed"),
+      done:                   _t("wo_status_done"),
+      completed:              _t("wo_status_done"),
+      cancelled:              _t("wo_status_cancel"),
+      canceled:               _t("wo_status_cancel"),
+    };
+  }
 
   const WO_STATUS_ICONS = {
     open:                   "bi-circle",
@@ -257,16 +261,18 @@
     const s     = String(status || "").toLowerCase();
     const cls   = badgeClass(s);
     const icon  = WO_STATUS_ICONS[s] || "bi-circle";
-    const label = WO_STATUS_LABELS[s] || status;
+    const label = getWoStatusLabels()[s] || status;
     return `<span class="badge badge-icon ${cls}" aria-label="${escapeHtml(label)}"><i class="bi ${icon} me-1" aria-hidden="true"></i>${escapeHtml(label)}</span>`;
   }
 
   function renderLines(title, lines, kind) {
+    var _t = window.i18n ? window.i18n.t : function(k){ return k; };
+    const noItemsMsg = kind === "productos" ? _t("wo_no_products") : _t("wo_no_services");
     if (!lines || !lines.length) {
       return `
         <div class="mb-3">
           <div class="field-label mb-1">${escapeHtml(title)}</div>
-          <div style="font-size:12.5px;color:var(--text-muted);">No hay ${kind} registrados.</div>
+          <div style="font-size:12.5px;color:var(--text-muted);">${noItemsMsg}</div>
         </div>
       `;
     }
@@ -294,8 +300,8 @@
                     ${ln.status ? `<div class="mt-1">${badgeHtml(ln.status)}</div>` : ""}
                   </div>
                   <div class="text-end small">
-                    <div><span class="text-muted">Cant:</span> ${escapeHtml(qty)}</div>
-                    <div><span class="text-muted">Unit:</span> ${escapeHtml(unit)}</div>
+                    <div><span class="text-muted">${_t("col_qty")}:</span> ${escapeHtml(qty)}</div>
+                    <div><span class="text-muted">${_t("col_unit")}:</span> ${escapeHtml(unit)}</div>
                     <div class="fw-semibold"><span class="text-muted">Total:</span> ${escapeHtml(total)}</div>
                   </div>
                 </div>
@@ -308,6 +314,7 @@
   }
 
   function renderCard(wo, idx) {
+    var _t = window.i18n ? window.i18n.t : function(k){ return k; };
     const vehicle = [
       wo.vehicle_plate ? `Placa ${wo.vehicle_plate}` : "",
       [wo.vehicle_make, wo.vehicle_model, wo.vehicle_year].filter(Boolean).join(" ")
@@ -332,7 +339,7 @@
           <div>
             <div class="wo-card-title">Orden #${idx + 1}</div>
             <div class="wo-card-vehicle">${escapeHtml(vehicle)}</div>
-            <div class="wo-card-dates">Abierta: ${escapeHtml(fmt(wo.opened_at))}${wo.closed_at ? ` · Cerrada: ${escapeHtml(fmt(wo.closed_at))}` : ""}</div>
+            <div class="wo-card-dates">${_t("wo_opened")}: ${escapeHtml(fmt(wo.opened_at))}${wo.closed_at ? ` · ${_t("wo_closed_lbl")}: ${escapeHtml(fmt(wo.closed_at))}` : ""}</div>
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:6px;">
             ${badgeHtml(status)}
@@ -342,15 +349,15 @@
 
         ${(wo.customer_symptoms || wo.diagnosis || wo.notes) ? `
           <div class="wo-card-body">
-            ${wo.customer_symptoms ? `<div class="field-row"><div class="field-label">Síntomas reportados</div><div class="field-val">${escapeHtml(wo.customer_symptoms)}</div></div>` : ""}
-            ${wo.diagnosis ? `<div class="field-row"><div class="field-label">Diagnóstico del taller</div><div class="field-val">${escapeHtml(wo.diagnosis)}</div></div>` : ""}
-            ${wo.notes ? `<div class="field-row" style="margin-bottom:0;"><div class="field-label">Notas</div><div class="field-val">${escapeHtml(wo.notes)}</div></div>` : ""}
+            ${wo.customer_symptoms ? `<div class="field-row"><div class="field-label">${_t("wo_symptoms")}</div><div class="field-val">${escapeHtml(wo.customer_symptoms)}</div></div>` : ""}
+            ${wo.diagnosis ? `<div class="field-row"><div class="field-label">${_t("wo_diagnosis_f")}</div><div class="field-val">${escapeHtml(wo.diagnosis)}</div></div>` : ""}
+            ${wo.notes ? `<div class="field-row" style="margin-bottom:0;"><div class="field-label">${_t("wo_notes_f")}</div><div class="field-val">${escapeHtml(wo.notes)}</div></div>` : ""}
           </div>
         ` : ""}
 
         <div class="wo-card-footer">
           <button class="btn-wo-details" type="button" data-bs-toggle="collapse" data-bs-target="#${collapseId}" aria-expanded="false">
-            <i class="bi bi-chevron-down"></i> Ver detalles
+            <i class="bi bi-chevron-down"></i> ${_t("btn_expand")}
           </button>
           <span class="badge text-bg-secondary">Servicios: ${services.length}</span>
           <span class="badge text-bg-secondary">Productos: ${products.length}</span>
@@ -362,13 +369,13 @@
 
         <div class="collapse" id="${collapseId}">
           <div style="padding:16px 20px 20px;border-top:1px solid var(--border);">
-            ${renderLines("Servicios", services, "servicios")}
-            ${renderLines("Productos", products, "productos")}
+            ${renderLines(_t("wo_services_s"), services, "servicios")}
+            ${renderLines(_t("wo_products_s"), products, "productos")}
             <div style="border-top:1px solid var(--border);padding-top:10px;margin-top:4px;">
-              <div class="wo-totals-row"><span class="wo-totals-label">Subtotal servicios</span><span class="wo-totals-val">${escapeHtml(servicesTotal)}</span></div>
-              <div class="wo-totals-row"><span class="wo-totals-label">Subtotal productos</span><span class="wo-totals-val">${escapeHtml(productsTotal)}</span></div>
+              <div class="wo-totals-row"><span class="wo-totals-label">${_t("wo_subtotal_svc")}</span><span class="wo-totals-val">${escapeHtml(servicesTotal)}</span></div>
+              <div class="wo-totals-row"><span class="wo-totals-label">${_t("wo_subtotal_prod")}</span><span class="wo-totals-val">${escapeHtml(productsTotal)}</span></div>
               <div class="wo-totals-row" style="padding-top:8px;border-top:1px solid var(--border);margin-top:4px;">
-                <span style="color:var(--text-muted);font-size:13px;">Total calculado</span>
+                <span style="color:var(--text-muted);font-size:13px;">${_t("wo_computed_total")}</span>
                 <span style="color:var(--accent-gold);font-family:var(--font-display);font-weight:800;font-size:16px;">${escapeHtml(computedTotal)}</span>
               </div>
             </div>
@@ -396,7 +403,7 @@
       list.innerHTML = `
         <div class="empty-state">
           <i class="bi bi-file-earmark-x"></i>
-          <p>No tenés órdenes de trabajo registradas.</p>
+          <p data-i18n="empty_no_orders">No tenés órdenes de trabajo registradas.</p>
         </div>
       `;
       return;
@@ -408,6 +415,8 @@
       list.appendChild(wrapper.firstElementChild);
     });
   }
+
+  window.__i18nRefresh = load;
 
   function logout() {
     localStorage.removeItem("customer_access_token");
@@ -469,5 +478,6 @@
     }
   })();
 </script>
+<script src="../assets/js/chat-widget.js"></script>
 </body>
 </html>

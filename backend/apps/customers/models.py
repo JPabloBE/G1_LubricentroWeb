@@ -14,6 +14,8 @@ class Customer(models.Model):
     is_active = models.BooleanField(default=True)
     last_login = models.DateTimeField(null=True, blank=True)
     password_changed_at = models.DateTimeField(null=True, blank=True)
+    failed_login_attempts = models.IntegerField(default=0)
+    locked_until = models.DateTimeField(null=True, blank=True)
 
     created_at = models.DateTimeField()
     updated_at = models.DateTimeField()

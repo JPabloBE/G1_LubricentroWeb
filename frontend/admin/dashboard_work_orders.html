@@ -208,7 +208,16 @@
 
                       <div class="mb-3">
                         <label class="form-label fw-semibold mb-1">Notas internas</label>
-                        <textarea id="woNotes" class="form-control" rows="4" placeholder="Observaciones internas..."></textarea>
+                        <textarea id="woNotes" class="form-control" rows="3" placeholder="Observaciones internas..."></textarea>
+                      </div>
+
+                      <div class="mb-3 d-none" id="clientMsgWrap">
+                        <label class="form-label fw-semibold mb-1">
+                          <i class="bi bi-chat-left-text me-1 text-warning"></i>Mensaje para el cliente
+                        </label>
+                        <textarea id="woClientMsg" class="form-control border-warning" rows="3"
+                          placeholder="Ej: Estamos esperando los repuestos, realizando pruebas finales…"></textarea>
+                        <div class="form-text"><i class="bi bi-eye me-1"></i>Visible para el cliente en el detalle de su cita.</div>
                       </div>
 
                       <div class="mb-3">
@@ -220,7 +229,7 @@
                         <div class="form-text">Calculado automáticamente desde servicios y productos.</div>
                       </div>
 
-                      <button id="btnSaveWo" class="btn btn-dark w-100">Guardar mecánico y notas</button>
+                      <button id="btnSaveWo" class="btn btn-dark w-100">Guardar mecánico, notas y mensaje</button>
                     </div>
                   </div>
 
@@ -726,8 +735,22 @@
 
       document.getElementById("detailSubtitle").textContent =
         `${wo.customer_name || ""} · ${wo.vehicle_plate || ""} · ${fmt(wo.opened_at)}`;
-      document.getElementById("woNotes").value = wo.notes || "";
+      document.getElementById("woNotes").value    = wo.notes || "";
       document.getElementById("woMechanic").value = wo.assigned_mechanic_id || "";
+
+      // Pre-cargar mensaje para el cliente desde la cita vinculada
+      const clientMsgWrap = document.getElementById("clientMsgWrap");
+      const clientMsgTa   = document.getElementById("woClientMsg");
+      if (wo.appointment_id) {
+        clientMsgWrap.classList.remove("d-none");
+        try {
+          const appt = await fetchJSON(`${APPT_URL}${wo.appointment_id}/`, { headers: authH() });
+          clientMsgTa.value = appt.admin_message || "";
+        } catch (_) { clientMsgTa.value = ""; }
+      } else {
+        clientMsgWrap.classList.add("d-none");
+        clientMsgTa.value = "";
+      }
 
       renderModalStatusButtons(wo);
       await loadServices(wo.work_order_id);
@@ -961,7 +984,15 @@
           assigned_mechanic_id: document.getElementById("woMechanic").value || null,
         }),
       });
-      showMsg("Mecánico y notas guardados.", "success");
+      if (currentWo.appointment_id) {
+        await fetchJSON(`${APPT_URL}${currentWo.appointment_id}/`, {
+          method: "PATCH", headers: authH(),
+          body: JSON.stringify({
+            admin_message: document.getElementById("woClientMsg").value.trim() || null,
+          }),
+        });
+      }
+      showMsg("Mecánico, notas y mensaje guardados.", "success");
       await loadWorkOrders();
     } catch (e) { showMsg(e.message || "Error guardando.", "danger", 5500); }
     finally {
